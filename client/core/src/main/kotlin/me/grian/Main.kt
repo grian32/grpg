@@ -125,6 +125,7 @@ class Main : ApplicationAdapter() {
     override fun dispose() {
         shapeRenderer.dispose()
         redFont.dispose()
+        blueFont.dispose()
         batch.dispose()
     }
 }
