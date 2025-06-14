@@ -74,6 +74,6 @@ class Main : ApplicationAdapter() {
         var squareY = 0.0f
         var squarePosX = 0.0f
         var squarePosY = 0.0f
-        var name = "Grian"
+        var name = ""
     }
 }
