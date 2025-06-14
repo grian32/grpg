@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import kotlin.math.log
 
 
 fun main(args: Array<String>) {
@@ -25,10 +26,12 @@ fun main(args: Array<String>) {
                 val sendChannel = socket.openWriteChannel(autoFlush = true)
 
                 try {
-                    while (true) {
-                        logger.info(receiveChannel.readUTF8Line())
+                    while (!receiveChannel.isClosedForRead) {
+                        logger.info(receiveChannel.readUTF8Line() ?: break)
                     }
                 } catch (e: Throwable) {
+                    logger.error("Error reading from socket", e)
+                } finally {
                     socket.close()
                 }
             }
