@@ -7,11 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import me.grian.Main.Companion.name
-import me.grian.Main.Companion.squarePosX
-import me.grian.Main.Companion.squarePosY
-import me.grian.Main.Companion.squareX
-import me.grian.Main.Companion.squareY
+import me.grian.Main.Companion.player
 import me.grian.Main.Companion.tileSize
 import me.grian.utils.filledShape
 import me.grian.utils.lineShape
@@ -53,18 +49,18 @@ object PlaygroundScene : Scene {
         filledShape(shapeRenderer) {
             color = Color.SKY
 
-            rect(squareX, squareY, tileSize, tileSize)
+            rect(player.realX, player.realY, tileSize, tileSize)
         }
     }
 
     private fun renderPlayerName(batch: SpriteBatch) {
-        val nameYPos = if ((squarePosX == 0.0f || squarePosX == 1.0f) && squarePosY == 15.0f) {
-            squareY + (tileSize / 2)
+        val nameYPos = if ((player.x == 0.0f || player.x == 1.0f) && player.y == 15.0f) {
+            player.realY + (tileSize / 2)
         } else {
-            squareY + tileSize
+            player.realY + tileSize
         }
 
-        blueFont.draw(batch, name, squareX, nameYPos)
+        blueFont.draw(batch, player.name, player.realX, nameYPos)
     }
 
     private fun renderGrid(shapeRenderer: ShapeRenderer) {
@@ -89,6 +85,6 @@ object PlaygroundScene : Scene {
     }
 
     private fun renderCoordinates(batch: SpriteBatch) {
-        redFont.draw(batch, "X: ${squareX / tileSize} Y: ${squareY / tileSize}", 0.0f, Gdx.graphics.height.toFloat())
+        redFont.draw(batch, "X: ${player.x} Y: ${player.y}", 0.0f, Gdx.graphics.height.toFloat())
     }
 }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import me.grian.player.Player
 import me.grian.scenes.LoginScreenScene
 import me.grian.scenes.PlaygroundScene
 import kotlin.math.max
@@ -41,16 +42,11 @@ class Main : ApplicationAdapter() {
 
     private fun handleInput() {
         when {
-            Gdx.input.isKeyJustPressed(Input.Keys.W) -> squareY += tileSize
-            Gdx.input.isKeyJustPressed(Input.Keys.S) -> squareY -= tileSize
-            Gdx.input.isKeyJustPressed(Input.Keys.A) -> squareX -= tileSize
-            Gdx.input.isKeyJustPressed(Input.Keys.D) -> squareX += tileSize
+            Gdx.input.isKeyJustPressed(Input.Keys.W) -> player.move(player.x, player.y + 1)
+            Gdx.input.isKeyJustPressed(Input.Keys.S) -> player.move(player.x, player.y - 1)
+            Gdx.input.isKeyJustPressed(Input.Keys.A) -> player.move(player.x - 1, player.y)
+            Gdx.input.isKeyJustPressed(Input.Keys.D) -> player.move(player.x + 1, player.y)
         }
-
-        squareY = max(0.0f, min(Gdx.graphics.height - tileSize, squareY))
-        squarePosY = squareY / tileSize
-        squareX = max(0.0f, min(Gdx.graphics.width - tileSize, squareX))
-        squarePosX = squareX / tileSize
     }
 
     override fun dispose() {
@@ -69,6 +65,8 @@ class Main : ApplicationAdapter() {
         val texturesToDipose = mutableListOf<Texture>()
 
         var isLoggedIn: Boolean = false
+
+        val player = Player(0.0f, 0.0f, 0.0f, 0.0f, "")
 
         var squareX = 0.0f
         var squareY = 0.0f
