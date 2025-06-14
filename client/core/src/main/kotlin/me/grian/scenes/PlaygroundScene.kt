@@ -27,6 +27,7 @@ object PlaygroundScene : Scene {
         parameter.color = Color.RED
         redFont = generator.generateFont(parameter)
 
+        parameter.size = 16
         parameter.color = Color.BLUE
         blueFont = generator.generateFont(parameter)
     }
