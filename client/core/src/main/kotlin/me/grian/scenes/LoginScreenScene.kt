@@ -54,8 +54,6 @@ object LoginScreenScene : Scene {
         stage.addActor(table)
 
         buildLayout()
-
-        table.debug = true
     }
 
     override fun render(shapeRenderer: ShapeRenderer, batch: SpriteBatch) {
