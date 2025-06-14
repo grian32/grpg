@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import me.grian.Main
 
 fun filledShape(sr: ShapeRenderer, func: ShapeRenderer.() -> Unit) {
     sr.begin(ShapeType.Filled)
@@ -31,5 +32,6 @@ fun createColorDrawable(color: Color): Drawable {
     pixmap.fill()
     val texture = Texture(pixmap)
     pixmap.dispose()
+    Main.texturesToDipose.add(texture)
     return TextureRegionDrawable(TextureRegion(texture))
 }

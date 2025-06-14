@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import me.grian.scenes.LoginScreenScene
@@ -57,11 +58,18 @@ class Main : ApplicationAdapter() {
         batch.dispose()
         PlaygroundScene.dispose()
         LoginScreenScene.dispose()
+
+        for (i in texturesToDipose) {
+            i.dispose()
+        }
     }
 
     companion object {
-        var isLoggedIn: Boolean = false
         var tileSize = 64.0f
+        val texturesToDipose = mutableListOf<Texture>()
+
+        var isLoggedIn: Boolean = false
+
         var squareX = 0.0f
         var squareY = 0.0f
         var squarePosX = 0.0f
