@@ -8,7 +8,7 @@ class Player(
     var y: Float,
     var realX: Float,
     var realY: Float,
-    val name: String
+    var name: String
 ) {
     fun move(x: Float, y: Float) {
         this.x = x.coerceIn(0.0f, Gdx.graphics.width / Main.tileSize)

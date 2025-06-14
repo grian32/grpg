@@ -142,7 +142,7 @@ object LoginScreenScene : Scene {
 
         loginButton.addListener(object : ClickListener() {
             override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                Main.name = field.text
+                Main.player.name = field.text
                 Main.isLoggedIn = true
             }
         })

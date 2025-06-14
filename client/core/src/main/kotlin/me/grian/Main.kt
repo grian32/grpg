@@ -67,11 +67,5 @@ class Main : ApplicationAdapter() {
         var isLoggedIn: Boolean = false
 
         val player = Player(0.0f, 0.0f, 0.0f, 0.0f, "")
-
-        var squareX = 0.0f
-        var squareY = 0.0f
-        var squarePosX = 0.0f
-        var squarePosY = 0.0f
-        var name = ""
     }
 }
