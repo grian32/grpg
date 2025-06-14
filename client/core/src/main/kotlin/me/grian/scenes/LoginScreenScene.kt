@@ -22,6 +22,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import me.grian.Main
 import me.grian.utils.createColorDrawable
 import me.grian.utils.filledShape
+import me.grian.utils.textButtonStyle
+import me.grian.utils.textFieldStyle
 import kotlin.math.log
 
 object LoginScreenScene : Scene {
@@ -115,21 +117,21 @@ object LoginScreenScene : Scene {
         val goldenrod = createColorDrawable(Color.GOLDENROD)
         val gold = createColorDrawable(Color.GOLD)
 
-        val buttonStyle = TextButtonStyle()
+        val buttonStyle = textButtonStyle {
+            font = this@LoginScreenScene.font
+            up = goldenrod
+            down = goldenrod
+            over = gold
+        }
 
-        buttonStyle.font = font
-        buttonStyle.up = goldenrod
-        buttonStyle.down = goldenrod
-        buttonStyle.over = gold
+        val textFieldStyle = textFieldStyle {
+            font = this@LoginScreenScene.font
+            fontColor = Color.WHITE
 
-
-        val textFieldStyle = TextFieldStyle()
-        textFieldStyle.font = font
-        textFieldStyle.fontColor = Color.WHITE
-
-        textFieldStyle.background = goldenrod
-        textFieldStyle.cursor = gold
-        textFieldStyle.selection = gold
+            background = goldenrod
+            cursor = gold
+            selection = gold
+        }
 
         val field = TextField("", textFieldStyle)
 
