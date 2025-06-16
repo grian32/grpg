@@ -1,6 +1,5 @@
 package me.grian.packets
 
-enum class PacketType(length: Int = 0) {
+enum class PacketType() {
     UTF8_STRING,
-    INTEGER(length = Int.SIZE_BYTES)
 }
