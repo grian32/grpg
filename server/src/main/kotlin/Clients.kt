@@ -2,6 +2,8 @@ package me.grian
 
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
+import io.ktor.utils.io.core.*
+import kotlinx.io.Buffer
 import me.grian.packets.PacketType
 import me.grian.packets.c2s.C2SPacket
 import me.grian.packets.c2s.C2SPacketOpcode
@@ -67,9 +69,10 @@ object Clients {
 
     suspend fun sendToUser(username: String, packet: S2CPacket) {
         val client = clients[username] ?: return
+        val buf = Buffer()
 
-        client.writeByte(packet.opcode)
-        println("wrote byte")
-        packet.handle(client)
+        buf.writeByte(packet.opcode)
+        packet.handle(buf)
+        client.writePacket(buf)
     }
 }
