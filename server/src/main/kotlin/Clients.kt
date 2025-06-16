@@ -5,6 +5,8 @@ import io.ktor.utils.io.*
 import me.grian.packets.PacketType
 import me.grian.packets.c2s.C2SPacket
 import me.grian.packets.c2s.C2SPacketOpcode
+import me.grian.packets.s2c.S2CLoginAcceptedPacket
+import me.grian.packets.s2c.S2CPacket
 import org.slf4j.LoggerFactory
 import java.nio.charset.Charset
 import kotlin.reflect.full.primaryConstructor
@@ -30,6 +32,9 @@ object Clients {
                     val strLength = receiveChannel.readInt()
                     val str = receiveChannel.readByteArray(strLength).toString(Charset.defaultCharset())
                     clients[str] = sendChannel
+                    println("received user")
+
+                    sendToUser(str, S2CLoginAcceptedPacket())
                     continue
                 }
 
@@ -58,5 +63,13 @@ object Clients {
         } finally {
             socket.close()
         }
+    }
+
+    suspend fun sendToUser(username: String, packet: S2CPacket) {
+        val client = clients[username] ?: return
+
+        client.writeByte(packet.opcode)
+        println("wrote byte")
+        packet.handle(client)
     }
 }
