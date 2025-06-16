@@ -2,7 +2,6 @@ package me.grian
 
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
-import io.ktor.utils.io.core.*
 import kotlinx.io.Buffer
 import me.grian.packets.PacketType
 import me.grian.packets.c2s.C2SPacket
@@ -63,8 +62,6 @@ object Clients {
             }
         } catch (e: Throwable) {
             logger.error("Error reading from socket", e)
-        } finally {
-            socket.close()
         }
     }
 
@@ -73,7 +70,7 @@ object Clients {
         val buf = Buffer()
 
         buf.writeByte(packet.opcode)
-        packet.handle(buf)
         client.writePacket(buf)
+        client.flush()
     }
 }
