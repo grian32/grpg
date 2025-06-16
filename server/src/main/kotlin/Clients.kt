@@ -33,10 +33,11 @@ object Clients {
                 if (packet == C2SPacketOpcode.LOGIN) {
                     val strLength = receiveChannel.readInt()
                     val str = receiveChannel.readByteArray(strLength).toString(Charset.defaultCharset())
-                    clients[str] = sendChannel
-                    println("received user")
+                    if (str !in clients) {
+                        clients[str] = sendChannel
 
-                    sendToUser(str, S2CLoginAcceptedPacket())
+                        sendToUser(str, S2CLoginAcceptedPacket())
+                    }
                     continue
                 }
 
