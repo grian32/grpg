@@ -7,7 +7,7 @@ import io.netty.buffer.Unpooled
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import me.grian.packets.Packet
+import me.grian.packets.c2s.C2SPacket
 import me.grian.packets.PacketType
 import me.grian.packets.c2s.C2SPacketOpcode
 import org.slf4j.LoggerFactory
@@ -55,7 +55,7 @@ fun main(args: Array<String>) {
                                     }
                                 }
 
-                                val inst = packet.packet.primaryConstructor!!.call() as Packet
+                                val inst = packet.packet.primaryConstructor!!.call() as C2SPacket
                                 inst.handle(bytes)
                                 continue
                             } else {

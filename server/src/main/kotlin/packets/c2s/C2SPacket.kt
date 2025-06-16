@@ -1,7 +1,7 @@
-package me.grian.packets
+package me.grian.packets.c2s
 
 import io.netty.buffer.ByteBuf
 
-interface Packet {
+interface C2SPacket {
     fun handle(data: ByteBuf)
 }
