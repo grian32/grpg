@@ -7,6 +7,7 @@ import me.grian.packets.PacketType
 import me.grian.packets.c2s.C2SPacket
 import me.grian.packets.c2s.C2SPacketOpcode
 import me.grian.packets.s2c.S2CLoginAcceptedPacket
+import me.grian.packets.s2c.S2CLoginRejectedPacket
 import me.grian.packets.s2c.S2CPacket
 import org.slf4j.LoggerFactory
 import java.nio.charset.Charset
@@ -36,6 +37,8 @@ object Clients {
                         clients[str] = sendChannel
 
                         sendToUser(str, S2CLoginAcceptedPacket())
+                    } else {
+                        sendToChannel(sendChannel, S2CLoginRejectedPacket())
                     }
                     logger.info("Client just logged in with username [${str}]")
                     println(clients)
@@ -72,11 +75,15 @@ object Clients {
 
     suspend fun sendToUser(username: String, packet: S2CPacket) {
         val client = clients[username] ?: return
+        sendToChannel(client, packet)
+    }
+
+    suspend fun sendToChannel(sendChannel: ByteWriteChannel, packet: S2CPacket) {
         val buf = Buffer()
 
         buf.writeByte(packet.opcode)
         packet.handle(buf)
-        client.writePacket(buf)
-        client.flush()
+        sendChannel.writePacket(buf)
+        sendChannel.flush()
     }
 }
