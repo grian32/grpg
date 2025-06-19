@@ -19,7 +19,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.grian.Main
+import me.grian.network.NetworkManager
+import me.grian.network.packets.c2s.C2SLoginPacket
 import me.grian.utils.createColorDrawable
 import me.grian.utils.filledShape
 import me.grian.utils.textButtonStyle
@@ -143,7 +147,9 @@ object LoginScreenScene : Scene {
         loginButton.addListener(object : ClickListener() {
             override fun clicked(event: InputEvent?, x: Float, y: Float) {
                 Main.player.name = field.text
-                Main.isLoggedIn = true
+                NetworkManager.sendPacket(C2SLoginPacket(
+                    field.text
+                ))
             }
         })
 

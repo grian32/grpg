@@ -6,6 +6,11 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import io.ktor.util.network.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import me.grian.network.NetworkManager
 import me.grian.player.Player
 import me.grian.player.PlayerInputHandler
 import me.grian.scenes.LoginScreenScene
@@ -26,6 +31,9 @@ class Main : ApplicationAdapter() {
 
         PlaygroundScene.create()
         LoginScreenScene.create()
+        NetworkManager.scope.launch {
+            NetworkManager.start()
+        }
     }
 
     override fun render() {
@@ -50,6 +58,8 @@ class Main : ApplicationAdapter() {
         for (i in texturesToDipose) {
             i.dispose()
         }
+
+        NetworkManager.dispose()
     }
 
     companion object {

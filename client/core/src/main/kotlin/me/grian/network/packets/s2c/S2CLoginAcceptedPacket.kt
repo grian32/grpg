@@ -1,0 +1,10 @@
+package me.grian.network.packets.s2c
+
+import me.grian.Main
+import me.grian.network.packets.s2c.S2CPacket
+
+class S2CLoginAcceptedPacket : S2CPacket {
+    override suspend fun handle(data: MutableMap<String, Any>) {
+        Main.isLoggedIn = true
+    }
+}
