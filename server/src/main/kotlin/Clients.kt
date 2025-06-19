@@ -75,6 +75,7 @@ object Clients {
         val buf = Buffer()
 
         buf.writeByte(packet.opcode)
+        packet.handle(buf)
         client.writePacket(buf)
         client.flush()
     }
