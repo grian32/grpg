@@ -37,6 +37,7 @@ object Clients {
 
                         sendToUser(str, S2CLoginAcceptedPacket())
                     }
+                    logger.info("Client just logged in with username [${str}]")
                     continue
                 }
 
