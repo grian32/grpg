@@ -38,6 +38,7 @@ object Clients {
                         sendToUser(str, S2CLoginAcceptedPacket())
                     }
                     logger.info("Client just logged in with username [${str}]")
+                    println(clients)
                     continue
                 }
 
@@ -63,6 +64,9 @@ object Clients {
             }
         } catch (e: Throwable) {
             logger.error("Error reading from socket", e)
+            val client = clients.entries.find { it.value == sendChannel }
+            if (client == null) return
+            clients.remove(client.key)
         }
     }
 
