@@ -6,7 +6,6 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.io.Buffer
 import me.grian.network.packets.PacketType
 import me.grian.network.packets.c2s.C2SPacket

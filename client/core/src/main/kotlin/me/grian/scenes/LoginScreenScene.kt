@@ -35,8 +35,10 @@ object LoginScreenScene : Scene {
     private lateinit var titleFont: BitmapFont
     private lateinit var titleText: GlyphLayout
     private lateinit var enterNameText: GlyphLayout
+    private lateinit var failedLoginText: GlyphLayout
     private lateinit var stage: Stage
     private lateinit var table: Table
+    var shouldRenderFailedLoginText = false
 
     override fun create() {
         val generator = FreeTypeFontGenerator(Gdx.files.internal("ui/font.ttf"))
@@ -51,6 +53,7 @@ object LoginScreenScene : Scene {
 
         titleText = GlyphLayout(titleFont, "GRPG Client")
         enterNameText = GlyphLayout(font, "Enter Name Below:")
+        failedLoginText = GlyphLayout(font, "Failed to login, most likely the name is already in use")
 
         stage = Stage()
         Gdx.input.inputProcessor = stage
@@ -113,6 +116,15 @@ object LoginScreenScene : Scene {
             halfScreenHeight - enterNameText.width / 2.0f,
             halfScreenHeight + loginBgHeight * 2 - 25.0f
         )
+
+        if (shouldRenderFailedLoginText) {
+            font.draw(
+                batch,
+                failedLoginText,
+                halfScreenWidth - failedLoginText.width / 2.0f,
+                halfScreenHeight - loginBgHeight * 2
+            )
+        }
 
         batch.end()
     }
