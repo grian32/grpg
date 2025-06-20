@@ -1,6 +1,6 @@
 package me.grian.player
 
 data class Point(
-    val x: Int,
-    val y: Int
+    var x: Int,
+    var y: Int
 )
