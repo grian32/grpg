@@ -18,7 +18,7 @@ import kotlin.reflect.full.primaryConstructor
 object Clients {
     private val c2sOpcodes = C2SPacketOpcode.entries
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val clients: MutableMap<String, Player> = mutableMapOf()
+    private val clients: MutableList<Player> = mutableListOf()
 
     suspend fun handleClient(socket: Socket, receiveChannel: ByteReadChannel, writeChannel: ByteWriteChannel) {
         try {
@@ -34,6 +34,7 @@ object Clients {
 
                 if (packet == C2SPacketOpcode.LOGIN) {
                     processLogin(receiveChannel, writeChannel)
+                    println(clients)
                     continue
                 }
 
@@ -60,29 +61,31 @@ object Clients {
             }
         } catch (e: Throwable) {
             logger.error("Error reading from socket", e)
-            val client = clients.entries.find { it.value.writeChannel == writeChannel }
+            val client = clients.find { it.writeChannel == writeChannel }
             if (client == null) return
-            clients.remove(client.key)
+            clients.remove(client)
         }
     }
 
     suspend fun processLogin(receiveChannel: ByteReadChannel, writeChannel: ByteWriteChannel) {
         val strLength = receiveChannel.readInt()
         val str = receiveChannel.readByteArray(strLength).toString(Charset.defaultCharset())
-        if (str !in clients) {
+        val names = clients.map { it.name }
+        if (str !in names) {
             var startingPoint = Point(0, 0)
 
             if (clients.isNotEmpty()) {
                 startingPoint = findFirstAvailablePosition(
-                    clients.values.mapTo(mutableSetOf()) { it.pos }
+                    clients.mapTo(mutableSetOf()) { it.pos }
                 )
             }
 
             val player = Player(
+                str,
                 writeChannel,
                 startingPoint
             )
-            clients[str] = player
+            clients.add(player)
             sendToUser(str, S2CLoginAcceptedPacket(startingPoint))
         } else {
             sendToChannel(writeChannel, S2CLoginRejectedPacket())
@@ -93,8 +96,8 @@ object Clients {
     }
 
     suspend fun sendToUser(username: String, packet: S2CPacket) {
-        val client = clients[username]?.writeChannel ?: return
-        sendToChannel(client, packet)
+        val client = clients.find { it.name == username } ?: return
+        sendToChannel(client.writeChannel, packet)
     }
 
     suspend fun sendToChannel(writeChannel: ByteWriteChannel, packet: S2CPacket) {
