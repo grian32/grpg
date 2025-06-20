@@ -3,7 +3,7 @@ package me.grian.packets.c2s
 import me.grian.packets.PacketType
 
 class C2SLoginPacket : C2SPacket {
-    override fun handle(data: MutableMap<String, Any>) {}
+    override fun handle(data: MutableMap<String, Any>, playerIdx: Int) {}
 
     companion object {
         val STRUCTURE = mapOf(

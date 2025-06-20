@@ -18,7 +18,7 @@ import kotlin.reflect.full.primaryConstructor
 object Clients {
     private val c2sOpcodes = C2SPacketOpcode.entries
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val clients: MutableList<Player> = mutableListOf()
+    val players: MutableList<Player> = mutableListOf()
 
     suspend fun handleClient(socket: Socket, receiveChannel: ByteReadChannel, writeChannel: ByteWriteChannel) {
         try {
@@ -34,9 +34,12 @@ object Clients {
 
                 if (packet == C2SPacketOpcode.LOGIN) {
                     processLogin(receiveChannel, writeChannel)
-                    println(clients)
+                    println(players)
                     continue
                 }
+
+                val client = players.indexOfFirst { it.writeChannel == writeChannel }
+                if (client == -1) return
 
                 val packetData = mutableMapOf<String, Any>()
 
@@ -56,27 +59,28 @@ object Clients {
                     packetData[name] = data
                 }
 
+
                 val instance = packet.packet.primaryConstructor!!.call() as C2SPacket
-                instance.handle(packetData)
+                instance.handle(packetData, client)
             }
         } catch (e: Throwable) {
             logger.error("Error reading from socket", e)
-            val client = clients.find { it.writeChannel == writeChannel }
+            val client = players.find { it.writeChannel == writeChannel }
             if (client == null) return
-            clients.remove(client)
+            players.remove(client)
         }
     }
 
     suspend fun processLogin(receiveChannel: ByteReadChannel, writeChannel: ByteWriteChannel) {
         val strLength = receiveChannel.readInt()
         val str = receiveChannel.readByteArray(strLength).toString(Charset.defaultCharset())
-        val names = clients.map { it.name }
+        val names = players.map { it.name }
         if (str !in names) {
             var startingPoint = Point(0, 0)
 
-            if (clients.isNotEmpty()) {
+            if (players.isNotEmpty()) {
                 startingPoint = findFirstAvailablePosition(
-                    clients.mapTo(mutableSetOf()) { it.pos }
+                    players.mapTo(mutableSetOf()) { it.pos }
                 )
             }
 
@@ -85,18 +89,18 @@ object Clients {
                 writeChannel,
                 startingPoint
             )
-            clients.add(player)
+            players.add(player)
             sendToUser(str, S2CLoginAcceptedPacket(startingPoint))
         } else {
             sendToChannel(writeChannel, S2CLoginRejectedPacket())
         }
 
         logger.info("Client logged in with username [${str}]")
-        println(clients)
+        println(players)
     }
 
     suspend fun sendToUser(username: String, packet: S2CPacket) {
-        val client = clients.find { it.name == username } ?: return
+        val client = players.find { it.name == username } ?: return
         sendToChannel(client.writeChannel, packet)
     }
 
