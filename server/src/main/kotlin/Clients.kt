@@ -32,31 +32,8 @@ object Clients {
                     continue
                 }
 
-                // TODO: probably factor this out to a function or something it is getting a bit bulky i fear
                 if (packet == C2SPacketOpcode.LOGIN) {
-                    val strLength = receiveChannel.readInt()
-                    val str = receiveChannel.readByteArray(strLength).toString(Charset.defaultCharset())
-                    if (str !in clients) {
-                        var startingPoint = Point(0, 0)
-
-                        if (clients.isNotEmpty()) {
-                            startingPoint = findFirstAvailablePosition(
-                                clients.values.mapTo(mutableSetOf()) { it.pos }
-                            )
-                        }
-
-                        val player = Player(
-                            sendChannel,
-                            startingPoint
-                        )
-                        clients[str] = player
-                        sendToUser(str, S2CLoginAcceptedPacket(startingPoint))
-                    } else {
-                        sendToChannel(sendChannel, S2CLoginRejectedPacket())
-                    }
-
-                    logger.info("Client logged in with username [${str}]")
-                    println(clients)
+                    processLogin(receiveChannel, sendChannel)
                     continue
                 }
 
@@ -87,6 +64,32 @@ object Clients {
             if (client == null) return
             clients.remove(client.key)
         }
+    }
+
+    suspend fun processLogin(receiveChannel: ByteReadChannel, writeChannel: ByteWriteChannel) {
+        val strLength = receiveChannel.readInt()
+        val str = receiveChannel.readByteArray(strLength).toString(Charset.defaultCharset())
+        if (str !in clients) {
+            var startingPoint = Point(0, 0)
+
+            if (clients.isNotEmpty()) {
+                startingPoint = findFirstAvailablePosition(
+                    clients.values.mapTo(mutableSetOf()) { it.pos }
+                )
+            }
+
+            val player = Player(
+                writeChannel,
+                startingPoint
+            )
+            clients[str] = player
+            sendToUser(str, S2CLoginAcceptedPacket(startingPoint))
+        } else {
+            sendToChannel(writeChannel, S2CLoginRejectedPacket())
+        }
+
+        logger.info("Client logged in with username [${str}]")
+        println(clients)
     }
 
     suspend fun sendToUser(username: String, packet: S2CPacket) {
