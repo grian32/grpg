@@ -27,9 +27,9 @@ fun main(args: Array<String>) {
 
             launch {
                 val receiveChannel = socket.openReadChannel()
-                val sendChannel = socket.openWriteChannel(autoFlush = true)
+                val writeChannel = socket.openWriteChannel(autoFlush = true)
 
-                Clients.handleClient(socket, receiveChannel, sendChannel)
+                Clients.handleClient(socket, receiveChannel, writeChannel)
             }
         }
     }

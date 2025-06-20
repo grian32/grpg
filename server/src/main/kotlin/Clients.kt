@@ -20,7 +20,7 @@ object Clients {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val clients: MutableMap<String, Player> = mutableMapOf()
 
-    suspend fun handleClient(socket: Socket, receiveChannel: ByteReadChannel, sendChannel: ByteWriteChannel) {
+    suspend fun handleClient(socket: Socket, receiveChannel: ByteReadChannel, writeChannel: ByteWriteChannel) {
         try {
             while (!receiveChannel.isClosedForRead) {
                 val opcode = receiveChannel.readByte()
@@ -33,7 +33,7 @@ object Clients {
                 }
 
                 if (packet == C2SPacketOpcode.LOGIN) {
-                    processLogin(receiveChannel, sendChannel)
+                    processLogin(receiveChannel, writeChannel)
                     continue
                 }
 
@@ -60,7 +60,7 @@ object Clients {
             }
         } catch (e: Throwable) {
             logger.error("Error reading from socket", e)
-            val client = clients.entries.find { it.value.writeChannel == sendChannel }
+            val client = clients.entries.find { it.value.writeChannel == writeChannel }
             if (client == null) return
             clients.remove(client.key)
         }
@@ -97,12 +97,12 @@ object Clients {
         sendToChannel(client, packet)
     }
 
-    suspend fun sendToChannel(sendChannel: ByteWriteChannel, packet: S2CPacket) {
+    suspend fun sendToChannel(writeChannel: ByteWriteChannel, packet: S2CPacket) {
         val buf = Buffer()
 
         buf.writeByte(packet.opcode)
         packet.handle(buf)
-        sendChannel.writePacket(buf)
-        sendChannel.flush()
+        writeChannel.writePacket(buf)
+        writeChannel.flush()
     }
 }
