@@ -37,20 +37,12 @@ object Clients {
                     val strLength = receiveChannel.readInt()
                     val str = receiveChannel.readByteArray(strLength).toString(Charset.defaultCharset())
                     if (str !in clients) {
-                        val allPositions = clients.values.map { it.pos }
-
                         var startingPoint = Point(0, 0)
 
-
-                        // label bad :S & needs to be y first so it puts them on the bottom row first
-                        outer@ for (y in 0..Constants.MAX_Y) {
-                            for (x in 0..Constants.MAX_X) {
-                                val pos = Point(x, y)
-                                if (pos !in allPositions) {
-                                    startingPoint = pos
-                                    break@outer
-                                }
-                            }
+                        if (clients.isNotEmpty()) {
+                            startingPoint = findFirstAvailablePosition(
+                                clients.values.mapTo(mutableSetOf()) { it.pos }
+                            )
                         }
 
                         val player = Player(
@@ -58,7 +50,6 @@ object Clients {
                             startingPoint
                         )
                         clients[str] = player
-                        // minX + miny on that row
                         sendToUser(str, S2CLoginAcceptedPacket(startingPoint))
                     } else {
                         sendToChannel(sendChannel, S2CLoginRejectedPacket())
