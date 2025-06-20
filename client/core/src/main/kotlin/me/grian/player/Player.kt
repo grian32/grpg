@@ -2,6 +2,8 @@ package me.grian.player
 
 import com.badlogic.gdx.Gdx
 import me.grian.Main
+import me.grian.network.NetworkManager
+import me.grian.network.packets.c2s.C2SMovePacket
 
 class Player(
     var x: Float,
@@ -13,6 +15,11 @@ class Player(
     fun move(x: Float, y: Float) {
         this.x = x.coerceIn(0.0f, Gdx.graphics.width / Main.tileSize)
         this.y = y.coerceIn(0.0f, Gdx.graphics.height / Main.tileSize)
+
+        NetworkManager.sendPacket(
+            C2SMovePacket(x.toInt(), y.toInt())
+        )
+
         realX = this.x * Main.tileSize
         realY = this.y * Main.tileSize
     }
