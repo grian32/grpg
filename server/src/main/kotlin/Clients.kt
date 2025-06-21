@@ -9,6 +9,7 @@ import me.grian.packets.c2s.C2SPacketOpcode
 import me.grian.packets.s2c.S2CLoginAcceptedPacket
 import me.grian.packets.s2c.S2CLoginRejectedPacket
 import me.grian.packets.s2c.S2CPacket
+import me.grian.packets.s2c.sendToWriteChannel
 import me.grian.player.Player
 import me.grian.player.Point
 import org.slf4j.LoggerFactory
@@ -34,7 +35,6 @@ object Clients {
 
                 if (packet == C2SPacketOpcode.LOGIN) {
                     processLogin(receiveChannel, writeChannel)
-                    println(players)
                     continue
                 }
 
@@ -62,6 +62,7 @@ object Clients {
 
                 val instance = packet.packet.primaryConstructor!!.call() as C2SPacket
                 instance.handle(packetData, client)
+                println(players)
             }
         } catch (e: Throwable) {
             logger.error("Error reading from socket", e)
@@ -90,26 +91,12 @@ object Clients {
                 startingPoint
             )
             players.add(player)
-            sendToUser(str, S2CLoginAcceptedPacket(startingPoint))
+            player.sendPacket(S2CLoginAcceptedPacket(startingPoint))
         } else {
-            sendToChannel(writeChannel, S2CLoginRejectedPacket())
+            S2CLoginRejectedPacket().sendToWriteChannel(writeChannel)
         }
 
         logger.info("Client logged in with username [${str}]")
         println(players)
-    }
-
-    suspend fun sendToUser(username: String, packet: S2CPacket) {
-        val client = players.find { it.name == username } ?: return
-        sendToChannel(client.writeChannel, packet)
-    }
-
-    suspend fun sendToChannel(writeChannel: ByteWriteChannel, packet: S2CPacket) {
-        val buf = Buffer()
-
-        buf.writeByte(packet.opcode)
-        packet.handle(buf)
-        writeChannel.writePacket(buf)
-        writeChannel.flush()
     }
 }
