@@ -13,8 +13,8 @@ class Player(
     var name: String
 ) {
     fun move(x: Float, y: Float) {
-        this.x = x.coerceIn(0.0f, Gdx.graphics.width / Main.tileSize)
-        this.y = y.coerceIn(0.0f, Gdx.graphics.height / Main.tileSize)
+        this.x = x.coerceIn(0.0f, (Gdx.graphics.width / Main.tileSize) - 1)
+        this.y = y.coerceIn(0.0f, (Gdx.graphics.height / Main.tileSize) - 1)
 
         NetworkManager.sendPacket(
             C2SMovePacket(x.toInt(), y.toInt())
