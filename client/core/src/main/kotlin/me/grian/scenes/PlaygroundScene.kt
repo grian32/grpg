@@ -96,7 +96,6 @@ object PlaygroundScene : Scene {
     }
 
     private fun renderCoordinates(batch: SpriteBatch) {
-        val player = Main.player
-        redFont.draw(batch, "X: ${player.x} Y: ${player.y}", 0.0f, Gdx.graphics.height.toFloat())
+        redFont.draw(batch, "X: ${Main.player.x} Y: ${Main.player.y}", 0.0f, Gdx.graphics.height.toFloat())
     }
 }
