@@ -60,8 +60,7 @@ object Clients {
                 }
 
 
-                val instance = packet.packet.primaryConstructor!!.call() as C2SPacket
-                instance.handle(packetData, client)
+                packet.packet.handle(packetData, client)
                 println(players)
             }
         } catch (e: Throwable) {
