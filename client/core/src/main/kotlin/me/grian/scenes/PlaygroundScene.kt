@@ -32,13 +32,19 @@ object PlaygroundScene : Scene {
 
     override fun render(shapeRenderer: ShapeRenderer, batch: SpriteBatch) {
         renderGrid(shapeRenderer)
-        renderPlayer(shapeRenderer, batch, Main.player)
+        renderPlayer(shapeRenderer, Main.player)
 
         for (i in players) {
-            renderPlayer(shapeRenderer, batch, i)
+            renderPlayer(shapeRenderer, i)
         }
 
         batch.begin()
+
+        renderPlayerName(batch, Main.player)
+
+        for (i in players) {
+            renderPlayerName(batch, i)
+        }
 
         renderCoordinates(batch)
 
@@ -50,24 +56,22 @@ object PlaygroundScene : Scene {
         blueFont.dispose()
     }
 
-    private fun renderPlayer(shapeRenderer: ShapeRenderer, batch: SpriteBatch, player: Player) {
+    private fun renderPlayer(shapeRenderer: ShapeRenderer, player: Player) {
         filledShape(shapeRenderer) {
             color = Color.SKY
 
             rect(player.realX, player.realY, tileSize, tileSize)
         }
+    }
 
+    private fun renderPlayerName(batch: SpriteBatch, player: Player) {
         val nameYPos = if ((player.x == 0.0f || player.x == 1.0f) && player.y == 15.0f) {
             player.realY + (tileSize / 2)
         } else {
             player.realY + tileSize
         }
 
-        batch.begin()
-
         blueFont.draw(batch, player.name, player.realX, nameYPos)
-
-        batch.end()
     }
 
     private fun renderGrid(shapeRenderer: ShapeRenderer) {
