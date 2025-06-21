@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import me.grian.Main
+import me.grian.Main.Companion.players
 import me.grian.Main.Companion.tileSize
 import me.grian.player.Player
 import me.grian.utils.filledShape
@@ -32,6 +33,10 @@ object PlaygroundScene : Scene {
     override fun render(shapeRenderer: ShapeRenderer, batch: SpriteBatch) {
         renderGrid(shapeRenderer)
         renderPlayer(shapeRenderer, batch, Main.player)
+
+        for (i in players) {
+            renderPlayer(shapeRenderer, batch, i)
+        }
 
         batch.begin()
 

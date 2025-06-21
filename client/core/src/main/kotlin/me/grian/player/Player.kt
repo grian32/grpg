@@ -23,4 +23,7 @@ class Player(
         realX = this.x * Main.tileSize
         realY = this.y * Main.tileSize
     }
+
+    constructor(x: Int, y: Int, name: String):
+        this(x.toFloat(), y.toFloat(), x * Main.tileSize, y * Main.tileSize, name)
 }
