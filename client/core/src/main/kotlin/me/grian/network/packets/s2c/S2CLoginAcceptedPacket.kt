@@ -1,24 +1,17 @@
 package me.grian.network.packets.s2c
 
+import io.ktor.utils.io.*
 import me.grian.Main
-import me.grian.network.packets.PacketType
 import me.grian.scenes.LoginScreenScene
 
 class S2CLoginAcceptedPacket : S2CPacket {
-    override suspend fun handle(data: MutableMap<String, Any>) {
+    override suspend fun handle(readChannel: ByteReadChannel) {
         Main.isLoggedIn = true
         LoginScreenScene.shouldRenderFailedLoginText = false
 
-        val initialX = data["initialX"]!! as Int
-        val initialY = data["initialY"]!! as Int
+        val initialX = readChannel.readInt()
+        val initialY = readChannel.readInt()
 
         Main.player.move(initialX.toFloat(), initialY.toFloat())
-    }
-
-    companion object {
-        val STRUCTURE = mapOf(
-            "initialX" to PacketType.INTEGER,
-            "initialY" to PacketType.INTEGER
-        )
     }
 }

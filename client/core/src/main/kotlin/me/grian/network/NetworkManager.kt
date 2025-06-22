@@ -41,29 +41,7 @@ object NetworkManager {
                     continue
                 }
 
-                var packetData = mutableMapOf<String, Any>()
-
-                if (!packet.decodes) {
-                    for ((name, dataType) in packet.structure) {
-                        val data = when (dataType) {
-                            PacketType.UTF8_STRING -> {
-                                val strLength = readChannel.readInt()
-                                val str = readChannel.readByteArray(strLength).toString(Charset.defaultCharset())
-
-                                str
-                            }
-
-                            PacketType.INTEGER -> readChannel.readInt()
-                            PacketType.BYTE -> readChannel.readByte()
-                        }
-
-                        packetData[name] = data
-                    }
-                } else {
-                    packetData = packet.instance.decode(readChannel)
-                }
-
-                packet.instance.handle(packetData)
+                packet.instance.handle(readChannel)
             }
         } catch (e: Throwable) {
             logger.error("Error reading from socket", e)
