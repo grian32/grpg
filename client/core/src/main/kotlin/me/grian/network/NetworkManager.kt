@@ -43,24 +43,29 @@ object NetworkManager {
                     continue
                 }
 
-                val packetData = mutableMapOf<String, Any>()
+                var packetData = mutableMapOf<String, Any>()
 
-                for ((name, dataType) in packet.structure) {
-                    val data = when (dataType) {
-                        PacketType.UTF8_STRING -> {
-                            val strLength = readChannel.readInt()
-                            val str = readChannel.readByteArray(strLength).toString(Charset.defaultCharset())
+                if (!packet.decodes) {
+                    for ((name, dataType) in packet.structure) {
+                        val data = when (dataType) {
+                            PacketType.UTF8_STRING -> {
+                                val strLength = readChannel.readInt()
+                                val str = readChannel.readByteArray(strLength).toString(Charset.defaultCharset())
 
-                            str
+                                str
+                            }
+
+                            PacketType.INTEGER -> readChannel.readInt()
+                            PacketType.BYTE -> readChannel.readByte()
                         }
-                        PacketType.INTEGER -> readChannel.readInt()
-                        PacketType.BYTE -> readChannel.readByte()
-                    }
 
-                    packetData[name] = data
+                        packetData[name] = data
+                    }
+                } else {
+                    packetData = packet.packet.decode(readChannel)
                 }
 
-                val instance = packet.packet.primaryConstructor!!.call() as S2CPacket
+                val instance = packet.packet
                 instance.handle(packetData)
             }
         } catch (e: Throwable) {
