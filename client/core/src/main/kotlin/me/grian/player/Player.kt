@@ -14,8 +14,10 @@ class Player(
     var name: String
 ) {
     fun move(x: Float, y: Float) {
-        this.x = x.coerceIn(0.0f, (Gdx.graphics.width / Main.tileSize) - 1)
-        this.y = y.coerceIn(0.0f, (Gdx.graphics.height / Main.tileSize) - 1)
+        val newX = x.coerceIn(0.0f, (Gdx.graphics.width / Main.tileSize) - 1)
+        val newY = y.coerceIn(0.0f, (Gdx.graphics.height / Main.tileSize) - 1)
+
+        if (Main.players.any { newX == it.x && newY == it.y }) return
 
         // maybe reconsider sending packet on function call, not sure though, have to see which one
         // ends up being more used, setting x/y directly or normnal move
@@ -23,8 +25,10 @@ class Player(
             C2SMovePacket(x.toInt(), y.toInt())
         )
 
-        realX = this.x * Main.tileSize
-        realY = this.y * Main.tileSize
+        this.x = newX
+        this.y = newY
+        realX = newX * Main.tileSize
+        realY = newY * Main.tileSize
     }
 
     constructor(x: Int, y: Int, name: String):
