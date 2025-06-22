@@ -9,11 +9,9 @@ import kotlinx.coroutines.launch
 import kotlinx.io.Buffer
 import me.grian.network.packets.PacketType
 import me.grian.network.packets.c2s.C2SPacket
-import me.grian.network.packets.s2c.S2CPacket
 import me.grian.network.packets.s2c.S2CPacketOpcode
 import org.slf4j.LoggerFactory
 import java.nio.charset.Charset
-import kotlin.reflect.full.primaryConstructor
 
 object NetworkManager {
     private val selectorManager = SelectorManager(Dispatchers.IO)
@@ -62,11 +60,10 @@ object NetworkManager {
                         packetData[name] = data
                     }
                 } else {
-                    packetData = packet.packet.decode(readChannel)
+                    packetData = packet.instance.decode(readChannel)
                 }
 
-                val instance = packet.packet
-                instance.handle(packetData)
+                packet.instance.handle(packetData)
             }
         } catch (e: Throwable) {
             logger.error("Error reading from socket", e)
