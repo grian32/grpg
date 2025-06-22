@@ -1,13 +1,38 @@
 package me.grian.network.packets.s2c
 
 import io.ktor.utils.io.*
+import me.grian.Main
+import me.grian.player.Player
+import java.nio.charset.Charset
 
 class S2CPlayersUpdatePacket : S2CPacket {
-    override suspend fun handle(data: MutableMap<String, Any>) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun handle(readChannel: ByteReadChannel) {
+        val length = readChannel.readShort()
 
-    override suspend fun decode(readChannel: ByteReadChannel): MutableMap<String, Any> {
-        TODO("Not yet implemented")
+        val playerList = mutableListOf<Player>()
+
+        repeat(length.toInt()) {
+            val nameLen = readChannel.readInt()
+            val name = readChannel.readByteArray(nameLen).toString(Charset.defaultCharset())
+            val x = readChannel.readInt()
+            val y = readChannel.readInt()
+
+            if (name == Main.player.name) {
+                // sending here cuz player move func also send packet, have to see
+                // about that
+                Main.player.x = x.toFloat()
+                Main.player.y = y.toFloat()
+                Main.player.realX = x * Main.tileSize
+                Main.player.realY = y * Main.tileSize
+            } else {
+                playerList.add(Player(
+                    x,
+                    y,
+                    name
+                ))
+            }
+
+            Main.players = playerList
+        }
     }
 }

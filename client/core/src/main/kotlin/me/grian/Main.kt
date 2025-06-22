@@ -69,10 +69,6 @@ class Main : ApplicationAdapter() {
         var isLoggedIn: Boolean = false
 
         val player = Player(0, 0, "")
-        val players = listOf(
-            Player(1, 5, "test"),
-            Player(6, 9, "test1"),
-            Player(12, 0, "test2")
-        )
+        var players: List<Player> = listOf()
     }
 }
