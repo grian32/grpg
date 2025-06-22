@@ -6,10 +6,7 @@ import kotlinx.io.Buffer
 import me.grian.packets.PacketType
 import me.grian.packets.c2s.C2SPacket
 import me.grian.packets.c2s.C2SPacketOpcode
-import me.grian.packets.s2c.S2CLoginAcceptedPacket
-import me.grian.packets.s2c.S2CLoginRejectedPacket
-import me.grian.packets.s2c.S2CPacket
-import me.grian.packets.s2c.sendToWriteChannel
+import me.grian.packets.s2c.*
 import me.grian.player.Player
 import me.grian.player.Point
 import org.slf4j.LoggerFactory
@@ -95,7 +92,18 @@ object Clients {
             S2CLoginRejectedPacket().sendToWriteChannel(writeChannel)
         }
 
+        updateAllPlayers()
         logger.info("Client logged in with username [${str}]")
+
         println(players)
+    }
+
+    suspend fun updateAllPlayers() {
+        val packet = S2CPlayersUpdatePacket()
+
+        for (i in players) {
+            println("Send to ${i.name}")
+            i.sendPacket(packet)
+        }
     }
 }

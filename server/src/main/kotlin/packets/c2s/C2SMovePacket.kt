@@ -3,9 +3,10 @@ package me.grian.packets.c2s
 import me.grian.Clients
 import me.grian.Constants
 import me.grian.packets.PacketType
+import me.grian.packets.s2c.S2CPlayersUpdatePacket
 
 class C2SMovePacket : C2SPacket {
-    override fun handle(data: MutableMap<String, Any>, playerIdx: Int) {
+    override suspend fun handle(data: MutableMap<String, Any>, playerIdx: Int) {
         val x = data["x"]!! as Int
         val y = data["y"]!! as Int
 
@@ -15,6 +16,7 @@ class C2SMovePacket : C2SPacket {
         // TODO: make sure they are not moving on top of other players.
 
         Clients.players[playerIdx].move(x, y)
+        Clients.updateAllPlayers()
     }
 
     companion object {

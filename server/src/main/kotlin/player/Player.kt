@@ -1,7 +1,6 @@
 package me.grian.player
 
 import io.ktor.utils.io.*
-import kotlinx.io.Buffer
 import me.grian.packets.s2c.S2CPacket
 import me.grian.packets.s2c.sendToWriteChannel
 
