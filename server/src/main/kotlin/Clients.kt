@@ -94,15 +94,12 @@ object Clients {
 
         updateAllPlayers()
         logger.info("Client logged in with username [${str}]")
-
-        println(players)
     }
 
     suspend fun updateAllPlayers() {
         val packet = S2CPlayersUpdatePacket()
 
         for (i in players) {
-            println("Send to ${i.name}")
             i.sendPacket(packet)
         }
     }
