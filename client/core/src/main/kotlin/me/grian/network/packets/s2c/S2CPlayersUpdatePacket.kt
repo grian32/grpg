@@ -20,8 +20,8 @@ class S2CPlayersUpdatePacket : S2CPacket {
             if (name == Main.player.name) {
                 // sending here cuz player move func also send packet, have to see
                 // about that
-                Main.player.x = x.toFloat()
-                Main.player.y = y.toFloat()
+                Main.player.pos.x = x
+                Main.player.pos.y = y
                 Main.player.realX = x * Main.tileSize
                 Main.player.realY = y * Main.tileSize
             } else {

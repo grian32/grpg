@@ -7,10 +7,10 @@ import me.grian.Main.Companion.player
 class PlayerInputHandler : InputProcessor {
     override fun keyDown(keycode: Int): Boolean {
         return when (keycode) {
-            Input.Keys.W -> { player.move(player.x, player.y + 1); true }
-            Input.Keys.S -> { player.move(player.x, player.y - 1); true }
-            Input.Keys.A -> { player.move(player.x - 1, player.y); true }
-            Input.Keys.D -> { player.move(player.x + 1, player.y); true }
+            Input.Keys.W -> { player.move(player.pos.x, player.pos.y + 1); true }
+            Input.Keys.S -> { player.move(player.pos.x, player.pos.y - 1); true }
+            Input.Keys.A -> { player.move(player.pos.x - 1, player.pos.y); true }
+            Input.Keys.D -> { player.move(player.pos.x + 1, player.pos.y); true }
             else -> false
         }
     }

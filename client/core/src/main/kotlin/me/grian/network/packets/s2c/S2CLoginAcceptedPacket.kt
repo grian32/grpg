@@ -12,6 +12,6 @@ class S2CLoginAcceptedPacket : S2CPacket {
         val initialX = readChannel.readInt()
         val initialY = readChannel.readInt()
 
-        Main.player.move(initialX.toFloat(), initialY.toFloat())
+        Main.player.move(initialX, initialY)
     }
 }

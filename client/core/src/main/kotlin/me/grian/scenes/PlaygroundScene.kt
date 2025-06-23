@@ -34,6 +34,7 @@ object PlaygroundScene : Scene {
         renderGrid(shapeRenderer)
         renderPlayer(shapeRenderer, Main.player)
 
+        // TODO: use explicit
         for (i in players) {
             renderPlayer(shapeRenderer, i)
         }
@@ -65,7 +66,7 @@ object PlaygroundScene : Scene {
     }
 
     private fun renderPlayerName(batch: SpriteBatch, player: Player) {
-        val nameYPos = if ((player.x == 0.0f || player.x == 1.0f) && player.y == 15.0f) {
+        val nameYPos = if ((player.pos.x == 0 || player.pos.x == 1) && player.pos.y == 15) {
             player.realY + (tileSize / 2)
         } else {
             player.realY + tileSize
@@ -96,6 +97,6 @@ object PlaygroundScene : Scene {
     }
 
     private fun renderCoordinates(batch: SpriteBatch) {
-        redFont.draw(batch, "X: ${Main.player.x} Y: ${Main.player.y}", 0.0f, Gdx.graphics.height.toFloat())
+        redFont.draw(batch, "X: ${Main.player.pos.x} Y: ${Main.player.pos.y}", 0.0f, Gdx.graphics.height.toFloat())
     }
 }
