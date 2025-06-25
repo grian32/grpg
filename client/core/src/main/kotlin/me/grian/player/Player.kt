@@ -22,11 +22,6 @@ class Player(
         NetworkManager.sendPacket(
             C2SMovePacket(x, y)
         )
-
-        this.pos.x = newX
-        this.pos.y = newY
-        realX = newX * Main.tileSize
-        realY = newY * Main.tileSize
     }
 
     constructor(x: Int, y: Int, name: String):
