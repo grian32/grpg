@@ -81,6 +81,16 @@ object PlaygroundScene : Scene {
 
         for (x in 0..gridX) {
             for (y in 0..gridY) {
+                // test code mainly so i can differentiate "chunks"
+                if (Main.player.chunkPos.y == 1 && x == 8 && y == 8) {
+
+                    filledShape(shapeRenderer) {
+                        color = Color.BLACK
+                        rect(x * tileSize, y * tileSize, tileSize, tileSize)
+                    }
+                    continue
+                }
+
                 filledShape(shapeRenderer) {
                     color = Color.WHITE
 

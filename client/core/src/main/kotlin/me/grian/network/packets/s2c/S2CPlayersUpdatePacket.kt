@@ -22,12 +22,16 @@ class S2CPlayersUpdatePacket : S2CPacket {
                 // about that
                 Main.player.pos.x = x
                 Main.player.pos.y = y
-                Main.player.realX = x * Main.tileSize
-                Main.player.realY = y * Main.tileSize
+                Main.player.realX = (x % Main.chunkSize) * Main.tileSize
+                Main.player.realY = (y % Main.chunkSize) * Main.tileSize
+                Main.player.chunkPos.x = x / Main.chunkSize
+                Main.player.chunkPos.y = y / Main.chunkSize
             } else {
                 playerList.add(Player(
                     x,
                     y,
+                    x / Main.chunkSize,
+                    y / Main.chunkSize,
                     name
                 ))
             }

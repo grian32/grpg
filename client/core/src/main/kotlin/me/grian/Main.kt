@@ -6,13 +6,11 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import io.ktor.util.network.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.grian.network.NetworkManager
 import me.grian.player.Player
 import me.grian.player.PlayerInputHandler
+import me.grian.player.Point
 import me.grian.scenes.LoginScreenScene
 import me.grian.scenes.PlaygroundScene
 
@@ -63,12 +61,19 @@ class Main : ApplicationAdapter() {
     }
 
     companion object {
-        var tileSize = 64.0f
+        const val tileSize = 64.0f
+        const val chunkSize = 16
         val texturesToDipose = mutableListOf<Texture>()
 
         var isLoggedIn: Boolean = false
 
-        val player = Player(0, 0, "")
+        val player = Player(0, 0, 0, 0,"")
         var players: List<Player> = listOf()
+
+        // need to do this dynamically based on a map i input this is jsut testing data :d
+        val zones = listOf(
+            Point(0, 0),
+            Point(0, 1)
+        )
     }
 }
