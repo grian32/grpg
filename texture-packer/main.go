@@ -41,12 +41,24 @@ func run(c *cobra.Command, _ []string) error {
 
 	buf := bytes.Buffer{}
 
-	WriteGRPGTexHeader(&buf, version)
+	err := WriteGRPGTexHeader(&buf, version)
+	if err != nil {
+		return err
+	}
 
-	manifestData := ParseManifestFile(manifest)
-	textures := BuildGRPGTexFromManifest(manifestData)
+	manifestData, err := ParseManifestFile(manifest)
+	if err != nil {
+		return err
+	}
+	textures, err := BuildGRPGTexFromManifest(manifestData)
+	if err != nil {
+		return err
+	}
 
-	WriteGRPGTex(&buf, textures)
+	err = WriteGRPGTex(&buf, textures)
+	if err != nil {
+		return err
+	}
 
 	f, err := os.Create(output)
 

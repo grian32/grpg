@@ -3,8 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"image/png"
-	"log"
+	"io"
 	"os"
 )
 
@@ -14,88 +15,83 @@ type GRPGTexHeader struct {
 }
 
 type GRPGTexTexture struct {
-	InternalIdLength uint16
-	InternalIdData   []byte
-	RGBPixels        [12288]byte // 64 px * 64 px * 3 bytes(r, g, b)
+	InternalIdData []byte
+	PNGBytes       []byte
 }
 
-func WriteGRPGTexHeader(buf *bytes.Buffer, version uint16) {
+func WriteGRPGTexHeader(buf *bytes.Buffer, version uint16) error {
 	header := GRPGTexHeader{
 		Magic:   [8]byte{'G', 'R', 'P', 'G', 'T', 'E', 'X', 0},
 		Version: version,
 	}
 	err := binary.Write(buf, binary.BigEndian, header)
-	if err != nil {
-		log.Fatal(err)
-	}
+
+	return err
 }
 
-func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) []GRPGTexTexture {
+func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]GRPGTexTexture, error) {
 	tex := make([]GRPGTexTexture, len(files))
 
 	for idx, file := range files {
 		f, err := os.Open(file.FilePath)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
-		data, err := png.Decode(f)
-
+		pngConfig, err := png.DecodeConfig(f)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
-		maxBounds := data.Bounds().Max
-
-		if maxBounds.X != 64 || maxBounds.Y != 64 {
-			log.Fatal("textures that are not exactly 64x64 are disallowed")
+		if pngConfig.Width != 64 || pngConfig.Height != 64 {
+			return nil, errors.New("PNG Images must be exactly 64x64")
 		}
 
-		rgbArray := [12288]byte{}
+		_, err = f.Seek(0, 0)
+		if err != nil {
+			return nil, err
+		}
 
-		rgbIdx := 0
-
-		for y := range 64 {
-			for x := range 64 {
-				r, g, b, _ := data.At(x, y).RGBA()
-				rgbArray[rgbIdx] = byte(r >> 8)
-				rgbArray[rgbIdx+1] = byte(g >> 8)
-				rgbArray[rgbIdx+2] = byte(b >> 8)
-				rgbIdx += 3
-			}
+		pngBytes, err := io.ReadAll(f)
+		if err != nil {
+			return nil, err
 		}
 
 		tex[idx] = GRPGTexTexture{
-			InternalIdLength: uint16(len(file.InternalName)),
-			InternalIdData:   []byte(file.InternalName),
-			RGBPixels:        rgbArray,
+			InternalIdData: []byte(file.InternalName),
+			PNGBytes:       pngBytes,
 		}
 
 		f.Close()
 	}
 
-	return tex
+	return tex, nil
 }
 
-func WriteGRPGTex(buf *bytes.Buffer, textures []GRPGTexTexture) {
+func WriteGRPGTex(buf *bytes.Buffer, textures []GRPGTexTexture) error {
 	err := binary.Write(buf, binary.BigEndian, uint32(len(textures)))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
+	// can add length checking for lengths being uint32 if it becomes an issue but that seems very unlikely lol..
 	for _, tex := range textures {
-		err = binary.Write(buf, binary.BigEndian, tex.InternalIdLength)
+		err = binary.Write(buf, binary.BigEndian, uint32(len(tex.InternalIdData)))
 
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		// using buf.write cuz not fixed length lol
 		buf.Write(tex.InternalIdData)
 
-		err = binary.Write(buf, binary.BigEndian, tex.RGBPixels)
+		err = binary.Write(buf, binary.BigEndian, uint32(len(tex.PNGBytes)))
 
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
+
+		buf.Write(tex.PNGBytes)
 	}
+
+	return nil
 }

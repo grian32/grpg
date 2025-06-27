@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
 	"strings"
@@ -11,7 +12,7 @@ type GRPGTexManifestEntry struct {
 	FilePath     string
 }
 
-func ParseManifestFile(path string) []GRPGTexManifestEntry {
+func ParseManifestFile(path string) ([]GRPGTexManifestEntry, error) {
 	content, err := os.ReadFile(path)
 
 	if err != nil {
@@ -27,7 +28,7 @@ func ParseManifestFile(path string) []GRPGTexManifestEntry {
 
 		// eh this is a bit shit but it's an "internal" tool anyway lol
 		if !strings.HasSuffix(contents[1], ".png") {
-			log.Fatal("only .png files are allowed as textures.")
+			return nil, errors.New("only .png files are allowed as textures")
 		}
 
 		entries[idx] = GRPGTexManifestEntry{
@@ -36,5 +37,5 @@ func ParseManifestFile(path string) []GRPGTexManifestEntry {
 		}
 	}
 
-	return entries
+	return entries, nil
 }
