@@ -25,6 +25,11 @@ func ParseManifestFile(path string) []GRPGTexManifestEntry {
 	for idx, line := range lines {
 		var contents = strings.Split(line, "=")
 
+		// eh this is a bit shit but it's an "internal" tool anyway lol
+		if !strings.HasSuffix(contents[1], ".png") {
+			log.Fatal("only .png files are allowed as textures.")
+		}
+
 		entries[idx] = GRPGTexManifestEntry{
 			InternalName: contents[0],
 			FilePath:     contents[1],
