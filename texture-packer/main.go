@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/charmbracelet/fang"
 	"github.com/spf13/cobra"
 	"os"
@@ -45,13 +44,10 @@ func run(c *cobra.Command, _ []string) error {
 	WriteGRPGTexHeader(&buf, version)
 
 	manifestData := ParseManifestFile(manifest)
-	fmt.Println(manifestData)
 	textures := BuildGRPGTexFromManifest(manifestData)
-	fmt.Println(textures)
 
 	WriteGRPGTex(&buf, textures)
 
-	fmt.Println(buf.Len())
 	f, err := os.Create(output)
 
 	defer f.Close()
