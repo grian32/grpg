@@ -1,0 +1,2 @@
+grass=grass_texture.png
+stone=stone_texture.png
