@@ -19,6 +19,10 @@ type GRPGTexTexture struct {
 	PNGBytes       []byte
 }
 
+func (t GRPGTexTexture) Equals(other GRPGTexTexture) bool {
+	return bytes.Equal(t.InternalIdData, other.InternalIdData) && bytes.Equal(t.PNGBytes, other.PNGBytes)
+}
+
 func WriteGRPGTexHeader(buf *bytes.Buffer, version uint16) error {
 	header := GRPGTexHeader{
 		Magic:   [8]byte{'G', 'R', 'P', 'G', 'T', 'E', 'X', 0},
