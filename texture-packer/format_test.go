@@ -15,8 +15,9 @@ func TestWriteGRPGTexHeaderVer1(t *testing.T) {
 
 	err := WriteGRPGTexHeader(&buf, 1)
 	if !bytes.Equal(expectedBytes, buf.Bytes()) || err != nil {
-		t.Errorf("WriteGRPGTexHeader(&buf, 1)= %q, %v, want match for %#q", output, err, expectedBytes)
+		t.Errorf("WriteGRPGTexHeader(&buf, 1)= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
 	}
+	buf.Reset()
 }
 
 func TestWriteGRPGTexHeaderVerMax(t *testing.T) {
@@ -27,6 +28,7 @@ func TestWriteGRPGTexHeaderVerMax(t *testing.T) {
 
 	err := WriteGRPGTexHeader(&buf, 65535)
 	if !bytes.Equal(expectedBytes, buf.Bytes()) || err != nil {
-		t.Errorf("WriteGRPGTexHeader(&buf, 1)= %q, %v, want match for %#q", output, err, expectedBytes)
+		t.Errorf("WriteGRPGTexHeader(&buf, 1)= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
 	}
+	buf.Reset()
 }
