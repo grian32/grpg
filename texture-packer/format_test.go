@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"io"
+	"os"
 	"testing"
 )
 
@@ -31,4 +33,52 @@ func TestWriteGRPGTexHeaderVerMax(t *testing.T) {
 		t.Errorf("WriteGRPGTexHeader(&buf, 1)= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
 	}
 	buf.Reset()
+}
+
+func TestBuildGRPGTexFromManifest(t *testing.T) {
+	manifest := []GRPGTexManifestEntry{
+		{
+			InternalName: "grass",
+			FilePath:     "testdata/grass_texture.png",
+		},
+		{
+			InternalName: "stone",
+			FilePath:     "testdata/stone_texture.png",
+		},
+	}
+
+	stone, err := os.Open("./testdata/stone_texture.png")
+	if err != nil {
+		t.Errorf("BuildGRPGTexFromManifest(files) errored loading stone texture : %v", err)
+	}
+	grass, err := os.Open("./testdata/grass_texture.png")
+	if err != nil {
+		t.Errorf("BuildGRPGTexFromManifest(files) errored loading grass texture : %v", err)
+	}
+
+	stonePngBytes, err := io.ReadAll(stone)
+	if err != nil {
+		t.Errorf("BuildGRPGTexFromManifest(files) errored reading grass texture : %v", err)
+	}
+	grassPngBytes, err := io.ReadAll(grass)
+	if err != nil {
+		t.Errorf("BuildGRPGTexFromManifest(files) errored reading grass texture : %v", err)
+	}
+
+	expected := []GRPGTexTexture{
+		{
+			InternalIdData: []byte("grass"),
+			PNGBytes:       grassPngBytes,
+		},
+		{
+			InternalIdData: []byte("stone"),
+			PNGBytes:       stonePngBytes,
+		},
+	}
+
+	output, err := BuildGRPGTexFromManifest(manifest)
+
+	if len(output) < 2 || !output[0].Equals(expected[0]) || !output[1].Equals(expected[1]) || err != nil {
+		t.Errorf("BuildGRPGTexFromManifest(manifest)= %q, %v, want match for %#q", output, err, expected)
+	}
 }
