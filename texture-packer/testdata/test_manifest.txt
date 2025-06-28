@@ -1,2 +1,2 @@
-grass=grass_texture.png
-stone=stone_texture.png
+grass=testdata/grass_texture.png
+stone=testdata/stone_texture.png
