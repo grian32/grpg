@@ -3,11 +3,39 @@ package main
 import (
 	"bytes"
 	"io"
+	"log"
 	"os"
 	"testing"
 )
 
-var buf = bytes.Buffer{}
+var (
+	buf           = bytes.Buffer{}
+	stone         *os.File
+	grass         *os.File
+	stonePngBytes []byte
+	grassPngBytes []byte
+)
+
+func init() {
+	var err error
+
+	stone, err = os.Open("./testdata/stone_texture.png")
+	if err != nil {
+		log.Fatal("Error loading stone texture while initializing format tests")
+	}
+	grass, err = os.Open("./testdata/grass_texture.png")
+	if err != nil {
+		log.Fatal("Error loading grass texture while initializing format tests")
+	}
+	stonePngBytes, err = io.ReadAll(stone)
+	if err != nil {
+		log.Fatal("Error loading stone png bytes while initializing format tests")
+	}
+	grassPngBytes, err = io.ReadAll(grass)
+	if err != nil {
+		log.Fatal("Error loading stone png bytes while initializing format tests")
+	}
+}
 
 func TestWriteGRPGTexHeaderVer1(t *testing.T) {
 	expectedBytes := []byte{
@@ -45,24 +73,6 @@ func TestBuildGRPGTexFromManifest(t *testing.T) {
 			InternalName: "stone",
 			FilePath:     "testdata/stone_texture.png",
 		},
-	}
-
-	stone, err := os.Open("./testdata/stone_texture.png")
-	if err != nil {
-		t.Errorf("BuildGRPGTexFromManifest(files) errored loading stone texture : %v", err)
-	}
-	grass, err := os.Open("./testdata/grass_texture.png")
-	if err != nil {
-		t.Errorf("BuildGRPGTexFromManifest(files) errored loading grass texture : %v", err)
-	}
-
-	stonePngBytes, err := io.ReadAll(stone)
-	if err != nil {
-		t.Errorf("BuildGRPGTexFromManifest(files) errored reading grass texture : %v", err)
-	}
-	grassPngBytes, err := io.ReadAll(grass)
-	if err != nil {
-		t.Errorf("BuildGRPGTexFromManifest(files) errored reading grass texture : %v", err)
 	}
 
 	expected := []GRPGTexTexture{
