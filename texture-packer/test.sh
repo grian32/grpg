@@ -1,3 +1,3 @@
 #!/bin/bash
 go build -o texpack
-./texpack -m test_manifest.txt --texv 1
+./texpack -m testdata/test_manifest.txt -o testdata/textures.pak --texv 1
