@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/binary"
 	"io"
 	"log"
 	"os"
@@ -90,5 +91,46 @@ func TestBuildGRPGTexFromManifest(t *testing.T) {
 
 	if len(output) < 2 || !output[0].Equals(expected[0]) || !output[1].Equals(expected[1]) || err != nil {
 		t.Errorf("BuildGRPGTexFromManifest(manifest)= %q, %v, want match for %#q", output, err, expected)
+	}
+}
+
+func TestWriteGRPGTex(t *testing.T) {
+	input := []GRPGTexTexture{
+		{
+			InternalIdData: []byte("grass"),
+			PNGBytes:       grassPngBytes,
+		},
+		{
+			InternalIdData: []byte("stone"),
+			PNGBytes:       stonePngBytes,
+		},
+	}
+
+	grassInternalIdLenBytes := make([]byte, 4)
+	binary.BigEndian.AppendUint32(grassInternalIdLenBytes, uint32(len(input[0].InternalIdData)))
+	grassPngBytesLen := make([]byte, 4)
+	binary.BigEndian.AppendUint32(grassPngBytesLen, uint32(len(input[0].PNGBytes)))
+
+	stoneInternalIdLenBytes := make([]byte, 4)
+	binary.BigEndian.AppendUint32(stoneInternalIdLenBytes, uint32(len(input[1].InternalIdData)))
+	stonePngBytesLen := make([]byte, 4)
+	binary.BigEndian.AppendUint32(stonePngBytesLen, uint32(len(input[1].PNGBytes)))
+
+	expectedBytes := []byte{0x00, 0x00, 0x00, 0x02 /* 2 textures len */}
+
+	expectedBytes = append(expectedBytes, grassInternalIdLenBytes...)
+	expectedBytes = append(expectedBytes, input[0].InternalIdData...)
+	expectedBytes = append(expectedBytes, grassPngBytesLen...)
+	expectedBytes = append(expectedBytes, input[0].PNGBytes...)
+
+	expectedBytes = append(expectedBytes, stoneInternalIdLenBytes...)
+	expectedBytes = append(expectedBytes, input[1].InternalIdData...)
+	expectedBytes = append(expectedBytes, stonePngBytesLen...)
+	expectedBytes = append(expectedBytes, input[1].PNGBytes...)
+
+	err := WriteGRPGTex(&buf, input)
+
+	if !bytes.Equal(expectedBytes, buf.Bytes()) || err != nil {
+		t.Errorf("WriteGRPGTex= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
 	}
 }
