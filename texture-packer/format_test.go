@@ -106,31 +106,25 @@ func TestWriteGRPGTex(t *testing.T) {
 		},
 	}
 
-	grassInternalIdLenBytes := make([]byte, 4)
-	binary.BigEndian.PutUint32(grassInternalIdLenBytes, uint32(len(input[0].InternalIdData)))
-	grassPngBytesLen := make([]byte, 4)
-	binary.BigEndian.PutUint32(grassPngBytesLen, uint32(len(input[0].PNGBytes)))
-
-	stoneInternalIdLenBytes := make([]byte, 4)
-	binary.BigEndian.PutUint32(stoneInternalIdLenBytes, uint32(len(input[1].InternalIdData)))
-	stonePngBytesLen := make([]byte, 4)
-	binary.BigEndian.PutUint32(stonePngBytesLen, uint32(len(input[1].PNGBytes)))
-
 	expectedBytes := []byte{0x00, 0x00, 0x00, 0x02 /* 2 textures len */}
 
-	expectedBytes = append(expectedBytes, grassInternalIdLenBytes...)
-	expectedBytes = append(expectedBytes, input[0].InternalIdData...)
-	expectedBytes = append(expectedBytes, grassPngBytesLen...)
-	expectedBytes = append(expectedBytes, input[0].PNGBytes...)
-
-	expectedBytes = append(expectedBytes, stoneInternalIdLenBytes...)
-	expectedBytes = append(expectedBytes, input[1].InternalIdData...)
-	expectedBytes = append(expectedBytes, stonePngBytesLen...)
-	expectedBytes = append(expectedBytes, input[1].PNGBytes...)
+	for _, tex := range input {
+		expectedBytes = append(expectedBytes, uint32ToBytes(len(tex.InternalIdData))...)
+		expectedBytes = append(expectedBytes, tex.InternalIdData...)
+		expectedBytes = append(expectedBytes, uint32ToBytes(len(tex.PNGBytes))...)
+		expectedBytes = append(expectedBytes, tex.PNGBytes...)
+	}
 
 	err := WriteGRPGTex(&buf, input)
 
 	if !bytes.Equal(expectedBytes, buf.Bytes()) || err != nil {
 		t.Errorf("WriteGRPGTex= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
 	}
+}
+
+func uint32ToBytes(u int) []byte {
+	arr := make([]byte, 4)
+	binary.BigEndian.PutUint32(arr, uint32(u))
+
+	return arr
 }
