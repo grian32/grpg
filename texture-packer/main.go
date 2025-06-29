@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"os"
+
 	"github.com/charmbracelet/fang"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var (
@@ -62,11 +63,11 @@ func run(c *cobra.Command, _ []string) error {
 
 	f, err := os.Create(output)
 
-	defer f.Close()
-
 	if err != nil {
 		return err
 	}
+
+	defer f.Close()
 
 	_, err = f.Write(buf.Bytes())
 
