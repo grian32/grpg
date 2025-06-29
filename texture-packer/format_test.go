@@ -107,14 +107,14 @@ func TestWriteGRPGTex(t *testing.T) {
 	}
 
 	grassInternalIdLenBytes := make([]byte, 4)
-	binary.BigEndian.AppendUint32(grassInternalIdLenBytes, uint32(len(input[0].InternalIdData)))
+	binary.BigEndian.PutUint32(grassInternalIdLenBytes, uint32(len(input[0].InternalIdData)))
 	grassPngBytesLen := make([]byte, 4)
-	binary.BigEndian.AppendUint32(grassPngBytesLen, uint32(len(input[0].PNGBytes)))
+	binary.BigEndian.PutUint32(grassPngBytesLen, uint32(len(input[0].PNGBytes)))
 
 	stoneInternalIdLenBytes := make([]byte, 4)
-	binary.BigEndian.AppendUint32(stoneInternalIdLenBytes, uint32(len(input[1].InternalIdData)))
+	binary.BigEndian.PutUint32(stoneInternalIdLenBytes, uint32(len(input[1].InternalIdData)))
 	stonePngBytesLen := make([]byte, 4)
-	binary.BigEndian.AppendUint32(stonePngBytesLen, uint32(len(input[1].PNGBytes)))
+	binary.BigEndian.PutUint32(stonePngBytesLen, uint32(len(input[1].PNGBytes)))
 
 	expectedBytes := []byte{0x00, 0x00, 0x00, 0x02 /* 2 textures len */}
 
