@@ -13,7 +13,7 @@ var (
 )
 
 func BuildGrid() g.Widget {
-	rgba, _ = g.LoadImage("grass_texture.png")
+	rgba, _ = g.LoadImage("./default_editor.png")
 
 	g.EnqueueNewTextureFromRgba(rgba, func(t *g.Texture) {
 		tex = t
@@ -33,5 +33,6 @@ func BuildGrid() g.Widget {
 			}
 		})
 	}
+
 	return nil
 }
