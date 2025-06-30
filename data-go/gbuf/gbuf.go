@@ -95,3 +95,7 @@ func (buf *GBuf) Clear() {
 	buf.slice = make([]byte, 0)
 	buf.pos = 0
 }
+
+func (buf *GBuf) Bytes() []byte {
+	return buf.slice
+}

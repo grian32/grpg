@@ -294,3 +294,14 @@ func TestGBuf_ClearThenWrite(t *testing.T) {
 		t.Errorf("GBuf_Clear() then WriteUint16() got %v, want %v", buf.slice, expected)
 	}
 }
+
+func TestGBuf_Bytes(t *testing.T) {
+	buf := NewEmptyGBuf()
+	buf.WriteUint32(2)
+
+	expected := []byte{0x00, 0x00, 0x00, 0x02}
+
+	if !bytes.Equal(expected, buf.Bytes()) {
+		t.Errorf("GBuf_Bytes()=%v want match for %v", buf.Bytes(), expected)
+	}
+}
