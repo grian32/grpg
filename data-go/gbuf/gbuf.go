@@ -93,4 +93,5 @@ func (buf *GBuf) WriteString(val string) {
 // Replaces the backing slice with an empty one
 func (buf *GBuf) Clear() {
 	buf.slice = make([]byte, 0)
+	buf.pos = 0
 }
