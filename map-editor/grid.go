@@ -1,8 +1,10 @@
 package main
 
 import (
-	g "github.com/AllenDang/giu"
 	"image"
+	"image/color"
+
+	g "github.com/AllenDang/giu"
 )
 
 var (
@@ -10,24 +12,26 @@ var (
 	tex  *g.Texture
 )
 
-func BuildGrid() []g.Widget {
+func BuildGrid() g.Widget {
 	rgba, _ = g.LoadImage("grass_texture.png")
 
 	g.EnqueueNewTextureFromRgba(rgba, func(t *g.Texture) {
 		tex = t
 	})
 
-	var rows []g.Widget
-
-	for _ = range 15 {
-		var content []g.Widget
-
-		for _ = range 15 {
-			content = append(content, g.ImageButton(tex).Size(64.0, 64.0))
-		}
-
-		rows = append(rows, g.Row(content...))
+	if tex != nil {
+		return g.Custom(func() {
+			canvas := g.GetCanvas()
+			pos := g.GetCursorScreenPos()
+			for dx := range 15 {
+				for dy := range 15 {
+					minPt := image.Pt(pos.X+(dx*64), pos.Y+(dy*64))
+					maxPt := image.Pt(pos.X+(dx*64)+64, pos.Y+(dy*64)+64)
+					canvas.AddImage(tex, minPt, maxPt)
+					canvas.AddRect(minPt, maxPt, color.RGBA{0, 0, 0, 255}, 0.0, g.DrawFlagsClosed, 1.0)
+				}
+			}
+		})
 	}
-
-	return rows
+	return nil
 }
