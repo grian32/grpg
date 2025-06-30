@@ -14,7 +14,15 @@ type Header struct {
 type Texture struct {
 	InternalIdData []byte
 	PNGBytes       []byte
+	Type           TextureType
 }
+
+type TextureType byte
+
+const (
+	TILE TextureType = 0x00
+	OBJ  TextureType = 0x01
+)
 
 func (t Texture) Equals(other Texture) bool {
 	return bytes.Equal(t.InternalIdData, other.InternalIdData) && bytes.Equal(t.PNGBytes, other.PNGBytes)
@@ -39,6 +47,8 @@ func WriteTextures(buf *gbuf.GBuf, textures []Texture) {
 
 		buf.WriteUint32(uint32(len(tex.PNGBytes)))
 		buf.WriteBytes(tex.PNGBytes)
+
+		buf.WriteByte(byte(tex.Type))
 	}
 }
 
@@ -84,9 +94,15 @@ func ReadTextures(buf *gbuf.GBuf) []Texture {
 			log.Fatal(err)
 		}
 
+		texType, err := buf.ReadByte()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		textures = append(textures, Texture{
 			InternalIdData: internalIdData,
 			PNGBytes:       pngBytes,
+			Type:           TextureType(texType),
 		})
 	}
 

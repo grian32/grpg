@@ -70,10 +70,12 @@ func TestWriteTextures(t *testing.T) {
 		{
 			InternalIdData: []byte("grass"),
 			PNGBytes:       grassPngBytes,
+			Type:           TILE,
 		},
 		{
 			InternalIdData: []byte("stone"),
 			PNGBytes:       stonePngBytes,
+			Type:           OBJ,
 		},
 	}
 
@@ -84,6 +86,7 @@ func TestWriteTextures(t *testing.T) {
 		expectedBytes = append(expectedBytes, tex.InternalIdData...)
 		expectedBytes = append(expectedBytes, uint32ToBytes(len(tex.PNGBytes))...)
 		expectedBytes = append(expectedBytes, tex.PNGBytes...)
+		expectedBytes = append(expectedBytes, byte(tex.Type))
 	}
 
 	WriteTextures(buf, input)
@@ -134,10 +137,12 @@ func TestReadTextures(t *testing.T) {
 		{
 			InternalIdData: []byte("grass"),
 			PNGBytes:       grassPngBytes,
+			Type:           TILE,
 		},
 		{
 			InternalIdData: []byte("stone"),
 			PNGBytes:       stonePngBytes,
+			Type:           OBJ,
 		},
 	}
 
@@ -149,11 +154,13 @@ func TestReadTextures(t *testing.T) {
 	buf.WriteBytes([]byte("grass"))
 	buf.WriteUint32(uint32(len(grassPngBytes)))
 	buf.WriteBytes(grassPngBytes)
+	buf.WriteByte(byte(TILE))
 
 	buf.WriteUint32(5)
 	buf.WriteBytes([]byte("stone"))
 	buf.WriteUint32(uint32(len(stonePngBytes)))
 	buf.WriteBytes(stonePngBytes)
+	buf.WriteByte(byte(OBJ))
 
 	output := ReadTextures(buf)
 
