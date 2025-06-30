@@ -12,7 +12,7 @@ func loop() {
 	//imgui.ShowDemoWindow()
 	var editorWindowPos imgui.Vec2
 	var editorWindowSize imgui.Vec2
-	g.Window("Editor").Flags(g.WindowFlagsNoCollapse|g.WindowFlagsNoMove|g.WindowFlagsNoResize).Size(1000, 1024).Layout(
+	g.Window("Editor").Flags(g.WindowFlagsNoCollapse|g.WindowFlagsNoMove|g.WindowFlagsNoResize).Size(1044, 1064).Layout(
 		g.Custom(func() {
 			editorWindowPos = imgui.WindowPos()
 			editorWindowSize = imgui.WindowSize()

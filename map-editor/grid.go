@@ -28,11 +28,11 @@ func BuildGrid() g.Widget {
 			pos := g.GetCursorScreenPos()
 			gridMinX := float32(pos.X)
 			gridMinY := float32(pos.Y)
-			gridMaxX := float32(pos.X + (15 * 64) + 64)
-			gridMaxY := float32(pos.Y + (15 * 64) + 64)
+			gridMaxX := float32(pos.X + (16 * 64) + 64)
+			gridMaxY := float32(pos.Y + (16 * 64) + 64)
 
-			for dx := range 15 {
-				for dy := range 15 {
+			for dx := range 16 {
+				for dy := range 16 {
 					minPt := image.Pt(pos.X+(dx*64), pos.Y+(dy*64))
 					maxPt := image.Pt(pos.X+(dx*64)+64, pos.Y+(dy*64)+64)
 					canvas.AddImage(tex, minPt, maxPt)
