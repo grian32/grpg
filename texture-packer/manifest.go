@@ -2,6 +2,9 @@ package main
 
 import (
 	"errors"
+	grpgtex "grpg-data-go"
+	"image/png"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -10,6 +13,45 @@ import (
 type GRPGTexManifestEntry struct {
 	InternalName string
 	FilePath     string
+}
+
+func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, error) {
+	tex := make([]grpgtex.Texture, len(files))
+
+	for idx, file := range files {
+		f, err := os.Open(file.FilePath)
+		if err != nil {
+			return nil, err
+		}
+
+		pngConfig, err := png.DecodeConfig(f)
+		if err != nil {
+			return nil, err
+		}
+
+		if pngConfig.Width != 64 || pngConfig.Height != 64 {
+			return nil, errors.New("PNG Images must be exactly 64x64")
+		}
+
+		_, err = f.Seek(0, 0)
+		if err != nil {
+			return nil, err
+		}
+
+		pngBytes, err := io.ReadAll(f)
+		if err != nil {
+			return nil, err
+		}
+
+		tex[idx] = grpgtex.Texture{
+			InternalIdData: []byte(file.InternalName),
+			PNGBytes:       pngBytes,
+		}
+
+		f.Close()
+	}
+
+	return tex, nil
 }
 
 func ParseManifestFile(path string) ([]GRPGTexManifestEntry, error) {

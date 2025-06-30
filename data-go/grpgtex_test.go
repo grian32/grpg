@@ -1,4 +1,4 @@
-package main
+package grpgtex
 
 import (
 	"bytes"
@@ -38,64 +38,34 @@ func init() {
 	}
 }
 
-func TestWriteGRPGTexHeaderVer1(t *testing.T) {
+func TestWriteHeaderVer1(t *testing.T) {
 	expectedBytes := []byte{
 		'G', 'R', 'P', 'G', 'T', 'E', 'X', 0, // magic
 		0x00, 0x01, // ver1
 	}
 
-	err := WriteGRPGTexHeader(&buf, 1)
+	err := WriteHeader(&buf, 1)
 	if !bytes.Equal(expectedBytes, buf.Bytes()) || err != nil {
-		t.Errorf("WriteGRPGTexHeader(&buf, 1)= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
+		t.Errorf("WriteHeader(&buf, 1)= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
 	}
 	buf.Reset()
 }
 
-func TestWriteGRPGTexHeaderVerMax(t *testing.T) {
+func TestWriteHeaderVerMax(t *testing.T) {
 	expectedBytes := []byte{
 		'G', 'R', 'P', 'G', 'T', 'E', 'X', 0, // magic
 		0xFF, 0xFF, // ver1
 	}
 
-	err := WriteGRPGTexHeader(&buf, 65535)
+	err := WriteHeader(&buf, 65535)
 	if !bytes.Equal(expectedBytes, buf.Bytes()) || err != nil {
-		t.Errorf("WriteGRPGTexHeader(&buf, 1)= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
+		t.Errorf("WriteHeader(&buf, 1)= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
 	}
 	buf.Reset()
 }
 
-func TestBuildGRPGTexFromManifest(t *testing.T) {
-	manifest := []GRPGTexManifestEntry{
-		{
-			InternalName: "grass",
-			FilePath:     "testdata/grass_texture.png",
-		},
-		{
-			InternalName: "stone",
-			FilePath:     "testdata/stone_texture.png",
-		},
-	}
-
-	expected := []GRPGTexTexture{
-		{
-			InternalIdData: []byte("grass"),
-			PNGBytes:       grassPngBytes,
-		},
-		{
-			InternalIdData: []byte("stone"),
-			PNGBytes:       stonePngBytes,
-		},
-	}
-
-	output, err := BuildGRPGTexFromManifest(manifest)
-
-	if len(output) < 2 || !output[0].Equals(expected[0]) || !output[1].Equals(expected[1]) || err != nil {
-		t.Errorf("BuildGRPGTexFromManifest(manifest)= %q, %v, want match for %#q", output, err, expected)
-	}
-}
-
-func TestWriteGRPGTex(t *testing.T) {
-	input := []GRPGTexTexture{
+func TestWriteTextures(t *testing.T) {
+	input := []Texture{
 		{
 			InternalIdData: []byte("grass"),
 			PNGBytes:       grassPngBytes,
@@ -115,7 +85,7 @@ func TestWriteGRPGTex(t *testing.T) {
 		expectedBytes = append(expectedBytes, tex.PNGBytes...)
 	}
 
-	err := WriteGRPGTex(&buf, input)
+	err := WriteTextures(&buf, input)
 
 	if !bytes.Equal(expectedBytes, buf.Bytes()) || err != nil {
 		t.Errorf("WriteGRPGTex= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)

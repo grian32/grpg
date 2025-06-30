@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	grpgtex "grpg-data-go"
 	"os"
 
 	"github.com/charmbracelet/fang"
@@ -42,7 +43,7 @@ func run(c *cobra.Command, _ []string) error {
 
 	buf := bytes.Buffer{}
 
-	err := WriteGRPGTexHeader(&buf, version)
+	err := grpgtex.WriteHeader(&buf, version)
 	if err != nil {
 		return err
 	}
@@ -56,7 +57,7 @@ func run(c *cobra.Command, _ []string) error {
 		return err
 	}
 
-	err = WriteGRPGTex(&buf, textures)
+	err = grpgtex.WriteTextures(&buf, textures)
 	if err != nil {
 		return err
 	}
