@@ -47,7 +47,7 @@ func TestWriteHeaderVer1(t *testing.T) {
 
 	WriteHeader(buf, 1)
 	if !bytes.Equal(expectedBytes, buf.Bytes()) {
-		t.Errorf("WriteHeader(&buf, 1)= %q, want match for %#q", buf.Bytes(), expectedBytes)
+		t.Errorf("WriteHeader(buf, 1)= %q, want match for %#q", buf.Bytes(), expectedBytes)
 	}
 	buf.Clear()
 }
@@ -60,7 +60,7 @@ func TestWriteHeaderVerMax(t *testing.T) {
 
 	WriteHeader(buf, 65535)
 	if !bytes.Equal(expectedBytes, buf.Bytes()) {
-		t.Errorf("WriteHeader(&buf, 1)= %q, want match for %#q", buf.Bytes(), expectedBytes)
+		t.Errorf("WriteHeader(buf, 1)= %q, want match for %#q", buf.Bytes(), expectedBytes)
 	}
 	buf.Clear()
 }
@@ -93,6 +93,74 @@ func TestWriteTextures(t *testing.T) {
 	}
 }
 
+func TestReadHeaderVer1(t *testing.T) {
+	expectedHeader := Header{
+		Magic:   [8]byte{'G', 'R', 'P', 'G', 'T', 'E', 'X', 0},
+		Version: 1,
+	}
+
+	buf := gbuf.NewGBuf([]byte{
+		'G', 'R', 'P', 'G', 'T', 'E', 'X', 0, // magic
+		0x00, 0x01, // ver1
+	})
+
+	output := ReadHeader(buf)
+
+	if output != expectedHeader {
+		t.Errorf("ReadHeader=%q, want match for %#q", output, expectedHeader)
+	}
+}
+
+func TestReadHeaderVerMax(t *testing.T) {
+	expectedHeader := Header{
+		Magic:   [8]byte{'G', 'R', 'P', 'G', 'T', 'E', 'X', 0},
+		Version: 65535,
+	}
+
+	buf := gbuf.NewGBuf([]byte{
+		'G', 'R', 'P', 'G', 'T', 'E', 'X', 0, // magic
+		0xFF, 0xFF, // ver1
+	})
+
+	output := ReadHeader(buf)
+
+	if output != expectedHeader {
+		t.Errorf("ReadHeader=%q, want match for %#q", output, expectedHeader)
+	}
+}
+
+func TestReadTextures(t *testing.T) {
+	expected := []Texture{
+		{
+			InternalIdData: []byte("grass"),
+			PNGBytes:       grassPngBytes,
+		},
+		{
+			InternalIdData: []byte("stone"),
+			PNGBytes:       stonePngBytes,
+		},
+	}
+
+	buf := gbuf.NewEmptyGBuf()
+
+	buf.WriteUint32(2)
+
+	buf.WriteUint32(5)
+	buf.WriteBytes([]byte("grass"))
+	buf.WriteUint32(uint32(len(grassPngBytes)))
+	buf.WriteBytes(grassPngBytes)
+
+	buf.WriteUint32(5)
+	buf.WriteBytes([]byte("stone"))
+	buf.WriteUint32(uint32(len(stonePngBytes)))
+	buf.WriteBytes(stonePngBytes)
+
+	output := ReadTextures(buf)
+
+	if !output[0].Equals(expected[0]) || !output[1].Equals(expected[1]) {
+		t.Errorf("ReadHeader=%q, want match for %#q", output, expected)
+	}
+}
 func uint32ToBytes(u int) []byte {
 	arr := make([]byte, 4)
 	binary.BigEndian.PutUint32(arr, uint32(u))
