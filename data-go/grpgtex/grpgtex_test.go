@@ -3,6 +3,7 @@ package grpgtex
 import (
 	"bytes"
 	"encoding/binary"
+	"grpg/data-go/gbuf"
 	"io"
 	"log"
 	"os"
@@ -10,7 +11,7 @@ import (
 )
 
 var (
-	buf           = bytes.Buffer{}
+	buf           = gbuf.NewEmptyGBuf()
 	stone         *os.File
 	grass         *os.File
 	stonePngBytes []byte
@@ -20,11 +21,11 @@ var (
 func init() {
 	var err error
 
-	stone, err = os.Open("./testdata/stone_texture.png")
+	stone, err = os.Open("../testdata/stone_texture.png")
 	if err != nil {
 		log.Fatal("Error loading stone texture while initializing format tests")
 	}
-	grass, err = os.Open("./testdata/grass_texture.png")
+	grass, err = os.Open("../testdata/grass_texture.png")
 	if err != nil {
 		log.Fatal("Error loading grass texture while initializing format tests")
 	}
@@ -44,11 +45,11 @@ func TestWriteHeaderVer1(t *testing.T) {
 		0x00, 0x01, // ver1
 	}
 
-	err := WriteHeader(&buf, 1)
-	if !bytes.Equal(expectedBytes, buf.Bytes()) || err != nil {
-		t.Errorf("WriteHeader(&buf, 1)= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
+	WriteHeader(buf, 1)
+	if !bytes.Equal(expectedBytes, buf.Bytes()) {
+		t.Errorf("WriteHeader(&buf, 1)= %q, want match for %#q", buf.Bytes(), expectedBytes)
 	}
-	buf.Reset()
+	buf.Clear()
 }
 
 func TestWriteHeaderVerMax(t *testing.T) {
@@ -57,11 +58,11 @@ func TestWriteHeaderVerMax(t *testing.T) {
 		0xFF, 0xFF, // ver1
 	}
 
-	err := WriteHeader(&buf, 65535)
-	if !bytes.Equal(expectedBytes, buf.Bytes()) || err != nil {
-		t.Errorf("WriteHeader(&buf, 1)= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
+	WriteHeader(buf, 65535)
+	if !bytes.Equal(expectedBytes, buf.Bytes()) {
+		t.Errorf("WriteHeader(&buf, 1)= %q, want match for %#q", buf.Bytes(), expectedBytes)
 	}
-	buf.Reset()
+	buf.Clear()
 }
 
 func TestWriteTextures(t *testing.T) {
@@ -85,10 +86,10 @@ func TestWriteTextures(t *testing.T) {
 		expectedBytes = append(expectedBytes, tex.PNGBytes...)
 	}
 
-	err := WriteTextures(&buf, input)
+	WriteTextures(buf, input)
 
-	if !bytes.Equal(expectedBytes, buf.Bytes()) || err != nil {
-		t.Errorf("WriteGRPGTex= %q, %v, want match for %#q", buf.Bytes(), err, expectedBytes)
+	if !bytes.Equal(expectedBytes, buf.Bytes()) {
+		t.Errorf("WriteGRPGTex= %q, want match for %#q", buf.Bytes(), expectedBytes)
 	}
 }
 
