@@ -134,3 +134,120 @@ func TestGBuf_ReadStringEmpty(t *testing.T) {
 		t.Errorf("GBuf_ReadString()=%s, %v want match for %s", output, err, expected)
 	}
 }
+
+func TestGBuf_WriteUint16(t *testing.T) {
+	buf := NewGBuf([]byte{})
+
+	buf.WriteUint16(0x1234)
+
+	expected := []byte{0x12, 0x34}
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_WriteUint16() got %v, want %v", buf.slice, expected)
+	}
+}
+
+func TestGBuf_WriteUint16Multiple(t *testing.T) {
+	buf := NewGBuf([]byte{})
+
+	buf.WriteUint16(0x1234)
+	buf.WriteUint16(0x5678)
+
+	expected := []byte{0x12, 0x34, 0x56, 0x78}
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_WriteUint16() got %v, want %v", buf.slice, expected)
+	}
+}
+
+func TestGBuf_WriteUint32(t *testing.T) {
+	buf := NewGBuf([]byte{})
+
+	buf.WriteUint32(0x12345678)
+
+	expected := []byte{0x12, 0x34, 0x56, 0x78}
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_WriteUint32() got %v, want %v", buf.slice, expected)
+	}
+}
+
+func TestGBuf_WriteUint32Multiple(t *testing.T) {
+	buf := NewGBuf([]byte{})
+
+	buf.WriteUint32(0x12345678)
+	buf.WriteUint32(0x9ABCDEF0)
+
+	expected := []byte{0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0}
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_WriteUint32() got %v, want %v", buf.slice, expected)
+	}
+}
+
+func TestGBuf_WriteBytes(t *testing.T) {
+	buf := NewGBuf([]byte{})
+
+	buf.WriteBytes([]byte{0x01, 0x02, 0x03})
+
+	expected := []byte{0x01, 0x02, 0x03}
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_WriteBytes() got %v, want %v", buf.slice, expected)
+	}
+}
+
+func TestGBuf_WriteBytesMultiple(t *testing.T) {
+	buf := NewGBuf([]byte{})
+
+	buf.WriteBytes([]byte{0x01, 0x02})
+	buf.WriteBytes([]byte{0x03, 0x04, 0x05})
+
+	expected := []byte{0x01, 0x02, 0x03, 0x04, 0x05}
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_WriteBytes() got %v, want %v", buf.slice, expected)
+	}
+}
+
+func TestGBuf_WriteBytesEmpty(t *testing.T) {
+	buf := NewGBuf([]byte{})
+
+	buf.WriteBytes([]byte{})
+
+	expected := []byte{}
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_WriteBytes() got %v, want %v", buf.slice, expected)
+	}
+}
+
+func TestGBuf_WriteString(t *testing.T) {
+	buf := NewGBuf([]byte{})
+
+	buf.WriteString("hello")
+
+	// Length 5 (0x00000005) followed by "hello"
+	expected := []byte{0x00, 0x00, 0x00, 0x05, 'h', 'e', 'l', 'l', 'o'}
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_WriteString() got %v, want %v", buf.slice, expected)
+	}
+}
+
+func TestGBuf_WriteStringEmpty(t *testing.T) {
+	buf := NewGBuf([]byte{})
+
+	buf.WriteString("")
+
+	// Length 0 (0x00000000) followed by no bytes
+	expected := []byte{0x00, 0x00, 0x00, 0x00}
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_WriteString() got %v, want %v", buf.slice, expected)
+	}
+}
+
+func TestGBuf_WriteStringMultiple(t *testing.T) {
+	buf := NewGBuf([]byte{})
+
+	buf.WriteString("hi")
+	buf.WriteString("bye")
+
+	// Length 2 (0x00000002) + "hi" + Length 3 (0x00000003) + "bye"
+	expected := []byte{0x00, 0x00, 0x00, 0x02, 'h', 'i', 0x00, 0x00, 0x00, 0x03, 'b', 'y', 'e'}
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_WriteString() got %v, want %v", buf.slice, expected)
+	}
+}

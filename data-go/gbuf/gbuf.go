@@ -58,3 +58,26 @@ func (buf *GBuf) ReadString() (string, error) {
 
 	return string(bytes[:]), nil
 }
+
+func (buf *GBuf) WriteUint16(val uint16) {
+	temp := make([]byte, 2)
+	binary.BigEndian.PutUint16(temp, val)
+	buf.slice = append(buf.slice, temp...)
+}
+
+func (buf *GBuf) WriteUint32(val uint32) {
+	temp := make([]byte, 4)
+	binary.BigEndian.PutUint32(temp, val)
+	buf.slice = append(buf.slice, temp...)
+}
+
+func (buf *GBuf) WriteBytes(bytes []byte) {
+	buf.slice = append(buf.slice, bytes...)
+}
+
+// WriteString
+// Writes a uint32 length encoded string to the buffer
+func (buf *GBuf) WriteString(val string) {
+	buf.WriteUint32(uint32(len(val)))
+	buf.WriteBytes([]byte(val))
+}
