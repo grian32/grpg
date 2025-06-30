@@ -88,3 +88,9 @@ func (buf *GBuf) WriteString(val string) {
 	buf.WriteUint32(uint32(len(val)))
 	buf.WriteBytes([]byte(val))
 }
+
+// Clear
+// Replaces the backing slice with an empty one
+func (buf *GBuf) Clear() {
+	buf.slice = make([]byte, 0)
+}
