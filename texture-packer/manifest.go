@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	grpgtex "grpg-data-go"
+	"grpg/data-go/grpgtex"
 	"image/png"
 	"io"
 	"log"

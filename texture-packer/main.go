@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	grpgtex "grpg-data-go"
+	"grpg/data-go/gbuf"
+	"grpg/data-go/grpgtex"
 	"os"
 
 	"github.com/charmbracelet/fang"
@@ -41,12 +41,9 @@ func run(c *cobra.Command, _ []string) error {
 		return errors.New("either version has not been entered, or is 0, which is invalid")
 	}
 
-	buf := bytes.Buffer{}
+	buf := gbuf.NewEmptyGBuf()
 
-	err := grpgtex.WriteHeader(&buf, version)
-	if err != nil {
-		return err
-	}
+	grpgtex.WriteHeader(buf, version)
 
 	manifestData, err := ParseManifestFile(manifest)
 	if err != nil {
@@ -57,10 +54,7 @@ func run(c *cobra.Command, _ []string) error {
 		return err
 	}
 
-	err = grpgtex.WriteTextures(&buf, textures)
-	if err != nil {
-		return err
-	}
+	grpgtex.WriteTextures(buf, textures)
 
 	f, err := os.Create(output)
 

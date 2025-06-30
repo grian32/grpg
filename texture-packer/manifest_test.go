@@ -1,12 +1,12 @@
 package main
 
 import (
+	"grpg/data-go/grpgtex"
 	"io"
 	"log"
 	"os"
 	"testing"
 )
-import "grpg-data-go"
 
 var (
 	stonePngBytes []byte
