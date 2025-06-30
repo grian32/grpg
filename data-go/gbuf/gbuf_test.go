@@ -136,7 +136,7 @@ func TestGBuf_ReadStringEmpty(t *testing.T) {
 }
 
 func TestGBuf_WriteUint16(t *testing.T) {
-	buf := NewGBuf([]byte{})
+	buf := NewEmptyGBuf()
 
 	buf.WriteUint16(0x1234)
 
@@ -147,7 +147,7 @@ func TestGBuf_WriteUint16(t *testing.T) {
 }
 
 func TestGBuf_WriteUint16Multiple(t *testing.T) {
-	buf := NewGBuf([]byte{})
+	buf := NewEmptyGBuf()
 
 	buf.WriteUint16(0x1234)
 	buf.WriteUint16(0x5678)
@@ -159,7 +159,7 @@ func TestGBuf_WriteUint16Multiple(t *testing.T) {
 }
 
 func TestGBuf_WriteUint32(t *testing.T) {
-	buf := NewGBuf([]byte{})
+	buf := NewEmptyGBuf()
 
 	buf.WriteUint32(0x12345678)
 
@@ -170,7 +170,7 @@ func TestGBuf_WriteUint32(t *testing.T) {
 }
 
 func TestGBuf_WriteUint32Multiple(t *testing.T) {
-	buf := NewGBuf([]byte{})
+	buf := NewEmptyGBuf()
 
 	buf.WriteUint32(0x12345678)
 	buf.WriteUint32(0x9ABCDEF0)
@@ -182,7 +182,7 @@ func TestGBuf_WriteUint32Multiple(t *testing.T) {
 }
 
 func TestGBuf_WriteBytes(t *testing.T) {
-	buf := NewGBuf([]byte{})
+	buf := NewEmptyGBuf()
 
 	buf.WriteBytes([]byte{0x01, 0x02, 0x03})
 
@@ -193,7 +193,7 @@ func TestGBuf_WriteBytes(t *testing.T) {
 }
 
 func TestGBuf_WriteBytesMultiple(t *testing.T) {
-	buf := NewGBuf([]byte{})
+	buf := NewEmptyGBuf()
 
 	buf.WriteBytes([]byte{0x01, 0x02})
 	buf.WriteBytes([]byte{0x03, 0x04, 0x05})
@@ -205,7 +205,7 @@ func TestGBuf_WriteBytesMultiple(t *testing.T) {
 }
 
 func TestGBuf_WriteBytesEmpty(t *testing.T) {
-	buf := NewGBuf([]byte{})
+	buf := NewEmptyGBuf()
 
 	buf.WriteBytes([]byte{})
 
@@ -216,7 +216,7 @@ func TestGBuf_WriteBytesEmpty(t *testing.T) {
 }
 
 func TestGBuf_WriteString(t *testing.T) {
-	buf := NewGBuf([]byte{})
+	buf := NewEmptyGBuf()
 
 	buf.WriteString("hello")
 
@@ -228,7 +228,7 @@ func TestGBuf_WriteString(t *testing.T) {
 }
 
 func TestGBuf_WriteStringEmpty(t *testing.T) {
-	buf := NewGBuf([]byte{})
+	buf := NewEmptyGBuf()
 
 	buf.WriteString("")
 
@@ -240,7 +240,7 @@ func TestGBuf_WriteStringEmpty(t *testing.T) {
 }
 
 func TestGBuf_WriteStringMultiple(t *testing.T) {
-	buf := NewGBuf([]byte{})
+	buf := NewEmptyGBuf()
 
 	buf.WriteString("hi")
 	buf.WriteString("bye")

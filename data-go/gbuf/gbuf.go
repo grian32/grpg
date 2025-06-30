@@ -17,6 +17,13 @@ func NewGBuf(data []byte) *GBuf {
 	}
 }
 
+func NewEmptyGBuf() *GBuf {
+	return &GBuf{
+		slice: []byte{},
+		pos:   0,
+	}
+}
+
 func (buf *GBuf) ReadUint16() (uint16, error) {
 	if buf.pos+2 > len(buf.slice) {
 		return 0, errors.New("not enough bytes to read uint16")
