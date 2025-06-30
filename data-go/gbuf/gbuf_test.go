@@ -305,3 +305,28 @@ func TestGBuf_Bytes(t *testing.T) {
 		t.Errorf("GBuf_Bytes()=%v want match for %v", buf.Bytes(), expected)
 	}
 }
+
+func TestGBuf_ReadByte(t *testing.T) {
+	buf := NewGBuf([]byte{0x00, 0x01})
+
+	firstByte, err := buf.ReadByte()
+	secondByte, err := buf.ReadByte()
+
+	if firstByte != 0x00 || secondByte != 0x01 || err != nil {
+		t.Errorf("GBuf_ReadByte()=%b, %b & %v want match for %b, %b", firstByte, secondByte, err, 0x00, 0x01)
+	}
+}
+
+func TestGBuf_WriteByte(t *testing.T) {
+	buf := NewEmptyGBuf()
+
+	buf.WriteByte(0xFF)
+	buf.WriteByte(0x01)
+	buf.WriteByte(0x02)
+
+	expectedBytes := []byte{0xFF, 0x01, 0x02}
+
+	if !bytes.Equal(buf.Bytes(), expectedBytes) {
+		t.Errorf("GBuf_ReadByte()=%v want match for %v", buf.Bytes(), expectedBytes)
+	}
+}
