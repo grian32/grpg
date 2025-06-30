@@ -2,7 +2,7 @@ module texture-packer
 
 go 1.24.4
 
-require grpg-data-go v0.0.0
+require grpg/data-go v0.0.0
 
 require (
 	github.com/charmbracelet/colorprofile v0.3.0 // indirect
@@ -28,4 +28,4 @@ require (
 	golang.org/x/text v0.24.0 // indirect
 )
 
-replace grpg-data-go => ../data-go
+replace grpg/data-go => ../data-go
