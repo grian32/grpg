@@ -251,3 +251,46 @@ func TestGBuf_WriteStringMultiple(t *testing.T) {
 		t.Errorf("GBuf_WriteString() got %v, want %v", buf.slice, expected)
 	}
 }
+
+func TestGBuf_Clear(t *testing.T) {
+	data := []byte{0x01, 0x02, 0x03, 0x04}
+	buf := NewGBuf(data)
+	buf.pos = 2
+
+	buf.Clear()
+
+	expectedSlice := []byte{}
+	expectedPos := 0
+
+	if !bytes.Equal(expectedSlice, buf.slice) || buf.pos != expectedPos {
+		t.Errorf("GBuf_Clear() slice=%v, pos=%d want slice=%v, pos=%d", buf.slice, buf.pos, expectedSlice, expectedPos)
+	}
+}
+
+func TestGBuf_ClearEmptyBuffer(t *testing.T) {
+	buf := NewGBuf([]byte{})
+	buf.pos = 0
+
+	buf.Clear()
+
+	expectedSlice := []byte{}
+	expectedPos := 0
+
+	if !bytes.Equal(expectedSlice, buf.slice) || buf.pos != expectedPos {
+		t.Errorf("GBuf_Clear() slice=%v, pos=%d want slice=%v, pos=%d", buf.slice, buf.pos, expectedSlice, expectedPos)
+	}
+}
+
+func TestGBuf_ClearThenWrite(t *testing.T) {
+	data := []byte{0x01, 0x02, 0x03, 0x04}
+	buf := NewGBuf(data)
+
+	buf.Clear()
+	buf.WriteUint16(0x1234)
+
+	expected := []byte{0x12, 0x34}
+
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_Clear() then WriteUint16() got %v, want %v", buf.slice, expected)
+	}
+}
