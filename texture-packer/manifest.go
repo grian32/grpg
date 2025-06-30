@@ -47,6 +47,7 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 		tex[idx] = grpgtex.Texture{
 			InternalIdData: []byte(file.InternalName),
 			PNGBytes:       pngBytes,
+			Type:           getTextureType(file.Type),
 		}
 
 		f.Close()
@@ -84,4 +85,19 @@ func ParseManifestFile(path string) ([]GRPGTexManifestEntry, error) {
 	}
 
 	return entries, nil
+}
+
+var textureTypeMap = map[string]grpgtex.TextureType{
+	"TILE": grpgtex.TILE,
+	"OBJ":  grpgtex.OBJ,
+}
+
+func getTextureType(str string) grpgtex.TextureType {
+	texType, exists := textureTypeMap[str]
+
+	if !exists {
+		return grpgtex.UNDEFINED
+	}
+
+	return texType
 }

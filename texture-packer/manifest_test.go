@@ -63,10 +63,12 @@ func TestBuildGRPGTexFromManifest(t *testing.T) {
 		{
 			InternalName: "grass",
 			FilePath:     "testdata/grass_texture.png",
+			Type:         "TILE",
 		},
 		{
 			InternalName: "stone",
 			FilePath:     "testdata/stone_texture.png",
+			Type:         "OBJ",
 		},
 	}
 
@@ -74,10 +76,12 @@ func TestBuildGRPGTexFromManifest(t *testing.T) {
 		{
 			InternalIdData: []byte("grass"),
 			PNGBytes:       grassPngBytes,
+			Type:           grpgtex.TILE,
 		},
 		{
 			InternalIdData: []byte("stone"),
 			PNGBytes:       stonePngBytes,
+			Type:           grpgtex.OBJ,
 		},
 	}
 
