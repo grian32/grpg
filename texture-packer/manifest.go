@@ -13,6 +13,7 @@ import (
 type GRPGTexManifestEntry struct {
 	InternalName string
 	FilePath     string
+	Type         string
 }
 
 func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, error) {
@@ -68,14 +69,17 @@ func ParseManifestFile(path string) ([]GRPGTexManifestEntry, error) {
 	for idx, line := range lines {
 		var contents = strings.Split(line, "=")
 
+		props := strings.Split(contents[1], "@")
+
 		// eh this is a bit shit but it's an "internal" tool anyway lol
-		if !strings.HasSuffix(contents[1], ".png") {
+		if !strings.HasSuffix(props[0], ".png") {
 			return nil, errors.New("only .png files are allowed as textures")
 		}
 
 		entries[idx] = GRPGTexManifestEntry{
 			InternalName: contents[0],
-			FilePath:     contents[1],
+			FilePath:     props[0],
+			Type:         props[1],
 		}
 	}
 

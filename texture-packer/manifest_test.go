@@ -39,10 +39,12 @@ func TestParseManifestFile(t *testing.T) {
 		{
 			InternalName: "grass",
 			FilePath:     "testdata/grass_texture.png",
+			Type:         "TILE",
 		},
 		{
 			InternalName: "stone",
 			FilePath:     "testdata/stone_texture.png",
+			Type:         "OBJ",
 		},
 	}
 

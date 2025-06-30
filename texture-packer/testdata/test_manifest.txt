@@ -1,2 +1,2 @@
-grass=testdata/grass_texture.png
-stone=testdata/stone_texture.png
+grass=testdata/grass_texture.png@TILE
+stone=testdata/stone_texture.png@OBJ
