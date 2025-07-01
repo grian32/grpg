@@ -25,6 +25,13 @@ func loop() {
 			fmt.Println("loading tex")
 		}),
 	)
+
+	g.Window("Selector").Pos(editorWindowPos.X+editorWindowSize.X+10, editorWindowPos.Y).Flags(g.WindowFlagsNoCollapse | g.WindowFlagsNoMove | g.WindowFlagsNoResize | g.WindowFlagsAlwaysAutoResize).Layout(
+		g.TabBar().TabItems(
+			g.TabItem("Tiles"),
+			g.TabItem("Objs"),
+		),
+	)
 }
 
 func main() {
