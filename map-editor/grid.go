@@ -28,7 +28,7 @@ func BuildGrid() g.Widget {
 		gridMinX := float32(pos.X)
 		gridMinY := float32(pos.Y)
 		gridMaxX := float32(pos.X+(16*64)) - 2
-		gridMaxY := float32(pos.Y + (16 * 64))
+		gridMaxY := float32(pos.Y+(16*64)) - 2
 
 		for dx := range 16 {
 			for dy := range 16 {
