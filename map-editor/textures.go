@@ -14,8 +14,13 @@ import (
 	"os"
 )
 
+type GiuTextureTyped struct {
+	Texture     *g.Texture
+	TextureType grpgtex.TextureType
+}
+
 var (
-	textures = make(map[string]*g.Texture)
+	textures = make(map[string]GiuTextureTyped)
 )
 
 func LoadTextures() {
@@ -54,9 +59,16 @@ func LoadTextures() {
 				log.Fatal(err)
 			}
 
+			internalId := string(tex.InternalIdData[:])
+
 			g.NewTextureFromRgba(pngImage.(*image.NRGBA), func(texture *g.Texture) {
-				textures[string(tex.InternalIdData[:])] = texture
+				textures[internalId] = GiuTextureTyped{
+					Texture:     texture,
+					TextureType: tex.Type,
+				}
 			})
 		}
+
+		BuildSelectorTypeMaps()
 	}
 }

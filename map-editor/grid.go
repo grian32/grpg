@@ -10,9 +10,8 @@ import (
 )
 
 var (
-	rgba       *image.RGBA
-	tex        *g.Texture
-	wasDrawing = false
+	rgba *image.RGBA
+	tex  *g.Texture
 )
 
 func BuildGrid() g.Widget {
