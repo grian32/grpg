@@ -18,6 +18,7 @@ var (
 func BuildGrid() g.Widget {
 	rgba, _ = g.LoadImage("./default_editor.png")
 
+	// TODO: ditch the async
 	g.EnqueueNewTextureFromRgba(rgba, func(t *g.Texture) {
 		tex = t
 	})
