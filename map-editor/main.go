@@ -4,6 +4,7 @@ import (
 	"github.com/AllenDang/cimgui-go/imgui"
 	g "github.com/AllenDang/giu"
 	"image/color"
+	"sync"
 )
 
 func main() {
@@ -17,7 +18,10 @@ func main() {
 	wnd.Run(loop)
 }
 
+var syncOnce sync.Once
+
 func loop() {
+	syncOnce.Do(LoadDefaultGridTex)
 	//imgui.ShowDemoWindow()
 	var editorWindowPos imgui.Vec2
 	var editorWindowSize imgui.Vec2
