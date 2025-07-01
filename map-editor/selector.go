@@ -18,6 +18,7 @@ var (
 		key: "_undefined",
 		val: nil,
 	}
+	textureSelected = false
 )
 
 func BuildSelectorTypeMaps() {
@@ -65,6 +66,7 @@ func buildTextureColumn(kv GTexKV) g.Widget {
 	return g.Column(
 		g.ImageButton(kv.val).OnClick(func() {
 			currentlySelected = kv
+			textureSelected = true
 			g.Update()
 		}),
 		g.Label(kv.key),

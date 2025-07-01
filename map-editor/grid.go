@@ -48,7 +48,7 @@ func BuildGrid() g.Widget {
 
 		mousePos := imgui.MousePos()
 
-		if mousePos.X >= gridMinX && mousePos.X <= gridMaxX && mousePos.Y >= gridMinY && mousePos.Y <= gridMaxY {
+		if textureSelected && mousePos.X >= gridMinX && mousePos.X <= gridMaxX && mousePos.Y >= gridMinY && mousePos.Y <= gridMaxY {
 			if g.IsMouseDown(g.MouseButtonLeft) {
 				dx := mousePos.X - gridMinX
 				dy := mousePos.Y - gridMinY
