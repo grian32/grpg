@@ -2,6 +2,7 @@ package grpgmap
 
 import (
 	"grpg/data-go/gbuf"
+	"grpg/data-go/grpgtex"
 	"log"
 )
 
@@ -10,6 +11,11 @@ type Header struct {
 	Version uint16
 	ChunkX  uint16
 	ChunkY  uint16
+}
+
+type Tile struct {
+	InternalId uint16
+	Type       grpgtex.TextureType
 }
 
 func WriteHeader(buf *gbuf.GBuf, header Header) {
@@ -43,4 +49,35 @@ func ReadHeader(buf *gbuf.GBuf) Header {
 		ChunkX:  chunkX,
 		ChunkY:  chunkY,
 	}
+}
+
+func WriteTiles(buf *gbuf.GBuf, tiles [256]Tile) {
+	for _, tile := range tiles {
+		buf.WriteUint16(tile.InternalId)
+		buf.WriteByte(byte(tile.Type))
+	}
+}
+
+func ReadTiles(buf *gbuf.GBuf) [256]Tile {
+	arr := [256]Tile{}
+
+	for idx := range 256 {
+		internalId, err := buf.ReadUint16()
+		if err != nil {
+			log.Fatal(err)
+		}
+		texType, err := buf.ReadByte()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		tile := Tile{
+			InternalId: internalId,
+			Type:       grpgtex.TextureType(texType),
+		}
+
+		arr[idx] = tile
+	}
+
+	return arr
 }
