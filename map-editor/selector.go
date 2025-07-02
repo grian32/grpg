@@ -8,7 +8,7 @@ import (
 
 type GTexKV struct {
 	key string
-	val *g.Texture
+	val GiuTextureTyped
 }
 
 var (
@@ -16,7 +16,7 @@ var (
 	objs                     = make([]GTexKV, 0)
 	currentlySelected GTexKV = GTexKV{
 		key: "_undefined",
-		val: nil,
+		val: GiuTextureTyped{},
 	}
 	textureSelected = false
 )
@@ -27,12 +27,12 @@ func BuildSelectorTypeMaps() {
 		case grpgtex.TILE:
 			tiles = append(tiles, GTexKV{
 				key: name,
-				val: tex.Texture,
+				val: tex,
 			})
 		case grpgtex.OBJ:
 			objs = append(objs, GTexKV{
 				key: name,
-				val: tex.Texture,
+				val: tex,
 			})
 		}
 	}
@@ -64,12 +64,12 @@ func BuildSelectorTab(data []GTexKV) g.Widget {
 
 func buildTextureColumn(kv GTexKV) g.Widget {
 	return g.Column(
-		g.ImageButton(kv.val).OnClick(func() {
+		g.ImageButton(kv.val.Texture).OnClick(func() {
 			currentlySelected = kv
 			textureSelected = true
 			g.Update()
 		}),
-		g.Label(kv.key),
+		g.Label(kv.val.FormattedStringId),
 	)
 }
 
@@ -77,8 +77,8 @@ func buildCurrentlySelected() g.Widget {
 	if currentlySelected.key != "_undefined" { // kind of ugly but can't set structs to nil :(
 		return g.Column(
 			g.Label("Currently Selected: "),
-			g.Image(currentlySelected.val),
-			g.Label(currentlySelected.key),
+			g.Image(currentlySelected.val.Texture),
+			g.Label(currentlySelected.val.FormattedStringId),
 		)
 	} else {
 		return g.Column(

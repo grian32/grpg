@@ -15,8 +15,10 @@ import (
 )
 
 type GiuTextureTyped struct {
-	Texture     *g.Texture
-	TextureType grpgtex.TextureType
+	Texture           *g.Texture
+	InternalId        uint16
+	FormattedStringId string // this is mainly for perf lol so ur not computing strings in the render loop
+	TextureType       grpgtex.TextureType
 }
 
 var (
@@ -63,8 +65,10 @@ func LoadTextures() {
 
 			g.NewTextureFromRgba(pngImage.(*image.NRGBA), func(texture *g.Texture) {
 				textures[internalId] = GiuTextureTyped{
-					Texture:     texture,
-					TextureType: tex.Type,
+					Texture:           texture,
+					InternalId:        tex.InternalIdInt,
+					FormattedStringId: fmt.Sprintf("%d: %s", tex.InternalIdInt, tex.InternalIdString),
+					TextureType:       tex.Type,
 				}
 			})
 		}
