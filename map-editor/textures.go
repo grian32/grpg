@@ -67,7 +67,7 @@ func LoadTextures() {
 				textures[internalId] = GiuTextureTyped{
 					Texture:           texture,
 					InternalId:        tex.InternalIdInt,
-					FormattedStringId: fmt.Sprintf("%d: %s", tex.InternalIdInt, tex.InternalIdString),
+					FormattedStringId: fmt.Sprintf("%s(id: %d)", tex.InternalIdString, tex.InternalIdInt),
 					TextureType:       tex.Type,
 				}
 			})
