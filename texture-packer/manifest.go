@@ -2,18 +2,22 @@ package main
 
 import (
 	"errors"
+	"github.com/pelletier/go-toml/v2"
 	"grpg/data-go/grpgtex"
 	"image/png"
 	"io"
-	"log"
 	"os"
-	"strings"
 )
 
+type ManifestConfig struct {
+	Textures []GRPGTexManifestEntry `toml:"texture"`
+}
+
 type GRPGTexManifestEntry struct {
-	InternalName string
-	FilePath     string
-	Type         string
+	InternalName string `toml:"name"`
+	InternalId   int    `toml:"id"`
+	FilePath     string `toml:"path"`
+	Type         string `toml:"type"`
 }
 
 func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, error) {
@@ -46,6 +50,7 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 
 		tex[idx] = grpgtex.Texture{
 			InternalIdString: []byte(file.InternalName),
+			InternalIdInt:    uint16(file.InternalId),
 			PNGBytes:         pngBytes,
 			Type:             getTextureType(file.Type),
 		}
@@ -57,34 +62,23 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 }
 
 func ParseManifestFile(path string) ([]GRPGTexManifestEntry, error) {
-	content, err := os.ReadFile(path)
-
+	file, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	var lines = strings.Split(string(content), "\n")
-
-	entries := make([]GRPGTexManifestEntry, len(lines))
-
-	for idx, line := range lines {
-		var contents = strings.Split(line, "=")
-
-		props := strings.Split(contents[1], "@")
-
-		// eh this is a bit shit but it's an "internal" tool anyway lol
-		if !strings.HasSuffix(props[0], ".png") {
-			return nil, errors.New("only .png files are allowed as textures")
-		}
-
-		entries[idx] = GRPGTexManifestEntry{
-			InternalName: contents[0],
-			FilePath:     props[0],
-			Type:         props[1],
-		}
+	bytes, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
 	}
 
-	return entries, nil
+	var cfg ManifestConfig
+	err = toml.Unmarshal(bytes, &cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return cfg.Textures, nil
 }
 
 var textureTypeMap = map[string]grpgtex.TextureType{
