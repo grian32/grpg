@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	chunkX int32
-	chunkY int32
+	chunkX int32 = -1
+	chunkY int32 = -1
 )
 
 func main() {
