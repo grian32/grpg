@@ -7,6 +7,11 @@ import (
 	"sync"
 )
 
+var (
+	chunkX int32
+	chunkY int32
+)
+
 func main() {
 	wnd := g.NewMasterWindow("GRPG Map Editor", 1640, 1240, g.MasterWindowFlagsNotResizable)
 	wnd.SetBgColor(color.RGBA{
@@ -33,10 +38,22 @@ func loop() {
 		BuildGrid(),
 	)
 
-	g.Window("Buttons").Pos(editorWindowPos.X, editorWindowPos.Y+editorWindowSize.Y+10).Flags(g.WindowFlagsNoCollapse | g.WindowFlagsNoMove | g.WindowFlagsNoResize | g.WindowFlagsAlwaysAutoResize).Layout(
-		g.Button("Load Textures").OnClick(func() {
-			LoadTextures()
-		}),
+	g.Window("Controls").Pos(editorWindowPos.X, editorWindowPos.Y+editorWindowSize.Y+10).Flags(g.WindowFlagsNoCollapse|g.WindowFlagsNoMove|g.WindowFlagsNoResize|g.WindowFlagsAlwaysAutoResize).Layout(
+		g.Row(
+			g.Button("Load Textures").OnClick(LoadTextures),
+			g.Button("Save Map").OnClick(SaveMap),
+			g.Button("Load Map").OnClick(LoadMap),
+		),
+		g.Row(
+			g.Column(
+				g.Label("Chunk X"),
+				g.InputInt(&chunkX).Flags(g.InputTextFlagsCharsDecimal),
+			),
+			g.Column(
+				g.Label("Chunk Y"),
+				g.InputInt(&chunkY).Flags(g.InputTextFlagsCharsDecimal),
+			),
+		),
 	)
 
 	g.Window("Selector").Pos(editorWindowPos.X+editorWindowSize.X+10, editorWindowPos.Y).Flags(g.WindowFlagsNoCollapse | g.WindowFlagsNoMove | g.WindowFlagsNoResize | g.WindowFlagsAlwaysAutoResize).Layout(
