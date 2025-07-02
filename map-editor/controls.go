@@ -31,6 +31,7 @@ func ClearGrid() {
 }
 
 func EnableEraser() {
+	textureSelected = true
 	eraserEnabled = true
 	currentlySelected = GTexKV{
 		key: "",

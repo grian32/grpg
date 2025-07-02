@@ -67,6 +67,7 @@ func buildTextureColumn(kv GTexKV) g.Widget {
 		g.ImageButton(kv.val.Texture).OnClick(func() {
 			currentlySelected = kv
 			textureSelected = true
+			eraserEnabled = false
 			g.Update()
 		}),
 		g.Label(kv.val.FormattedStringId),
@@ -74,16 +75,16 @@ func buildTextureColumn(kv GTexKV) g.Widget {
 }
 
 func buildCurrentlySelected() g.Widget {
-	if currentlySelected.key != "_undefined" { // kind of ugly but can't set structs to nil :(
+	if eraserEnabled {
+		return g.Column(
+			g.Label("Currently Selected: "),
+			g.Label("Eraser!"),
+		)
+	} else if currentlySelected.key != "_undefined" {
 		return g.Column(
 			g.Label("Currently Selected: "),
 			g.Image(currentlySelected.val.Texture),
 			g.Label(currentlySelected.val.FormattedStringId),
-		)
-	} else if eraserEnabled {
-		return g.Column(
-			g.Label("Currently Selected: "),
-			g.Label("Eraser!"),
 		)
 	} else {
 		return g.Column(
