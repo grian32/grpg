@@ -43,6 +43,8 @@ func loop() {
 			g.Button("Load Textures").OnClick(LoadTextures),
 			g.Button("Save Map").OnClick(SaveMap),
 			g.Button("Load Map").OnClick(LoadMap),
+			g.Button("Set all empty tiles to currently selected").OnClick(SetAllEmptyTiles),
+			g.Button("Clear Grid").OnClick(ClearGrid),
 		),
 		g.Row(
 			g.Column(
