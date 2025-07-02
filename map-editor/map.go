@@ -4,6 +4,7 @@ import (
 	"github.com/sqweek/dialog"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgmap"
+	"io"
 	"os"
 )
 
@@ -63,5 +64,43 @@ func SaveMap() {
 }
 
 func LoadMap() {
+	if len(textures) == 0 {
+		dialog.Message("No textures loaded.").Error()
+		return
+	}
 
+	fileToLoad, err := dialog.File().Title("Please select a .grpgmap file").Load()
+	if err != nil {
+		dialog.Message("Error finding file to load").Error()
+		return
+	}
+
+	file, err := os.Open(fileToLoad)
+	if err != nil {
+		dialog.Message("Error loading file").Error()
+		return
+	}
+
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		dialog.Message("Error reading file").Error()
+		return
+	}
+
+	buf := gbuf.NewGBuf(fileBytes)
+	header := grpgmap.ReadHeader(buf)
+
+	if string(header.Magic[:]) != "GRPGMAP\x00" {
+		dialog.Message("File isn't valid GRPGMAP format.").Error()
+		return
+	}
+
+	chunkX = int32(header.ChunkX)
+	chunkY = int32(header.ChunkY)
+
+	tiles := grpgmap.ReadTiles(buf)
+
+	for idx, tile := range tiles {
+		gridTextures[idx] = texturesById[tile.InternalId].InternalIdString
+	}
 }
