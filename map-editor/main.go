@@ -13,7 +13,7 @@ var (
 )
 
 func main() {
-	wnd := g.NewMasterWindow("GRPG Map Editor", 1640, 1240, g.MasterWindowFlagsNotResizable)
+	wnd := g.NewMasterWindow("GRPG Map Editor", 1640, 1200, g.MasterWindowFlagsNotResizable)
 	wnd.SetBgColor(color.RGBA{
 		R: 17,
 		G: 31,
