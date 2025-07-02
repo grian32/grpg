@@ -69,11 +69,13 @@ func TestWriteTextures(t *testing.T) {
 	input := []Texture{
 		{
 			InternalIdString: []byte("grass"),
+			InternalIdInt:    0,
 			PNGBytes:         grassPngBytes,
 			Type:             TILE,
 		},
 		{
 			InternalIdString: []byte("stone"),
+			InternalIdInt:    1,
 			PNGBytes:         stonePngBytes,
 			Type:             OBJ,
 		},
@@ -84,6 +86,7 @@ func TestWriteTextures(t *testing.T) {
 	for _, tex := range input {
 		expectedBytes = append(expectedBytes, uint32ToBytes(len(tex.InternalIdString))...)
 		expectedBytes = append(expectedBytes, tex.InternalIdString...)
+		expectedBytes = append(expectedBytes, uint16ToBytes(int(tex.InternalIdInt))...)
 		expectedBytes = append(expectedBytes, uint32ToBytes(len(tex.PNGBytes))...)
 		expectedBytes = append(expectedBytes, tex.PNGBytes...)
 		expectedBytes = append(expectedBytes, byte(tex.Type))
@@ -136,11 +139,13 @@ func TestReadTextures(t *testing.T) {
 	expected := []Texture{
 		{
 			InternalIdString: []byte("grass"),
+			InternalIdInt:    0,
 			PNGBytes:         grassPngBytes,
 			Type:             TILE,
 		},
 		{
 			InternalIdString: []byte("stone"),
+			InternalIdInt:    1,
 			PNGBytes:         stonePngBytes,
 			Type:             OBJ,
 		},
@@ -152,12 +157,14 @@ func TestReadTextures(t *testing.T) {
 
 	buf.WriteUint32(5)
 	buf.WriteBytes([]byte("grass"))
+	buf.WriteUint16(0)
 	buf.WriteUint32(uint32(len(grassPngBytes)))
 	buf.WriteBytes(grassPngBytes)
 	buf.WriteByte(byte(TILE))
 
 	buf.WriteUint32(5)
 	buf.WriteBytes([]byte("stone"))
+	buf.WriteUint16(1)
 	buf.WriteUint32(uint32(len(stonePngBytes)))
 	buf.WriteBytes(stonePngBytes)
 	buf.WriteByte(byte(OBJ))
@@ -168,9 +175,17 @@ func TestReadTextures(t *testing.T) {
 		t.Errorf("ReadHeader=%q, want match for %#q", output, expected)
 	}
 }
+
 func uint32ToBytes(u int) []byte {
 	arr := make([]byte, 4)
 	binary.BigEndian.PutUint32(arr, uint32(u))
+
+	return arr
+}
+
+func uint16ToBytes(u int) []byte {
+	arr := make([]byte, 2)
+	binary.BigEndian.PutUint16(arr, uint16(u))
 
 	return arr
 }

@@ -13,6 +13,7 @@ type Header struct {
 
 type Texture struct {
 	InternalIdString []byte
+	InternalIdInt    uint16
 	PNGBytes         []byte
 	Type             TextureType
 }
@@ -45,6 +46,8 @@ func WriteTextures(buf *gbuf.GBuf, textures []Texture) {
 	for _, tex := range textures {
 		buf.WriteUint32(uint32(len(tex.InternalIdString)))
 		buf.WriteBytes(tex.InternalIdString)
+
+		buf.WriteUint16(tex.InternalIdInt)
 
 		buf.WriteUint32(uint32(len(tex.PNGBytes)))
 		buf.WriteBytes(tex.PNGBytes)
@@ -81,7 +84,12 @@ func ReadTextures(buf *gbuf.GBuf) []Texture {
 		if err != nil {
 			log.Fatal(err)
 		}
-		internalIdData, err := buf.ReadBytes(int(internalIdLen))
+		internalIdString, err := buf.ReadBytes(int(internalIdLen))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		internalIdInt, err := buf.ReadUint16()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -101,7 +109,8 @@ func ReadTextures(buf *gbuf.GBuf) []Texture {
 		}
 
 		textures = append(textures, Texture{
-			InternalIdString: internalIdData,
+			InternalIdString: internalIdString,
+			InternalIdInt:    internalIdInt,
 			PNGBytes:         pngBytes,
 			Type:             TextureType(texType),
 		})
