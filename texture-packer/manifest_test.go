@@ -74,14 +74,14 @@ func TestBuildGRPGTexFromManifest(t *testing.T) {
 
 	expected := []grpgtex.Texture{
 		{
-			InternalIdData: []byte("grass"),
-			PNGBytes:       grassPngBytes,
-			Type:           grpgtex.TILE,
+			InternalIdString: []byte("grass"),
+			PNGBytes:         grassPngBytes,
+			Type:             grpgtex.TILE,
 		},
 		{
-			InternalIdData: []byte("stone"),
-			PNGBytes:       stonePngBytes,
-			Type:           grpgtex.OBJ,
+			InternalIdString: []byte("stone"),
+			PNGBytes:         stonePngBytes,
+			Type:             grpgtex.OBJ,
 		},
 	}
 

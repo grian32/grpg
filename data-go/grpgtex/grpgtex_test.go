@@ -68,22 +68,22 @@ func TestWriteHeaderVerMax(t *testing.T) {
 func TestWriteTextures(t *testing.T) {
 	input := []Texture{
 		{
-			InternalIdData: []byte("grass"),
-			PNGBytes:       grassPngBytes,
-			Type:           TILE,
+			InternalIdString: []byte("grass"),
+			PNGBytes:         grassPngBytes,
+			Type:             TILE,
 		},
 		{
-			InternalIdData: []byte("stone"),
-			PNGBytes:       stonePngBytes,
-			Type:           OBJ,
+			InternalIdString: []byte("stone"),
+			PNGBytes:         stonePngBytes,
+			Type:             OBJ,
 		},
 	}
 
 	expectedBytes := []byte{0x00, 0x00, 0x00, 0x02 /* 2 textures len */}
 
 	for _, tex := range input {
-		expectedBytes = append(expectedBytes, uint32ToBytes(len(tex.InternalIdData))...)
-		expectedBytes = append(expectedBytes, tex.InternalIdData...)
+		expectedBytes = append(expectedBytes, uint32ToBytes(len(tex.InternalIdString))...)
+		expectedBytes = append(expectedBytes, tex.InternalIdString...)
 		expectedBytes = append(expectedBytes, uint32ToBytes(len(tex.PNGBytes))...)
 		expectedBytes = append(expectedBytes, tex.PNGBytes...)
 		expectedBytes = append(expectedBytes, byte(tex.Type))
@@ -135,14 +135,14 @@ func TestReadHeaderVerMax(t *testing.T) {
 func TestReadTextures(t *testing.T) {
 	expected := []Texture{
 		{
-			InternalIdData: []byte("grass"),
-			PNGBytes:       grassPngBytes,
-			Type:           TILE,
+			InternalIdString: []byte("grass"),
+			PNGBytes:         grassPngBytes,
+			Type:             TILE,
 		},
 		{
-			InternalIdData: []byte("stone"),
-			PNGBytes:       stonePngBytes,
-			Type:           OBJ,
+			InternalIdString: []byte("stone"),
+			PNGBytes:         stonePngBytes,
+			Type:             OBJ,
 		},
 	}
 

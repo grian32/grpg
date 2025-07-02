@@ -45,9 +45,9 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 		}
 
 		tex[idx] = grpgtex.Texture{
-			InternalIdData: []byte(file.InternalName),
-			PNGBytes:       pngBytes,
-			Type:           getTextureType(file.Type),
+			InternalIdString: []byte(file.InternalName),
+			PNGBytes:         pngBytes,
+			Type:             getTextureType(file.Type),
 		}
 
 		f.Close()

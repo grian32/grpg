@@ -59,7 +59,7 @@ func LoadTextures() {
 				log.Fatal(err)
 			}
 
-			internalId := string(tex.InternalIdData[:])
+			internalId := string(tex.InternalIdString[:])
 
 			g.NewTextureFromRgba(pngImage.(*image.NRGBA), func(texture *g.Texture) {
 				textures[internalId] = GiuTextureTyped{

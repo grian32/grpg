@@ -12,9 +12,9 @@ type Header struct {
 }
 
 type Texture struct {
-	InternalIdData []byte
-	PNGBytes       []byte
-	Type           TextureType
+	InternalIdString []byte
+	PNGBytes         []byte
+	Type             TextureType
 }
 
 type TextureType byte
@@ -26,7 +26,7 @@ const (
 )
 
 func (t Texture) Equals(other Texture) bool {
-	return bytes.Equal(t.InternalIdData, other.InternalIdData) && bytes.Equal(t.PNGBytes, other.PNGBytes)
+	return bytes.Equal(t.InternalIdString, other.InternalIdString) && bytes.Equal(t.PNGBytes, other.PNGBytes)
 }
 
 func WriteHeader(buf *gbuf.GBuf, version uint16) {
@@ -43,8 +43,8 @@ func WriteTextures(buf *gbuf.GBuf, textures []Texture) {
 
 	// can add length checking for lengths being uint32 if it becomes an issue but that seems very unlikely lol..
 	for _, tex := range textures {
-		buf.WriteUint32(uint32(len(tex.InternalIdData)))
-		buf.WriteBytes(tex.InternalIdData)
+		buf.WriteUint32(uint32(len(tex.InternalIdString)))
+		buf.WriteBytes(tex.InternalIdString)
 
 		buf.WriteUint32(uint32(len(tex.PNGBytes)))
 		buf.WriteBytes(tex.PNGBytes)
@@ -101,9 +101,9 @@ func ReadTextures(buf *gbuf.GBuf) []Texture {
 		}
 
 		textures = append(textures, Texture{
-			InternalIdData: internalIdData,
-			PNGBytes:       pngBytes,
-			Type:           TextureType(texType),
+			InternalIdString: internalIdData,
+			PNGBytes:         pngBytes,
+			Type:             TextureType(texType),
 		})
 	}
 
