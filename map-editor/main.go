@@ -45,6 +45,7 @@ func loop() {
 			g.Button("Load Map").OnClick(LoadMap),
 			g.Button("Set all empty tiles to currently selected").OnClick(SetAllEmptyTiles),
 			g.Button("Clear Grid").OnClick(ClearGrid),
+			g.Button("Enable Eraser").OnClick(EnableEraser),
 		),
 		g.Row(
 			g.Column(

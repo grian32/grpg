@@ -80,6 +80,11 @@ func buildCurrentlySelected() g.Widget {
 			g.Image(currentlySelected.val.Texture),
 			g.Label(currentlySelected.val.FormattedStringId),
 		)
+	} else if eraserEnabled {
+		return g.Column(
+			g.Label("Currently Selected: "),
+			g.Label("Eraser!"),
+		)
 	} else {
 		return g.Column(
 			g.Label("Currently Selected: "),

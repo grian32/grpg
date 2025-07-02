@@ -2,6 +2,10 @@ package main
 
 import "github.com/sqweek/dialog"
 
+var (
+	eraserEnabled = false
+)
+
 func SetAllEmptyTiles() {
 	if currentlySelected.key == "_undefined" || len(textures) == 0 {
 		dialog.Message("No tile currently selected/textures not loaded.").Error()
@@ -23,5 +27,13 @@ func ClearGrid() {
 
 	for idx, _ := range gridTextures {
 		gridTextures[idx] = ""
+	}
+}
+
+func EnableEraser() {
+	eraserEnabled = true
+	currentlySelected = GTexKV{
+		key: "",
+		val: GiuTextureTyped{},
 	}
 }
