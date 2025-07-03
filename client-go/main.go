@@ -6,21 +6,23 @@ import (
 )
 
 var (
-	screenWidth  int32  = 960
-	screenHeight int32  = 960
-	playerName   string = ""
+	g = &scene.Game{
+		ScreenWidth:  960,
+		ScreenHeight: 960,
+		SceneManager: scene.GSceneManager{},
+		PlayerName:   "",
+	}
 )
 
 func main() {
-	rl.InitWindow(screenWidth, screenHeight, "GRPG Client")
+	rl.InitWindow(960, 960, "GRPG Client")
 
 	alkhemikalFont := rl.LoadFont("./assets/font.ttf")
 	defer rl.UnloadFont(alkhemikalFont)
 
-	sceneManager := scene.NewGSceneManager(&scene.LoginScreen{
-		Font:         alkhemikalFont,
-		ScreenWidth:  screenWidth,
-		ScreenHeight: screenHeight,
+	g.SceneManager.SwitchTo(&scene.LoginScreen{
+		Font: alkhemikalFont,
+		Game: g,
 	})
 
 	defer rl.CloseWindow()
@@ -28,10 +30,10 @@ func main() {
 	rl.SetTargetFPS(60)
 
 	for !rl.WindowShouldClose() {
-		sceneManager.CurrentScene.Loop()
+		g.SceneManager.CurrentScene.Loop()
 		rl.BeginDrawing()
 
-		sceneManager.CurrentScene.Render()
+		g.SceneManager.CurrentScene.Render()
 
 		rl.EndDrawing()
 	}

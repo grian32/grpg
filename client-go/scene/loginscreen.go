@@ -7,10 +7,9 @@ import (
 )
 
 type LoginScreen struct {
-	Font         rl.Font
-	ScreenWidth  int32
-	ScreenHeight int32
-	LoginName    string
+	Font      rl.Font
+	LoginName string
+	Game      *Game
 }
 
 func (l *LoginScreen) Cleanup() {
@@ -48,8 +47,8 @@ func (l *LoginScreen) Loop() {
 func (l *LoginScreen) Render() {
 	rl.ClearBackground(rl.Black)
 
-	halfWidth := l.ScreenWidth / 2
-	halfHeight := l.ScreenHeight / 2
+	halfWidth := l.Game.ScreenWidth / 2
+	halfHeight := l.Game.ScreenHeight / 2
 
 	drawTitleText(l, halfWidth, halfHeight)
 	rl.DrawRectangle(halfWidth-200, halfHeight-300, 400, 200, rl.NewColor(186, 109, 22, 255))
@@ -109,5 +108,8 @@ func drawLayout(l *LoginScreen, halfWidth, halfHeight int32) {
 	}
 
 	if rg.Button(loginButtonPos, "Login") {
+		l.Game.SceneManager.SwitchTo(&Playground{
+			Game: l.Game,
+		})
 	}
 }

@@ -11,15 +11,11 @@ type GSceneManager struct {
 	CurrentScene GScene
 }
 
-func NewGSceneManager(initialScene GScene) *GSceneManager {
-	initialScene.Setup()
-	return &GSceneManager{
-		CurrentScene: initialScene,
-	}
-}
-
 func (gsm *GSceneManager) SwitchTo(other GScene) {
-	gsm.CurrentScene.Cleanup()
+	if gsm.CurrentScene != nil {
+		gsm.CurrentScene.Cleanup()
+	}
+
 	other.Setup()
 	gsm.CurrentScene = other
 }
