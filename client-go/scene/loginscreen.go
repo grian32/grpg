@@ -1,6 +1,7 @@
 package scene
 
 import (
+	"client/util"
 	rg "github.com/gen2brain/raylib-go/raygui"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -13,12 +14,35 @@ type LoginScreen struct {
 }
 
 func (l *LoginScreen) Cleanup() {
+	rg.LoadStyleDefault()
 }
 
 func (l *LoginScreen) Setup() {
+	rg.SetFont(l.Font)
+	rg.SetStyle(rg.DEFAULT, rg.TEXT_SIZE, 20)
+
+	bgCol := util.RGBInt64Color(232, 152, 16)
+	buttonHoverCol := util.RGBInt64Color(227, 160, 43)
+	buttonPresedCol := util.RGBInt64Color(204, 144, 39)
+
+	white := util.RGBInt64Color(255, 255, 255)
+	rg.SetStyle(rg.TEXTBOX, rg.BASE_COLOR_PRESSED, bgCol)
+
+	rg.SetStyle(rg.BUTTON, rg.BASE_COLOR_NORMAL, bgCol)
+	rg.SetStyle(rg.BUTTON, rg.BASE_COLOR_FOCUSED, buttonHoverCol)
+	rg.SetStyle(rg.BUTTON, rg.BASE_COLOR_PRESSED, buttonPresedCol)
+
+	rg.SetStyle(rg.DEFAULT, rg.BORDER_COLOR_PRESSED, white)
+	rg.SetStyle(rg.DEFAULT, rg.TEXT_COLOR_PRESSED, white)
+	rg.SetStyle(rg.DEFAULT, rg.BORDER_COLOR_NORMAL, white)
+	rg.SetStyle(rg.DEFAULT, rg.TEXT_COLOR_NORMAL, white)
+	rg.SetStyle(rg.DEFAULT, rg.BORDER_COLOR_FOCUSED, white)
+	rg.SetStyle(rg.DEFAULT, rg.TEXT_COLOR_FOCUSED, white)
+
 }
 
 func (l *LoginScreen) Loop() {
+
 }
 
 func (l *LoginScreen) Render() {
@@ -28,7 +52,6 @@ func (l *LoginScreen) Render() {
 	halfHeight := l.ScreenHeight / 2
 
 	drawTitleText(l, halfWidth, halfHeight)
-	rg.SetStyle(rg.TEXTBOX, rg.BASE_COLOR_NORMAL, 1)
 	rl.DrawRectangle(halfWidth-200, halfHeight-300, 400, 200, rl.NewColor(186, 109, 22, 255))
 	drawEnterNameText(l, halfWidth, halfHeight)
 	drawLayout(l, halfWidth, halfHeight)
@@ -65,16 +88,26 @@ func drawEnterNameText(l *LoginScreen, halfWidth, halfHeight int32) {
 
 func drawLayout(l *LoginScreen, halfWidth, halfHeight int32) {
 	loginTextPos := rl.Rectangle{
-		X:      float32(halfWidth) - 100,
+		X:      float32(halfWidth) - 50,
 		Y:      float32(halfHeight) - 250,
-		Width:  200,
-		Height: 20,
+		Width:  100,
+		Height: 30,
 	}
 
 	rg.TextBox(
 		loginTextPos,
 		&l.LoginName,
-		24,
+		8,
 		true,
 	)
+
+	loginButtonPos := rl.Rectangle{
+		X:      float32(halfWidth) - 30,
+		Y:      float32(halfHeight) - 200,
+		Width:  60,
+		Height: 30,
+	}
+
+	if rg.Button(loginButtonPos, "Login") {
+	}
 }

@@ -36,8 +36,3 @@ func main() {
 		rl.EndDrawing()
 	}
 }
-
-// SetPlayerName TODO: kinda icky to have a setter
-func SetPlayerName(name string) {
-	playerName = name
-}
