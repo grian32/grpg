@@ -40,22 +40,23 @@ func (p *Playground) Render() {
 
 	player := p.Game.Player
 
-	var cameraX int32 = 4
-	var cameraY int32 = 4
+	var cameraX int32 = 4 * p.Game.TileSize
+	var cameraY int32 = 4 * p.Game.TileSize
 
-	if player.X <= 12 {
-		cameraX = util.MinI(player.X-9, 0)
+	// eh just hardcode these prob
+	if player.RealX <= 12*p.Game.TileSize {
+		cameraX = util.MinI(player.RealX-(9*p.Game.TileSize), 0)
 	}
 
-	if player.Y <= 12 {
-		cameraY = util.MinI(player.Y-9, 0)
+	if player.RealY <= 12*p.Game.TileSize {
+		cameraY = util.MinI(player.RealY-(9*p.Game.TileSize), 0)
 	}
 
 	fmt.Printf("cam: %d, %d & player: ", cameraX, cameraY)
 
 	camera := rl.Camera2D{
 		Offset:   rl.Vector2{X: 0, Y: 0},
-		Target:   rl.Vector2{X: float32(cameraX * p.Game.TileSize), Y: float32(cameraY * p.Game.TileSize)},
+		Target:   rl.Vector2{X: float32(cameraX), Y: float32(cameraY)},
 		Rotation: 0,
 		Zoom:     1,
 	}
@@ -82,12 +83,24 @@ func drawWorld(p *Playground) {
 				rl.DrawRectangle(dx, dy, p.Game.TileSize, p.Game.TileSize, rl.Gray)
 			}
 			rl.DrawRectangleLines(dx, dy, p.Game.TileSize, p.Game.TileSize, rl.Black)
+
+			if p.Game.Player.ChunkY == 1 && x == 8 && y == 8 {
+				rl.DrawRectangle(dx, dy, p.Game.TileSize, p.Game.TileSize, rl.Red)
+			}
 		}
 	}
 }
 
 func drawPlayer(p *Playground) {
 	rl.DrawRectangle(p.Game.Player.RealX, p.Game.Player.RealY, 64, 64, rl.SkyBlue)
+	rl.DrawTextEx(
+		p.Font,
+		p.Game.Player.Name,
+		rl.Vector2{X: float32(p.Game.Player.RealX), Y: float32(p.Game.Player.RealY)},
+		16,
+		0,
+		rl.Red,
+	)
 }
 
 func drawGameFrame(p *Playground) {
@@ -95,4 +108,6 @@ func drawGameFrame(p *Playground) {
 	rl.DrawTextEx(p.Font, "inventory or something", rl.Vector2{X: 768, Y: 0}, 24, 0, rl.White)
 	rl.DrawRectangle(0, 768, 960-192, 192, rl.Blue)
 	rl.DrawTextEx(p.Font, "something else eventually", rl.Vector2{X: 0, Y: 768}, 24, 0, rl.White)
+	playerCoords := fmt.Sprintf("X: %d, Y: %d", p.Game.Player.X, p.Game.Player.Y)
+	rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 0, Y: 800}, 24, 0, rl.White)
 }

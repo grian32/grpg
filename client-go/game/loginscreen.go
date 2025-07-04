@@ -13,11 +13,14 @@ type LoginScreen struct {
 }
 
 func (l *LoginScreen) Cleanup() {
-	rg.LoadStyleDefault()
-	rl.UnloadFont(l.Font)
+	if l.Font.Texture.ID != 0 {
+		rl.UnloadFont(l.Font)
+	}
 }
 
 func (l *LoginScreen) Setup() {
+	l.Font = rl.LoadFont("./assets/font.ttf")
+
 	rg.SetFont(l.Font)
 	rg.SetStyle(rg.DEFAULT, rg.TEXT_SIZE, 20)
 
@@ -38,8 +41,6 @@ func (l *LoginScreen) Setup() {
 	rg.SetStyle(rg.DEFAULT, rg.TEXT_COLOR_NORMAL, white)
 	rg.SetStyle(rg.DEFAULT, rg.BORDER_COLOR_FOCUSED, white)
 	rg.SetStyle(rg.DEFAULT, rg.TEXT_COLOR_FOCUSED, white)
-
-	l.Font = rl.LoadFont("./assets/font.ttf")
 }
 
 func (l *LoginScreen) Loop() {
@@ -110,8 +111,8 @@ func drawLayout(l *LoginScreen, halfWidth, halfHeight int32) {
 	}
 
 	if rg.Button(loginButtonPos, "Login") {
+		l.Game.Player.Name = l.LoginName
 		l.Game.SceneManager.SwitchTo(&Playground{
-			Font: l.Font,
 			Game: l.Game,
 		})
 	}
