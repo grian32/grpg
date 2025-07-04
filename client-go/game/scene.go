@@ -1,4 +1,4 @@
-package scene
+package game
 
 type GScene interface {
 	Setup()

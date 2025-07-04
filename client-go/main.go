@@ -1,27 +1,24 @@
 package main
 
 import (
-	"client/scene"
+	"client/game"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 var (
-	g = &scene.Game{
+	g = &game.Game{
 		ScreenWidth:  960,
 		ScreenHeight: 960,
-		SceneManager: scene.GSceneManager{},
-		PlayerName:   "",
+		TileSize:     64,
+		SceneManager: &game.GSceneManager{},
+		Player:       &game.Player{X: 15, Y: 15, RealX: 960, RealY: 960, Name: ""},
 	}
 )
 
 func main() {
 	rl.InitWindow(960, 960, "GRPG Client")
 
-	alkhemikalFont := rl.LoadFont("./assets/font.ttf")
-	defer rl.UnloadFont(alkhemikalFont)
-
-	g.SceneManager.SwitchTo(&scene.LoginScreen{
-		Font: alkhemikalFont,
+	g.SceneManager.SwitchTo(&game.LoginScreen{
 		Game: g,
 	})
 

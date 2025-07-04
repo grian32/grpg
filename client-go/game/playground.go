@@ -1,0 +1,98 @@
+package game
+
+import (
+	"client/util"
+	"fmt"
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
+
+type Playground struct {
+	Font rl.Font
+	Game *Game
+}
+
+func (p *Playground) Setup() {
+	p.Font = rl.LoadFont("./assets/font.ttf")
+}
+
+func (p *Playground) Cleanup() {
+	rl.UnloadFont(p.Font)
+}
+
+func (p *Playground) Loop() {
+
+	player := p.Game.Player
+
+	if rl.IsKeyPressed(rl.KeyW) {
+		player.Move(player.X, player.Y-1, p.Game)
+	} else if rl.IsKeyPressed(rl.KeyS) {
+		player.Move(player.X, player.Y+1, p.Game)
+	} else if rl.IsKeyPressed(rl.KeyA) {
+		player.Move(player.X-1, player.Y, p.Game)
+	} else if rl.IsKeyPressed(rl.KeyD) {
+		player.Move(player.X+1, player.Y, p.Game)
+	}
+	fmt.Println(player)
+}
+
+func (p *Playground) Render() {
+	rl.ClearBackground(rl.Black)
+
+	player := p.Game.Player
+
+	var cameraX int32 = 4
+	var cameraY int32 = 4
+
+	if player.X <= 12 {
+		cameraX = util.MinI(player.X-9, 0)
+	}
+
+	if player.Y <= 12 {
+		cameraY = util.MinI(player.Y-9, 0)
+	}
+
+	fmt.Printf("cam: %d, %d & player: ", cameraX, cameraY)
+
+	camera := rl.Camera2D{
+		Offset:   rl.Vector2{X: 0, Y: 0},
+		Target:   rl.Vector2{X: float32(cameraX * p.Game.TileSize), Y: float32(cameraY * p.Game.TileSize)},
+		Rotation: 0,
+		Zoom:     1,
+	}
+
+	rl.BeginMode2D(camera)
+
+	drawWorld(p)
+	drawPlayer(p)
+
+	rl.EndMode2D()
+
+	drawGameFrame(p)
+}
+
+func drawWorld(p *Playground) {
+	for x := range 16 {
+		for y := range 16 {
+			dx := int32(x) * p.Game.TileSize
+			dy := int32(y) * p.Game.TileSize
+
+			if y%2 == 0 || x%2 == 0 {
+				rl.DrawRectangle(dx, dy, p.Game.TileSize, p.Game.TileSize, rl.White)
+			} else {
+				rl.DrawRectangle(dx, dy, p.Game.TileSize, p.Game.TileSize, rl.Gray)
+			}
+			rl.DrawRectangleLines(dx, dy, p.Game.TileSize, p.Game.TileSize, rl.Black)
+		}
+	}
+}
+
+func drawPlayer(p *Playground) {
+	rl.DrawRectangle(p.Game.Player.RealX, p.Game.Player.RealY, 64, 64, rl.SkyBlue)
+}
+
+func drawGameFrame(p *Playground) {
+	rl.DrawRectangle(768, 0, 192, 960, rl.Blue)
+	rl.DrawTextEx(p.Font, "inventory or something", rl.Vector2{X: 768, Y: 0}, 24, 0, rl.White)
+	rl.DrawRectangle(0, 768, 960-192, 192, rl.Blue)
+	rl.DrawTextEx(p.Font, "something else eventually", rl.Vector2{X: 0, Y: 768}, 24, 0, rl.White)
+}
