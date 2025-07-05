@@ -21,17 +21,21 @@ func (p *Playground) Cleanup() {
 }
 
 func (p *Playground) Loop() {
-
 	player := p.Game.Player
 
+	// TODO: figure out some way to send remove duplicate packet code
 	if rl.IsKeyPressed(rl.KeyW) {
 		player.Move(player.X, player.Y-1, p.Game)
+		player.SendMovePacket(p.Game)
 	} else if rl.IsKeyPressed(rl.KeyS) {
 		player.Move(player.X, player.Y+1, p.Game)
+		player.SendMovePacket(p.Game)
 	} else if rl.IsKeyPressed(rl.KeyA) {
 		player.Move(player.X-1, player.Y, p.Game)
+		player.SendMovePacket(p.Game)
 	} else if rl.IsKeyPressed(rl.KeyD) {
 		player.Move(player.X+1, player.Y, p.Game)
+		player.SendMovePacket(p.Game)
 	}
 }
 

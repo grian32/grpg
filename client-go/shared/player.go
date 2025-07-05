@@ -1,5 +1,7 @@
 package shared
 
+import "client/network/c2s"
+
 type Player struct {
 	X      int32
 	Y      int32
@@ -26,4 +28,11 @@ func (p *Player) Move(newX, newY int32, game *Game) {
 
 	p.ChunkX = p.X / 16
 	p.ChunkY = p.Y / 16
+}
+
+func (p *Player) SendMovePacket(game *Game) {
+	SendPacket(game.Conn, &c2s.MovePacket{
+		X: p.X,
+		Y: p.Y,
+	})
 }
