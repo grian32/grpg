@@ -122,3 +122,10 @@ func (buf *GBuf) Clear() {
 func (buf *GBuf) Bytes() []byte {
 	return buf.slice
 }
+
+// TODO: tests
+func (buf *GBuf) WriteInt32(val int32) {
+	temp := make([]byte, 4)
+	binary.BigEndian.PutUint32(temp, uint32(val))
+	buf.slice = append(buf.slice, temp...)
+}
