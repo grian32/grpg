@@ -60,6 +60,10 @@ func (l *LoginScreen) Render() {
 	rl.DrawRectangle(halfWidth-200, halfHeight-300, 400, 200, rl.NewColor(186, 109, 22, 255))
 	drawCenteredText(l, halfWidth, float32(halfHeight-275), 24.0, 0.4, "Enter Name Below:", rl.White)
 	drawLayout(l, halfWidth, halfHeight)
+
+	if l.Game.ShowFailedLogin {
+		drawCenteredText(l, halfWidth, 900.0, 24.0, 0.0, "Login failed, name most likely already taken", rl.Red)
+	}
 }
 
 func drawCenteredText(l *LoginScreen, halfWidth int32, yPos, size, spacing float32, text string, color color.RGBA) {

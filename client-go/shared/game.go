@@ -7,12 +7,13 @@ import (
 )
 
 type Game struct {
-	ScreenWidth  int32
-	ScreenHeight int32
-	TileSize     int32
-	SceneManager *GSceneManager
-	Player       *Player
-	Conn         net.Conn
+	ScreenWidth     int32
+	ScreenHeight    int32
+	TileSize        int32
+	SceneManager    *GSceneManager
+	Player          *Player
+	Conn            net.Conn
+	ShowFailedLogin bool
 }
 
 // i think this would make sense as a function on game but er.. cyclical lol!

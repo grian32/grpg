@@ -8,4 +8,5 @@ import (
 type LoginRejected struct{}
 
 func (l LoginRejected) Handle(buf *gbuf.GBuf, game *shared.Game) {
+	game.ShowFailedLogin = true
 }

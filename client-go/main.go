@@ -9,12 +9,13 @@ import (
 
 var (
 	g = &shared.Game{
-		ScreenWidth:  960,
-		ScreenHeight: 960,
-		TileSize:     64,
-		SceneManager: &shared.GSceneManager{},
-		Player:       &shared.Player{X: 15, Y: 15, RealX: 960, RealY: 960, Name: ""},
-		Conn:         network.StartConn(),
+		ScreenWidth:     960,
+		ScreenHeight:    960,
+		TileSize:        64,
+		SceneManager:    &shared.GSceneManager{},
+		Player:          &shared.Player{X: 15, Y: 15, RealX: 960, RealY: 960, Name: ""},
+		Conn:            network.StartConn(),
+		ShowFailedLogin: false,
 	}
 )
 
