@@ -17,8 +17,10 @@ type PacketData struct {
 
 var (
 	LoginAcceptedData = PacketData{Opcode: 0x01, Length: 8, Handler: &LoginAccepted{}}
+	LoginRejectedData = PacketData{Opcode: 0x01, Length: 0, Handler: &LoginRejected{}}
 )
 
 var Packets = map[byte]PacketData{
 	0x01: LoginAcceptedData,
+	0x02: LoginRejectedData,
 }
