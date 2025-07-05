@@ -75,6 +75,16 @@ func (buf *GBuf) ReadByte() (byte, error) {
 	return val, nil
 }
 
+// TODO: tests
+func (buf *GBuf) ReadInt32() (int32, error) {
+	if buf.pos+4 > len(buf.slice) {
+		return 0, errors.New("not enough bytes to read int32")
+	}
+	val := int32(binary.BigEndian.Uint32(buf.slice[buf.pos : buf.pos+4]))
+	buf.pos += 4
+	return val, nil
+}
+
 func (buf *GBuf) WriteUint16(val uint16) {
 	temp := make([]byte, 2)
 	binary.BigEndian.PutUint16(temp, val)
