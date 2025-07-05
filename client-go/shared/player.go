@@ -1,4 +1,4 @@
-package game
+package shared
 
 type Player struct {
 	X      int32

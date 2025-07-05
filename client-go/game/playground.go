@@ -1,6 +1,7 @@
 package game
 
 import (
+	"client/shared"
 	"client/util"
 	"fmt"
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -8,7 +9,7 @@ import (
 
 type Playground struct {
 	Font rl.Font
-	Game *Game
+	Game *shared.Game
 }
 
 func (p *Playground) Setup() {
@@ -40,8 +41,8 @@ func (p *Playground) Render() {
 
 	player := p.Game.Player
 
-	var cameraX int32 = 4 * p.Game.TileSize
-	var cameraY int32 = 4 * p.Game.TileSize
+	var cameraX = 4 * p.Game.TileSize
+	var cameraY = 4 * p.Game.TileSize
 
 	// eh just hardcode these prob
 	if player.RealX <= 12*p.Game.TileSize {

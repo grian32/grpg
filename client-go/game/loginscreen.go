@@ -1,6 +1,8 @@
 package game
 
 import (
+	"client/network/c2s"
+	"client/shared"
 	"client/util"
 	rg "github.com/gen2brain/raylib-go/raygui"
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -9,7 +11,7 @@ import (
 type LoginScreen struct {
 	Font      rl.Font
 	LoginName string
-	Game      *Game
+	Game      *shared.Game
 }
 
 func (l *LoginScreen) Cleanup() {
@@ -111,9 +113,8 @@ func drawLayout(l *LoginScreen, halfWidth, halfHeight int32) {
 	}
 
 	if rg.Button(loginButtonPos, "Login") {
-		l.Game.Player.Name = l.LoginName
-		l.Game.SceneManager.SwitchTo(&Playground{
-			Game: l.Game,
+		shared.SendPacket(l.Game.Conn, &c2s.LoginPacket{
+			PlayerName: l.LoginName,
 		})
 	}
 }
