@@ -33,7 +33,6 @@ func (p *Playground) Loop() {
 	} else if rl.IsKeyPressed(rl.KeyD) {
 		player.Move(player.X+1, player.Y, p.Game)
 	}
-	fmt.Println(player)
 }
 
 func (p *Playground) Render() {
@@ -52,8 +51,6 @@ func (p *Playground) Render() {
 	if player.RealY <= 12*p.Game.TileSize {
 		cameraY = util.MinI(player.RealY-(9*p.Game.TileSize), 0)
 	}
-
-	fmt.Printf("cam: %d, %d & player: ", cameraX, cameraY)
 
 	camera := rl.Camera2D{
 		Offset:   rl.Vector2{X: 0, Y: 0},
