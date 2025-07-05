@@ -6,6 +6,7 @@ import (
 	"client/util"
 	rg "github.com/gen2brain/raylib-go/raygui"
 	rl "github.com/gen2brain/raylib-go/raylib"
+	"image/color"
 )
 
 type LoginScreen struct {
@@ -55,39 +56,21 @@ func (l *LoginScreen) Render() {
 	halfWidth := l.Game.ScreenWidth / 2
 	halfHeight := l.Game.ScreenHeight / 2
 
-	drawTitleText(l, halfWidth, halfHeight)
+	drawCenteredText(l, halfWidth, float32(halfHeight-375), 48.0, 0.0, "GRPG Client", rl.White)
 	rl.DrawRectangle(halfWidth-200, halfHeight-300, 400, 200, rl.NewColor(186, 109, 22, 255))
-	drawEnterNameText(l, halfWidth, halfHeight)
+	drawCenteredText(l, halfWidth, float32(halfHeight-275), 24.0, 0.4, "Enter Name Below:", rl.White)
 	drawLayout(l, halfWidth, halfHeight)
 }
 
-// TODO: generalize this maybe? can pass y offset/size/text/spacing and make it draw centered text or somethingh, just trying to port rn
-func drawTitleText(l *LoginScreen, halfWidth, halfHeight int32) {
-	text := "GRPG Client"
-	var size float32 = 48.0
-
-	calculatedSize := rl.MeasureTextEx(l.Font, text, size, 0.0)
+func drawCenteredText(l *LoginScreen, halfWidth int32, yPos, size, spacing float32, text string, color color.RGBA) {
+	calculatedSize := rl.MeasureTextEx(l.Font, text, size, spacing)
 
 	textPos := rl.Vector2{
 		X: float32(halfWidth) - (calculatedSize.X / 2),
-		Y: float32(halfHeight) - 375,
+		Y: yPos,
 	}
 
-	rl.DrawTextEx(l.Font, text, textPos, size, 0, rl.White)
-}
-
-func drawEnterNameText(l *LoginScreen, halfWidth, halfHeight int32) {
-	text := "Enter Name Below:"
-	var size float32 = 24.0
-
-	calculatedSize := rl.MeasureTextEx(l.Font, text, size, 0.4)
-
-	textPos := rl.Vector2{
-		X: float32(halfWidth) - (calculatedSize.X / 2),
-		Y: float32(halfHeight) - 275,
-	}
-
-	rl.DrawTextEx(l.Font, text, textPos, size, 0.4, rl.White)
+	rl.DrawTextEx(l.Font, text, textPos, size, spacing, color)
 }
 
 func drawLayout(l *LoginScreen, halfWidth, halfHeight int32) {
