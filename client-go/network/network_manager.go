@@ -24,7 +24,7 @@ func StartConn() net.Conn {
 	return netConn
 }
 
-func ProcessServerPackets(conn net.Conn, packetChan chan<- ChanPacket) {
+func ReadServerPackets(conn net.Conn, packetChan chan<- ChanPacket) {
 	reader := bufio.NewReader(conn)
 
 	for {

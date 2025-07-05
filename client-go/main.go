@@ -31,7 +31,7 @@ func main() {
 
 	serverPackets := make(chan network.ChanPacket, 100)
 
-	go network.ProcessServerPackets(g.Conn, serverPackets)
+	go network.ReadServerPackets(g.Conn, serverPackets)
 
 	rl.SetTargetFPS(60)
 
