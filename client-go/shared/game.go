@@ -12,6 +12,7 @@ type Game struct {
 	TileSize        int32
 	SceneManager    *GSceneManager
 	Player          *Player
+	OtherPlayers    []Player
 	Conn            net.Conn
 	ShowFailedLogin bool
 }

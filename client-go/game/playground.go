@@ -66,6 +66,7 @@ func (p *Playground) Render() {
 	rl.BeginMode2D(camera)
 
 	drawWorld(p)
+	drawOtherPlayers(p)
 	drawPlayer(p)
 
 	rl.EndMode2D()
@@ -93,6 +94,7 @@ func drawWorld(p *Playground) {
 	}
 }
 
+// TODO: generalize this code
 func drawPlayer(p *Playground) {
 	rl.DrawRectangle(p.Game.Player.RealX, p.Game.Player.RealY, 64, 64, rl.SkyBlue)
 	rl.DrawTextEx(
@@ -103,6 +105,20 @@ func drawPlayer(p *Playground) {
 		0,
 		rl.Red,
 	)
+}
+
+func drawOtherPlayers(p *Playground) {
+	for _, player := range p.Game.OtherPlayers {
+		rl.DrawRectangle(player.RealX, player.RealY, 64, 64, rl.SkyBlue)
+		rl.DrawTextEx(
+			p.Font,
+			player.Name,
+			rl.Vector2{X: float32(p.Game.Player.RealX), Y: float32(p.Game.Player.RealY)},
+			16,
+			0,
+			rl.Red,
+		)
+	}
 }
 
 func drawGameFrame(p *Playground) {

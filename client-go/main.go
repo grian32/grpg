@@ -9,11 +9,31 @@ import (
 
 var (
 	g = &shared.Game{
-		ScreenWidth:     960,
-		ScreenHeight:    960,
-		TileSize:        64,
-		SceneManager:    &shared.GSceneManager{},
-		Player:          &shared.Player{X: 15, Y: 15, RealX: 960, RealY: 960, Name: ""},
+		ScreenWidth:  960,
+		ScreenHeight: 960,
+		TileSize:     64,
+		SceneManager: &shared.GSceneManager{},
+		Player:       &shared.Player{X: 15, Y: 15, RealX: 960, RealY: 960, Name: ""},
+		OtherPlayers: []shared.Player{
+			{
+				X:      12,
+				Y:      12,
+				RealX:  768,
+				RealY:  768,
+				ChunkX: 0,
+				ChunkY: 0,
+				Name:   "OtherDu",
+			},
+			{
+				X:      12,
+				Y:      11,
+				RealX:  768,
+				RealY:  704,
+				ChunkX: 0,
+				ChunkY: 0,
+				Name:   "OtherD",
+			},
+		},
 		Conn:            network.StartConn(),
 		ShowFailedLogin: false,
 	}
