@@ -4,6 +4,7 @@ import (
 	"client/game"
 	"client/network"
 	"client/shared"
+	"flag"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -40,7 +41,11 @@ var (
 )
 
 func main() {
-	rl.InitWindow(960, 960, "GRPG Client")
+	windowTitle := flag.String("title", "GRPG Client", "the window title")
+
+	flag.Parse()
+
+	rl.InitWindow(960, 960, *windowTitle)
 
 	g.SceneManager.SwitchTo(&game.LoginScreen{
 		Game: g,
