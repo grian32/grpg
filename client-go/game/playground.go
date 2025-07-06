@@ -113,7 +113,7 @@ func drawOtherPlayers(p *Playground) {
 		rl.DrawTextEx(
 			p.Font,
 			player.Name,
-			rl.Vector2{X: float32(p.Game.Player.RealX), Y: float32(p.Game.Player.RealY)},
+			rl.Vector2{X: float32(player.RealX), Y: float32(player.RealY)},
 			16,
 			0,
 			rl.Red,
