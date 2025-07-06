@@ -23,11 +23,11 @@ func (p *Player) Move(newX, newY int32, game *Game) {
 	p.X = newX
 	p.Y = newY
 
-	p.RealX = (p.X % 16) * game.TileSize
-	p.RealY = (p.Y % 16) * game.TileSize
+	p.RealX = (p.X % int32(game.ChunkSize)) * int32(game.TileSize)
+	p.RealY = (p.Y % int32(game.ChunkSize)) * int32(game.TileSize)
 
-	p.ChunkX = p.X / 16
-	p.ChunkY = p.Y / 16
+	p.ChunkX = p.X / int32(game.ChunkSize)
+	p.ChunkY = p.Y / int32(game.ChunkSize)
 }
 
 func (p *Player) SendMovePacket(game *Game) {
