@@ -88,7 +88,9 @@ func drawLayout(l *LoginScreen, halfWidth, halfHeight int32) {
 	rg.TextBox(
 		loginTextPos,
 		&l.LoginName,
-		8,
+		// one of the all time stupidest variable names/variables, it takes the input - 1 as the max chars in the
+		// textbox, 317 pi level shit :(
+		9,
 		true,
 	)
 
