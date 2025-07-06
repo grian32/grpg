@@ -11,16 +11,18 @@ type Packet interface {
 
 type PacketData struct {
 	Opcode  byte
-	Length  uint16
+	Length  int16
 	Handler Packet
 }
 
 var (
 	LoginAcceptedData = PacketData{Opcode: 0x01, Length: 8, Handler: &LoginAccepted{}}
-	LoginRejectedData = PacketData{Opcode: 0x01, Length: 0, Handler: &LoginRejected{}}
+	LoginRejectedData = PacketData{Opcode: 0x02, Length: 0, Handler: &LoginRejected{}}
+	PlayersUpdateData = PacketData{Opcode: 0x03, Length: -1, Handler: &PlayersUpdate{}}
 )
 
 var Packets = map[byte]PacketData{
 	0x01: LoginAcceptedData,
 	0x02: LoginRejectedData,
+	0x03: PlayersUpdateData,
 }

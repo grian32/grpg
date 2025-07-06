@@ -3,6 +3,7 @@ package network
 import (
 	"bufio"
 	"client/network/s2c"
+	"encoding/binary"
 	"fmt"
 	"grpg/data-go/gbuf"
 	"io"
@@ -34,12 +35,21 @@ func ReadServerPackets(conn net.Conn, packetChan chan<- ChanPacket) {
 			return
 		}
 
-		fmt.Println(opcode)
-
 		packetData := s2c.Packets[opcode]
 
-		bytes := make([]byte, packetData.Length)
+		var bytes []byte
 
+		// really dumb cheap hacks  to make players update work until i rewrite the server to go since i dont wanna modify
+		// the kotlin one anymore, basically reads the amount of players and then reads bytes assuming 8 char player
+		// names
+		if packetData.Length == -1 {
+			lenBytes := make([]byte, 2)
+			_, _ = io.ReadFull(reader, lenBytes)
+			packetLen := int16(binary.BigEndian.Uint16(lenBytes))
+			bytes = make([]byte, packetLen*20)
+		} else {
+			bytes = make([]byte, packetData.Length)
+		}
 		_, err = io.ReadFull(reader, bytes)
 		if err != nil {
 			return
