@@ -7,10 +7,9 @@ import (
 )
 
 type Game struct {
-	ScreenWidth     uint32
-	ScreenHeight    uint32
-	TileSize        uint32
-	ChunkSize       uint32
+	ScreenWidth     int32
+	ScreenHeight    int32
+	TileSize        int32
 	SceneManager    *GSceneManager
 	Player          *Player
 	OtherPlayers    []Player
