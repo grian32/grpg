@@ -100,6 +100,7 @@ func drawLayout(l *LoginScreen, halfWidth, halfHeight int32) {
 	}
 
 	if rg.Button(loginButtonPos, "Login") {
+		l.Game.Player.Name = l.LoginName
 		shared.SendPacket(l.Game.Conn, &c2s.LoginPacket{
 			PlayerName: l.LoginName,
 		})
