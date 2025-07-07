@@ -53,9 +53,10 @@ func handleClient(conn net.Conn, game *shared.Game) {
 	reader := bufio.NewReader(conn)
 
 	for {
-		for _, p := range game.Players {
-			fmt.Printf("%s @ %d, %d\n", p.Name, p.Pos.X, p.Pos.Y)
+		for _, pl := range game.Players {
+			fmt.Printf("%v @ %d, %d;", pl.Name, pl.Pos.X, pl.Pos.Y)
 		}
+		fmt.Println()
 
 		opcode, err := reader.ReadByte()
 		if err != nil {
@@ -86,10 +87,12 @@ func handleClient(conn net.Conn, game *shared.Game) {
 		for idx, p := range game.Players {
 			if p.Conn == conn {
 				playerPos = idx
-			} else {
-				log.Printf("Couldn't find player in position, %v\n", p)
-				return
 			}
+		}
+
+		if playerPos == -1 {
+			fmt.Printf("Couldn't find player with conn %v", conn)
+			return
 		}
 
 		packetData.Handler.Handle(buf, game, playerPos)
@@ -110,7 +113,7 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 
 	for _, player := range game.Players {
 		if player.Name == string(name) {
-			shared.SendPacket(conn, &s2c.LoginRejected{})
+			s2c.SendPacket(conn, &s2c.LoginRejected{}, game)
 			return
 		}
 	}
@@ -127,5 +130,5 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 	game.Players = append(game.Players, player)
 	game.PlayersByChunk[zeroPos] = append(game.PlayersByChunk[zeroPos], player)
 
-	shared.SendPacket(conn, &s2c.LoginAccepted{})
+	s2c.SendPacket(conn, &s2c.LoginAccepted{}, game)
 }
