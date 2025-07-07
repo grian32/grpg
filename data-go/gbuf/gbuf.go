@@ -35,7 +35,7 @@ func (buf *GBuf) ReadUint16() (uint16, error) {
 
 func (buf *GBuf) ReadUint32() (uint32, error) {
 	if buf.pos+4 > len(buf.slice) {
-		return 0, errors.New("not enough bytes to read uint16")
+		return 0, errors.New("not enough bytes to read uint32")
 	}
 	val := binary.BigEndian.Uint32(buf.slice[buf.pos : buf.pos+4])
 	buf.pos += 4

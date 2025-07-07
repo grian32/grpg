@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"server/network"
 	"server/network/c2s"
 	"server/network/s2c"
 	"server/shared"
@@ -113,7 +114,7 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 
 	for _, player := range game.Players {
 		if player.Name == string(name) {
-			s2c.SendPacket(conn, &s2c.LoginRejected{}, game)
+			network.SendPacket(conn, &s2c.LoginRejected{}, game)
 			return
 		}
 	}
@@ -130,5 +131,7 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 	game.Players = append(game.Players, player)
 	game.PlayersByChunk[zeroPos] = append(game.PlayersByChunk[zeroPos], player)
 
-	s2c.SendPacket(conn, &s2c.LoginAccepted{}, game)
+	network.SendPacket(conn, &s2c.LoginAccepted{}, game)
+	// this will be changed to the chunkpos where u login when i have player saves
+	network.UpdatePlayersByChunk(util.Vector2I{X: 0, Y: 0}, game)
 }

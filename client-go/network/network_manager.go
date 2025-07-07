@@ -39,14 +39,19 @@ func ReadServerPackets(conn net.Conn, packetChan chan<- ChanPacket) {
 
 		var bytes []byte
 
-		// really dumb cheap hacks  to make players update work until i rewrite the server to go since i dont wanna modify
 		// the kotlin one anymore, basically reads the amount of players and then reads bytes assuming 8 char player
 		// names
 		if packetData.Length == -1 {
 			lenBytes := make([]byte, 2)
-			_, _ = io.ReadFull(reader, lenBytes)
-			packetLen := int16(binary.BigEndian.Uint16(lenBytes))
-			bytes = make([]byte, packetLen*20)
+			_, err = io.ReadFull(reader, lenBytes)
+
+			if err != nil {
+				log.Printf("Failed to read packet length for variable length packet with opcode %b, %v\n", opcode, err)
+				continue
+			}
+
+			packetLen := binary.BigEndian.Uint16(lenBytes)
+			bytes = make([]byte, packetLen)
 		} else {
 			bytes = make([]byte, packetData.Length)
 		}

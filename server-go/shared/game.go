@@ -1,9 +1,6 @@
 package shared
 
 import (
-	"grpg/data-go/gbuf"
-	"net"
-	"server/network/s2c"
 	"server/util"
 )
 
@@ -14,14 +11,4 @@ type Game struct {
 	// for bounds checks.
 	MaxX uint32
 	MaxY uint32
-}
-
-func SendPacket(conn net.Conn, packet s2c.Packet) {
-	buf := gbuf.NewEmptyGBuf()
-	buf.WriteByte(packet.Opcode())
-	packet.Handle(buf)
-	_, err := conn.Write(buf.Bytes())
-	if err != nil {
-		return
-	}
 }
