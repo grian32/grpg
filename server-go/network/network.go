@@ -14,8 +14,10 @@ func UpdatePlayersByChunk(chunkPos util.Vector2I, game *shared.Game) {
 		ChunkPos: chunkPos,
 	}
 
-	for _, player := range game.PlayersByChunk[chunkPos] {
-		SendPacket(player.Conn, packet, game)
+	for _, player := range game.Players {
+		if player.ChunkPos == chunkPos {
+			SendPacket(player.Conn, packet, game)
+		}
 	}
 }
 

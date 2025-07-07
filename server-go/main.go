@@ -18,10 +18,9 @@ import (
 
 var (
 	g = &shared.Game{
-		Players:        []*shared.Player{},
-		PlayersByChunk: map[util.Vector2I][]*shared.Player{},
-		MaxX:           15,
-		MaxY:           31,
+		Players: []*shared.Player{},
+		MaxX:    15,
+		MaxY:    31,
 	}
 )
 
@@ -129,7 +128,6 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 	}
 
 	game.Players = append(game.Players, player)
-	game.PlayersByChunk[zeroPos] = append(game.PlayersByChunk[zeroPos], player)
 
 	network.SendPacket(conn, &s2c.LoginAccepted{}, game)
 	// this will be changed to the chunkpos where u login when i have player saves

@@ -17,11 +17,14 @@ func (p *PlayersUpdate) Opcode() byte {
 
 func (p *PlayersUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	packetLen := 2 // player len
+	playerLen := 0
 
 	// TODO: might be able to do this without iterating twice but would require a way to modify at pos in gbuf
-	players := game.PlayersByChunk[p.ChunkPos]
-	for _, player := range players {
-		packetLen += 4 + len(player.Name) + 4 + 4 // len name, name, x, y
+	for _, player := range game.Players {
+		if player.ChunkPos == p.ChunkPos {
+			packetLen += 4 + len(player.Name) + 4 + 4 // len name, name, x, y
+			playerLen++
+		}
 	}
 
 	// this will also catch name len being > uint32 & len(players) being > uint16 since packetlen includes them
@@ -31,11 +34,13 @@ func (p *PlayersUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 
 	buf.WriteUint16(uint16(packetLen))
 
-	buf.WriteUint16(uint16(len(players)))
+	buf.WriteUint16(uint16(playerLen))
 
-	for _, player := range players {
-		buf.WriteString(player.Name)
-		buf.WriteUint32(player.Pos.X)
-		buf.WriteUint32(player.Pos.Y)
+	for _, player := range game.Players {
+		if player.ChunkPos == p.ChunkPos {
+			buf.WriteString(player.Name)
+			buf.WriteUint32(player.Pos.X)
+			buf.WriteUint32(player.Pos.Y)
+		}
 	}
 }
