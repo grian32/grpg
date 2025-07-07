@@ -30,9 +30,9 @@ func (p *Player) Move(newX, newY int32, game *Game) {
 	p.ChunkY = p.Y / 16
 }
 
-func (p *Player) SendMovePacket(game *Game) {
+func (p *Player) SendMovePacket(game *Game, x, y int32) {
 	SendPacket(game.Conn, &c2s.MovePacket{
-		X: p.X,
-		Y: p.Y,
+		X: x,
+		Y: y,
 	})
 }
