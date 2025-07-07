@@ -25,16 +25,16 @@ var (
 )
 
 func main() {
-	listerner, err := net.Listen("tcp", ":4422")
+	listener, err := net.Listen("tcp", ":4422")
 	if err != nil {
 		log.Fatal("Failed to start: ", err)
 	}
 
-	defer listerner.Close()
+	defer listener.Close()
 	log.Println("Listening on 127.0.0.1:4422")
 
 	for {
-		conn, err := listerner.Accept()
+		conn, err := listener.Accept()
 		if err != nil {
 			log.Printf("Failed to accept connection: %v\n", err)
 			continue
@@ -54,12 +54,13 @@ func handleClient(conn net.Conn, game *shared.Game) {
 
 	for {
 		for _, p := range game.Players {
-			fmt.Printf("%s @ %d, %d\n", p.Name, p.X, p.Y)
+			fmt.Printf("%s @ %d, %d\n", p.Name, p.Pos.X, p.Pos.Y)
 		}
 
 		opcode, err := reader.ReadByte()
 		if err != nil {
 			log.Printf("Failed to read packet opcode: %v, Conn lost.\n", err)
+			// TODO: remove player
 			return
 		}
 
@@ -80,11 +81,11 @@ func handleClient(conn net.Conn, game *shared.Game) {
 
 		buf := gbuf.NewGBuf(bytes)
 
-		var playerPos util.Vector2I
+		var playerPos = -1
 
-		for _, p := range game.Players {
+		for idx, p := range game.Players {
 			if p.Conn == conn {
-				playerPos = util.Vector2I{X: p.ChunkX, Y: p.ChunkY}
+				playerPos = idx
 			} else {
 				log.Printf("Couldn't find player in position, %v\n", p)
 				return
@@ -114,19 +115,17 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 		}
 	}
 
-	firstAvailablePosition := game.FindFirstAvailablePosition()
+	zeroPos := util.Vector2I{X: 0, Y: 0}
 
-	g.Players[firstAvailablePosition] = &shared.Player{
-		X:      firstAvailablePosition.X,
-		Y:      firstAvailablePosition.Y,
-		ChunkX: firstAvailablePosition.X / 16,
-		ChunkY: firstAvailablePosition.Y / 16,
-		Name:   string(name),
-		Conn:   conn,
+	player := &shared.Player{
+		Pos:      zeroPos,
+		ChunkPos: zeroPos,
+		Name:     string(name),
+		Conn:     conn,
 	}
 
-	shared.SendPacket(conn, &s2c.LoginAccepted{
-		InitialX: int32(firstAvailablePosition.X),
-		InitialY: int32(firstAvailablePosition.Y),
-	})
+	game.Players = append(game.Players, player)
+	game.PlayersByChunk[zeroPos] = append(game.PlayersByChunk[zeroPos], player)
+
+	shared.SendPacket(conn, &s2c.LoginAccepted{})
 }

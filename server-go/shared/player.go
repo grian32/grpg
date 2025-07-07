@@ -1,13 +1,14 @@
 package shared
 
-import "net"
+import (
+	"net"
+	"server/util"
+)
 
 type Player struct {
-	X uint32
-	Y uint32
+	Pos util.Vector2I
 	// might not need these will see how design pans out
-	ChunkX uint32
-	ChunkY uint32
-	Name   string
-	Conn   net.Conn
+	ChunkPos util.Vector2I
+	Name     string
+	Conn     net.Conn
 }

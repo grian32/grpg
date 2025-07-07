@@ -3,11 +3,10 @@ package c2s
 import (
 	"grpg/data-go/gbuf"
 	"server/shared"
-	"server/util"
 )
 
 type Packet interface {
-	Handle(buf *gbuf.GBuf, game *shared.Game, playerPos util.Vector2I)
+	Handle(buf *gbuf.GBuf, game *shared.Game, playerPos int)
 }
 
 type PacketData struct {

@@ -5,13 +5,12 @@ import (
 	"grpg/data-go/gbuf"
 	"log"
 	"server/shared"
-	"server/util"
 )
 
 type Move struct {
 }
 
-func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, playerPos util.Vector2I) {
+func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, playerPos int) {
 	newX, err1 := buf.ReadInt32()
 	newY, err2 := buf.ReadInt32()
 
@@ -21,6 +20,6 @@ func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, playerPos util.Vector2I
 	}
 
 	player := game.Players[playerPos]
-	player.X = uint32(newX)
-	player.Y = uint32(newY)
+	player.Pos.X = uint32(newX)
+	player.Pos.Y = uint32(newY)
 }

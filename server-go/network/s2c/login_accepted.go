@@ -5,8 +5,6 @@ import (
 )
 
 type LoginAccepted struct {
-	InitialX int32
-	InitialY int32
 }
 
 func (l *LoginAccepted) Opcode() byte {
@@ -14,6 +12,5 @@ func (l *LoginAccepted) Opcode() byte {
 }
 
 func (l *LoginAccepted) Handle(buf *gbuf.GBuf) {
-	buf.WriteInt32(l.InitialX)
-	buf.WriteInt32(l.InitialY)
+	// noop
 }

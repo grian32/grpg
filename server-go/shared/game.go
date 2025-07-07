@@ -25,16 +25,3 @@ func SendPacket(conn net.Conn, packet s2c.Packet) {
 		return
 	}
 }
-
-func (g *Game) FindFirstAvailablePosition() util.Vector2I {
-	for y := range g.MaxY + 1 {
-		for x := range g.MaxX + 1 {
-			pos := util.Vector2I{X: x, Y: y}
-			if _, exists := g.Players[pos]; !exists {
-				return pos
-			}
-		}
-	}
-
-	return util.Vector2I{X: 0, Y: 0}
-}

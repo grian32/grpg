@@ -16,7 +16,7 @@ type PacketData struct {
 }
 
 var (
-	LoginAcceptedData = PacketData{Opcode: 0x01, Length: 8, Handler: &LoginAccepted{}}
+	LoginAcceptedData = PacketData{Opcode: 0x01, Length: 0, Handler: &LoginAccepted{}}
 	LoginRejectedData = PacketData{Opcode: 0x02, Length: 0, Handler: &LoginRejected{}}
 	PlayersUpdateData = PacketData{Opcode: 0x03, Length: -1, Handler: &PlayersUpdate{}}
 )
