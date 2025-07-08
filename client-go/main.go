@@ -4,6 +4,7 @@ import (
 	"client/game"
 	"client/network"
 	"client/shared"
+	"client/util"
 	"flag"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -15,6 +16,7 @@ var (
 		TileSize:        64,
 		MaxX:            0,
 		MaxY:            0,
+		CollisionMap:    make(map[util.Vector2I]struct{}),
 		SceneManager:    &shared.GSceneManager{},
 		Player:          &shared.Player{X: 0, Y: 0, RealX: 0, RealY: 0, Name: ""},
 		OtherPlayers:    []shared.Player{},

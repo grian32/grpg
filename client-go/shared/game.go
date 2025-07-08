@@ -2,6 +2,7 @@ package shared
 
 import (
 	"client/network/c2s"
+	"client/util"
 	"grpg/data-go/gbuf"
 	"net"
 )
@@ -11,6 +12,7 @@ type Game struct {
 	ScreenHeight    int32
 	MaxX            uint16
 	MaxY            uint16
+	CollisionMap    map[util.Vector2I]struct{}
 	TileSize        int32
 	SceneManager    *GSceneManager
 	Player          *Player

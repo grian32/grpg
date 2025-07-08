@@ -81,6 +81,15 @@ func (p *Playground) Setup() {
 
 			p.Maps[chunkPos] = tiles
 
+			for idx, tile := range tiles {
+				if tile.Type == grpgtex.OBJ {
+					x := (idx % 16) + (int(header.ChunkX) * 16)
+					y := (idx / 16) + (int(header.ChunkY) * 16)
+
+					p.Game.CollisionMap[util.Vector2I{X: int32(x), Y: int32(y)}] = struct{}{}
+				}
+			}
+
 			if ((header.ChunkX+1)*16)-1 > p.Game.MaxX {
 				p.Game.MaxX = ((header.ChunkX + 1) * 16) - 1
 			}
@@ -88,6 +97,7 @@ func (p *Playground) Setup() {
 			if ((header.ChunkY+1)*16)-1 > p.Game.MaxY {
 				p.Game.MaxY = ((header.ChunkY + 1) * 16) - 1
 			}
+			fmt.Printf("max x%d/y%d", p.Game.MaxX, p.Game.MaxY)
 		}
 	}
 }
