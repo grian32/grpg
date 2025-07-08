@@ -3,17 +3,85 @@ package game
 import (
 	"client/shared"
 	"client/util"
+	"cmp"
 	"fmt"
 	rl "github.com/gen2brain/raylib-go/raylib"
+	"grpg/data-go/gbuf"
+	"grpg/data-go/grpgmap"
+	"grpg/data-go/grpgtex"
+	"io"
+	"log"
+	"os"
+	"path/filepath"
 )
 
 type Playground struct {
-	Font rl.Font
-	Game *shared.Game
+	Font     rl.Font
+	Game     *shared.Game
+	Textures map[uint16]rl.Texture2D
+	Maps     map[util.Vector2I][256]grpgmap.Tile
 }
 
 func (p *Playground) Setup() {
 	p.Font = rl.LoadFont("./assets/font.ttf")
+
+	p.Textures = make(map[uint16]rl.Texture2D)
+	p.Maps = make(map[util.Vector2I][256]grpgmap.Tile)
+
+	grpgTexFile, err1 := os.Open("../../grpg-assets/textures.pak")
+	grpgTexBytes, err2 := io.ReadAll(grpgTexFile)
+
+	buf := gbuf.NewGBuf(grpgTexBytes)
+	header := grpgtex.ReadHeader(buf)
+	if string(header.Magic[:]) != "GRPGTEX\x00" {
+		log.Fatal("File is not GRPGTEX file.")
+	}
+
+	log.Printf("Succesfully loaded GRPGTEX file with version %d\n", header.Version)
+
+	textures := grpgtex.ReadTextures(buf)
+	if err := cmp.Or(err1, err2); err != nil {
+		log.Fatal("Failed reading GRPGTEX file")
+	}
+
+	for _, tex := range textures {
+		rlImage := rl.LoadImageFromMemory(".png", tex.PNGBytes, int32(len(tex.PNGBytes)))
+		rlTex := rl.LoadTextureFromImage(rlImage)
+
+		p.Textures[tex.InternalIdInt] = rlTex
+	}
+
+	dir := "../../grpg-assets/maps/"
+	entries, err := os.ReadDir(dir)
+
+	if err != nil {
+		log.Fatal("Error reading maps directory")
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			fullPath := filepath.Join(dir, entry.Name())
+
+			file, err1 := os.Open(fullPath)
+			bytes, err2 := io.ReadAll(file)
+
+			if err := cmp.Or(err1, err2); err != nil {
+				log.Fatalf("Error reading map file, %v", err)
+			}
+
+			buf := gbuf.NewGBuf(bytes)
+			header := grpgmap.ReadHeader(buf)
+
+			if string(header.Magic[:]) != "GRPGMAP\x00" {
+				log.Fatalf("File %s isn't GRPGMAP", fullPath)
+			}
+
+			tiles := grpgmap.ReadTiles(buf)
+			chunkPos := util.Vector2I{X: int32(header.ChunkX), Y: int32(header.ChunkY)}
+
+			p.Maps[chunkPos] = tiles
+		}
+	}
 }
 
 func (p *Playground) Cleanup() {
@@ -23,7 +91,6 @@ func (p *Playground) Cleanup() {
 func (p *Playground) Loop() {
 	player := p.Game.Player
 
-	// TODO: figure out some way to send remove duplicate packet code
 	if rl.IsKeyPressed(rl.KeyW) {
 		player.SendMovePacket(p.Game, player.X, player.Y-1)
 	} else if rl.IsKeyPressed(rl.KeyS) {
@@ -71,22 +138,14 @@ func (p *Playground) Render() {
 }
 
 func drawWorld(p *Playground) {
-	for x := range 16 {
-		for y := range 16 {
-			dx := int32(x) * p.Game.TileSize
-			dy := int32(y) * p.Game.TileSize
+	mapTiles := p.Maps[util.Vector2I{X: p.Game.Player.ChunkX, Y: p.Game.Player.ChunkY}]
 
-			if y%2 == 0 || x%2 == 0 {
-				rl.DrawRectangle(dx, dy, p.Game.TileSize, p.Game.TileSize, rl.White)
-			} else {
-				rl.DrawRectangle(dx, dy, p.Game.TileSize, p.Game.TileSize, rl.Gray)
-			}
-			rl.DrawRectangleLines(dx, dy, p.Game.TileSize, p.Game.TileSize, rl.Black)
+	for i := range 256 {
+		dx := int32(i%16) * p.Game.TileSize
+		dy := int32(i/16) * p.Game.TileSize
 
-			if p.Game.Player.ChunkY == 1 && x == 8 && y == 8 {
-				rl.DrawRectangle(dx, dy, p.Game.TileSize, p.Game.TileSize, rl.Red)
-			}
-		}
+		tex := p.Textures[mapTiles[i].InternalId]
+		rl.DrawTexture(tex, dx, dy, rl.White)
 	}
 }
 
