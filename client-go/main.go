@@ -13,6 +13,8 @@ var (
 		ScreenWidth:     960,
 		ScreenHeight:    960,
 		TileSize:        64,
+		MaxX:            0,
+		MaxY:            0,
 		SceneManager:    &shared.GSceneManager{},
 		Player:          &shared.Player{X: 0, Y: 0, RealX: 0, RealY: 0, Name: ""},
 		OtherPlayers:    []shared.Player{},

@@ -13,13 +13,6 @@ type Player struct {
 }
 
 func (p *Player) Move(newX, newY int32, game *Game) {
-	// TODO: send packet
-	// TODO: bounds after map loading
-	// basic bounds checking for testing purposes
-	if newX > 15 || newX < 0 || newY > 31 || newY < 0 {
-		return
-	}
-
 	p.X = newX
 	p.Y = newY
 
@@ -31,6 +24,10 @@ func (p *Player) Move(newX, newY int32, game *Game) {
 }
 
 func (p *Player) SendMovePacket(game *Game, x, y int32) {
+	if x > int32(game.MaxX) || x < 0 || y > int32(game.MaxY) || y < 0 {
+		return
+	}
+
 	SendPacket(game.Conn, &c2s.MovePacket{
 		X: x,
 		Y: y,

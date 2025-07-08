@@ -80,6 +80,14 @@ func (p *Playground) Setup() {
 			chunkPos := util.Vector2I{X: int32(header.ChunkX), Y: int32(header.ChunkY)}
 
 			p.Maps[chunkPos] = tiles
+
+			if ((header.ChunkX+1)*16)-1 > p.Game.MaxX {
+				p.Game.MaxX = ((header.ChunkX + 1) * 16) - 1
+			}
+
+			if ((header.ChunkY+1)*16)-1 > p.Game.MaxY {
+				p.Game.MaxY = ((header.ChunkY + 1) * 16) - 1
+			}
 		}
 	}
 }
