@@ -3,8 +3,8 @@ package c2s
 import "grpg/data-go/gbuf"
 
 type MovePacket struct {
-	X int32
-	Y int32
+	X uint32
+	Y uint32
 }
 
 func (m *MovePacket) Opcode() byte {
@@ -12,6 +12,6 @@ func (m *MovePacket) Opcode() byte {
 }
 
 func (m *MovePacket) Handle(buf *gbuf.GBuf) {
-	buf.WriteInt32(m.X)
-	buf.WriteInt32(m.Y)
+	buf.WriteUint32(m.X)
+	buf.WriteUint32(m.Y)
 }

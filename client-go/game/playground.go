@@ -97,7 +97,6 @@ func (p *Playground) Setup() {
 			if ((header.ChunkY+1)*16)-1 > p.Game.MaxY {
 				p.Game.MaxY = ((header.ChunkY + 1) * 16) - 1
 			}
-			fmt.Printf("max x%d/y%d", p.Game.MaxX, p.Game.MaxY)
 		}
 	}
 }

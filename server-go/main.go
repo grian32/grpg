@@ -19,12 +19,14 @@ import (
 var (
 	g = &shared.Game{
 		Players: []*shared.Player{},
-		MaxX:    15,
-		MaxY:    31,
+		MaxX:    0,
+		MaxY:    0,
 	}
 )
 
 func main() {
+	LoadCollisionMaps(g)
+
 	listener, err := net.Listen("tcp", ":4422")
 	if err != nil {
 		log.Fatal("Failed to start: ", err)
