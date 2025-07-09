@@ -14,6 +14,7 @@ import (
 	"server/network/s2c"
 	"server/shared"
 	"server/util"
+	"time"
 )
 
 var (
@@ -24,6 +25,12 @@ var (
 	}
 )
 
+type ChanPacket struct {
+	Bytes      []byte
+	PlayerPos  int
+	PacketData c2s.PacketData
+}
+
 func main() {
 	LoadCollisionMaps(g)
 
@@ -31,6 +38,10 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to start: ", err)
 	}
+
+	packets := make(chan ChanPacket, 1000)
+
+	go cycle(packets)
 
 	defer listener.Close()
 	log.Println("Listening on 127.0.0.1:4422")
@@ -42,11 +53,34 @@ func main() {
 			continue
 		}
 
-		go handleClient(conn, g)
+		go handleClient(conn, g, packets)
 	}
 }
 
-func handleClient(conn net.Conn, game *shared.Game) {
+func cycle(packets chan ChanPacket) {
+	for {
+		expectedTime := time.Now().Add(60 * time.Millisecond)
+
+		// dodgy label hack to break out properly but wcyd
+	processPackets:
+		for {
+			select {
+			case packet := <-packets:
+				buf := gbuf.NewGBuf(packet.Bytes)
+				packet.PacketData.Handler.Handle(buf, g, packet.PlayerPos)
+			default:
+				break processPackets
+			}
+		}
+
+		diff := expectedTime.Sub(time.Now())
+		if diff > 0 {
+			time.Sleep(diff)
+		}
+	}
+}
+
+func handleClient(conn net.Conn, game *shared.Game, packets chan ChanPacket) {
 	defer conn.Close()
 	clientAddr := conn.RemoteAddr().String()
 
@@ -55,12 +89,8 @@ func handleClient(conn net.Conn, game *shared.Game) {
 	reader := bufio.NewReader(conn)
 
 	for {
-		for _, pl := range game.Players {
-			fmt.Printf("%v @ %d, %d;", pl.Name, pl.Pos.X, pl.Pos.Y)
-		}
-		fmt.Println()
-
 		opcode, err := reader.ReadByte()
+		fmt.Println(opcode)
 		if err != nil {
 			log.Printf("Failed to read packet opcode: %v, Conn lost.\n", err)
 			// TODO: remove player
@@ -82,8 +112,6 @@ func handleClient(conn net.Conn, game *shared.Game) {
 			return
 		}
 
-		buf := gbuf.NewGBuf(bytes)
-
 		var playerPos = -1
 
 		for idx, p := range game.Players {
@@ -97,7 +125,12 @@ func handleClient(conn net.Conn, game *shared.Game) {
 			return
 		}
 
-		packetData.Handler.Handle(buf, game, playerPos)
+		//packetData.Handler.Handle(buf, game, playerPos)
+		packets <- ChanPacket{
+			Bytes:      bytes,
+			PlayerPos:  playerPos,
+			PacketData: packetData,
+		}
 	}
 }
 
