@@ -93,7 +93,24 @@ func handleClient(conn net.Conn, game *shared.Game, packets chan ChanPacket) {
 		fmt.Println(opcode)
 		if err != nil {
 			log.Printf("Failed to read packet opcode: %v, Conn lost.\n", err)
-			// TODO: remove player
+			playerPos := -1
+			var playerChunk util.Vector2I
+			for idx, p := range game.Players {
+				if p.Conn == conn {
+					playerPos = idx
+					playerChunk = p.ChunkPos
+					break
+				}
+			}
+
+			if playerPos == -1 {
+				log.Printf("Couldn't find player to remove after losing connection.")
+			} else {
+				game.Players[playerPos] = game.Players[len(game.Players)-1]
+				game.Players = game.Players[:len(game.Players)-1]
+				network.UpdatePlayersByChunk(playerChunk, game)
+			}
+
 			return
 		}
 
