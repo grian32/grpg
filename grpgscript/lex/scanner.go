@@ -56,30 +56,31 @@ func (s *Scanner) ScanToken() {
 	token, exists := oneLengthTokenMap[char]
 	if exists {
 		s.AddToken(token, nil)
-	} else {
-		switch char {
-		case '!':
-			s.AddToken(s.IfNextIsT('=', BangEqual, Bang), nil)
-		case '=':
-			s.AddToken(s.IfNextIsT('=', EqualEqual, Equal), nil)
-		case '>':
-			s.AddToken(s.IfNextIsT('=', GreaterEqual, Greater), nil)
-		case '<':
-			s.AddToken(s.IfNextIsT('=', LessEqual, Less), nil)
-		case '/':
-			if s.NextIs('/') {
-				for s.Peek() != '\n' && !s.IsAtEnd() {
-					s.Advance()
-				}
-			} else {
-				s.AddToken(Slash, nil)
+		return
+	}
+
+	switch char {
+	case '!':
+		s.AddToken(s.IfNextIsT('=', BangEqual, Bang), nil)
+	case '=':
+		s.AddToken(s.IfNextIsT('=', EqualEqual, Equal), nil)
+	case '>':
+		s.AddToken(s.IfNextIsT('=', GreaterEqual, Greater), nil)
+	case '<':
+		s.AddToken(s.IfNextIsT('=', LessEqual, Less), nil)
+	case '/':
+		if s.NextIs('/') {
+			for s.Peek() != '\n' && !s.IsAtEnd() {
+				s.Advance()
 			}
-		case ' ', '\r', '\t':
-		case '\n':
-			s.line++
-		default:
-			log.Printf("Unrecognized char %c, %d", char, s.line)
+		} else {
+			s.AddToken(Slash, nil)
 		}
+	case ' ', '\r', '\t':
+	case '\n':
+		s.line++
+	default:
+		log.Printf("Unrecognized char %c, %d", char, s.line)
 	}
 }
 
