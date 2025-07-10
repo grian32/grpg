@@ -38,6 +38,59 @@ func TestParseSymbols(t *testing.T) {
 	}
 }
 
+func TestParseDoubleSymbols(t *testing.T) {
+	file, err1 := os.Open("../testdata/doublesymbols.grpgscript")
+	bytes, err2 := io.ReadAll(file)
+	if err := cmp.Or(err1, err2); err != nil {
+		t.Errorf("Error reading symbols file: %v", err)
+	}
+
+	scanner := NewScanner(string(bytes))
+	scanner.ScanTokens()
+
+	expectedTokenTypes := []Token{
+		{Type: BangEqual, Repr: "!=", Literal: nil, Line: 1},
+		{Type: EqualEqual, Repr: "==", Literal: nil, Line: 1},
+		{Type: GreaterEqual, Repr: ">=", Literal: nil, Line: 1},
+		{Type: LessEqual, Repr: "<=", Literal: nil, Line: 1},
+		{Type: Equal, Repr: "=", Literal: nil, Line: 1},
+		{Type: Less, Repr: "<", Literal: nil, Line: 1},
+		{Type: Greater, Repr: ">", Literal: nil, Line: 1},
+		{Type: Bang, Repr: "!", Literal: nil, Line: 1},
+		{Type: Eof, Repr: "", Literal: nil, Line: 1},
+	}
+
+	output := scanner.Tokens
+
+	if !tokenSliceEquals(expectedTokenTypes, output) {
+		t.Errorf("Wanted %v, got %v", expectedTokenTypes, output)
+	}
+}
+
+func TestParseSymbolsComments(t *testing.T) {
+	file, err1 := os.Open("../testdata/symbolscomments.grpgscript")
+	bytes, err2 := io.ReadAll(file)
+	if err := cmp.Or(err1, err2); err != nil {
+		t.Errorf("Error reading symbols file: %v", err)
+	}
+
+	scanner := NewScanner(string(bytes))
+	scanner.ScanTokens()
+
+	expectedTokenTypes := []Token{
+		{Type: BangEqual, Repr: "!=", Literal: nil, Line: 2},
+		{Type: Bang, Repr: "!", Literal: nil, Line: 3},
+		{Type: Bang, Repr: "!", Literal: nil, Line: 4},
+		{Type: Eof, Repr: "", Literal: nil, Line: 4},
+	}
+
+	output := scanner.Tokens
+
+	if !tokenSliceEquals(expectedTokenTypes, output) {
+		t.Errorf("Wanted %v, got %v", expectedTokenTypes, output)
+	}
+}
+
 func tokenSliceEquals(a, b []Token) bool {
 	if len(a) != len(b) {
 		return false

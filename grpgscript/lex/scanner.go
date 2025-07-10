@@ -1,6 +1,8 @@
 package lex
 
-import "log"
+import (
+	"log"
+)
 
 type Scanner struct {
 	Source  string
@@ -48,14 +50,36 @@ func (s *Scanner) ScanTokens() {
 }
 
 func (s *Scanner) ScanToken() {
-	char := s.Source[s.current]
-	s.current += 1
+	char := s.Advance()
 
-	token, exists := oneLengthTokenMap[rune(char)]
-	if !exists {
-		log.Printf("Invalid Character: %c", char)
-	} else {
+	// quick lookup for single char tokens
+	token, exists := oneLengthTokenMap[char]
+	if exists {
 		s.AddToken(token, nil)
+	} else {
+		switch char {
+		case '!':
+			s.AddToken(s.IfNextIsT('=', BangEqual, Bang), nil)
+		case '=':
+			s.AddToken(s.IfNextIsT('=', EqualEqual, Equal), nil)
+		case '>':
+			s.AddToken(s.IfNextIsT('=', GreaterEqual, Greater), nil)
+		case '<':
+			s.AddToken(s.IfNextIsT('=', LessEqual, Less), nil)
+		case '/':
+			if s.NextIs('/') {
+				for s.Peek() != '\n' && !s.IsAtEnd() {
+					s.Advance()
+				}
+			} else {
+				s.AddToken(Slash, nil)
+			}
+		case ' ', '\r', '\t':
+		case '\n':
+			s.line++
+		default:
+			log.Printf("Unrecognized char %c, %d", char, s.line)
+		}
 	}
 }
 
@@ -67,4 +91,46 @@ func (s *Scanner) AddToken(token TokenType, literal any) {
 		Literal: literal,
 		Line:    s.line,
 	})
+}
+
+func (s *Scanner) Advance() rune {
+	char := s.Source[s.current]
+	s.current += 1
+	return rune(char)
+}
+
+func (s *Scanner) IfNextIsT(next rune, t TokenType, f TokenType) TokenType {
+	if s.IsAtEnd() {
+		return f
+	}
+	if rune(s.Source[s.current]) != next {
+		return f
+	}
+
+	s.current += 1
+	return t
+}
+
+func (s *Scanner) NextIs(next rune) bool {
+	if s.IsAtEnd() {
+		return false
+	}
+	if rune(s.Source[s.current]) != next {
+		return false
+	}
+
+	s.current += 1
+
+	return true
+}
+
+func (s *Scanner) Peek() rune {
+	if s.current <= s.start {
+		return '\000' // craft: = \0 java
+	}
+	return rune(s.Source[s.current])
+}
+
+func (s *Scanner) IsAtEnd() bool {
+	return s.current >= uint32(len(s.Source))
 }

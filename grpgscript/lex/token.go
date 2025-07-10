@@ -19,6 +19,15 @@ var tokenTypeToString = map[TokenType]string{
 	Slash:      "Slash",
 	Star:       "Star",
 
+	Bang:         "Bang",
+	BangEqual:    "BangEqual",
+	Equal:        "Equal",
+	EqualEqual:   "EqualEqual",
+	Greater:      "Greater",
+	GreaterEqual: "GreaterEqual",
+	Less:         "Less",
+	LessEqual:    "LessEqual",
+
 	Identifier: "Identifier",
 	String:     "String",
 	Int:        "Int",
@@ -56,6 +65,15 @@ const (
 	Semicolon
 	Slash
 	Star
+
+	Bang
+	BangEqual
+	Equal
+	EqualEqual
+	Greater
+	GreaterEqual
+	Less
+	LessEqual
 
 	Identifier
 	String
