@@ -1,0 +1,5 @@
+fnc helloWorld() : str {
+    return "Hello, world!\n";
+}
+
+printf("%s\n", helloWorld());
