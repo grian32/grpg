@@ -1,6 +1,7 @@
 package lex
 
 import (
+	"grpgscript/util"
 	"log"
 )
 
@@ -80,8 +81,20 @@ func (s *Scanner) ScanToken() {
 	case '\n':
 		s.line++
 	default:
-		log.Printf("Unrecognized char %c, %d", char, s.line)
+		if util.IsDigit(char) {
+			s.Int()
+		} else {
+			log.Printf("Unrecognized char %c, %d", char, s.line)
+		}
 	}
+}
+
+func (s *Scanner) Int() {
+	for util.IsDigit(s.Peek()) {
+		s.Advance()
+	}
+
+	s.AddToken(Int, s.Source[s.start:s.current])
 }
 
 func (s *Scanner) AddToken(token TokenType, literal any) {
@@ -126,7 +139,7 @@ func (s *Scanner) NextIs(next rune) bool {
 }
 
 func (s *Scanner) Peek() rune {
-	if s.current <= s.start {
+	if s.IsAtEnd() {
 		return '\000' // craft: = \0 java
 	}
 	return rune(s.Source[s.current])

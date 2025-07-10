@@ -12,6 +12,7 @@ var (
 	singleSymbols  []byte
 	doubleSymbols  []byte
 	symbolComments []byte
+	numbers        []byte
 )
 
 func init() {
@@ -36,6 +37,13 @@ func init() {
 		log.Fatalf("Error reading symbols comments file: %v", err)
 	}
 	symbolComments = bytes
+
+	file, err1 = os.Open("../testdata/numbers.grpgscript")
+	bytes, err2 = io.ReadAll(file)
+	if err := cmp.Or(err1, err2); err != nil {
+		log.Fatalf("Error reading symbols comments file: %v", err)
+	}
+	numbers = bytes
 }
 
 func BenchmarkSingleSymbols(b *testing.B) {
@@ -50,5 +58,10 @@ func BenchmarkDoubleSymbols(b *testing.B) {
 
 func BenchmarkSymbolsComments(b *testing.B) {
 	scanner := NewScanner(string(symbolComments))
+	scanner.ScanTokens()
+}
+
+func BenchmarkNumbers(b *testing.B) {
+	scanner := NewScanner(string(numbers))
 	scanner.ScanTokens()
 }

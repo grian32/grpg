@@ -91,6 +91,30 @@ func TestParseSymbolsComments(t *testing.T) {
 	}
 }
 
+func TestParseInt(t *testing.T) {
+	file, err1 := os.Open("../testdata/numbers.grpgscript")
+	bytes, err2 := io.ReadAll(file)
+	if err := cmp.Or(err1, err2); err != nil {
+		t.Errorf("Error reading symbols file: %v", err)
+	}
+
+	scanner := NewScanner(string(bytes))
+	scanner.ScanTokens()
+
+	expectedTokenTypes := []Token{
+		{Type: Int, Repr: "123456", Literal: 123456, Line: 1},
+		{Type: Int, Repr: "99999999999", Literal: 99999999999, Line: 2},
+		{Type: Int, Repr: "421124142", Literal: 421124142, Line: 3},
+		{Type: Eof, Repr: "", Literal: nil, Line: 3},
+	}
+
+	output := scanner.Tokens
+
+	if !tokenSliceEquals(expectedTokenTypes, output) {
+		t.Errorf("Wanted %v, got %v", expectedTokenTypes, output)
+	}
+}
+
 func tokenSliceEquals(a, b []Token) bool {
 	if len(a) != len(b) {
 		return false
