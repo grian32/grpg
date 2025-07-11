@@ -2,6 +2,7 @@ package lex
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type TokenType int
@@ -99,10 +100,11 @@ type Token struct {
 	Line    uint32
 }
 
+// Equal should only be used for testing as it uses reflect.deepequal
 func (t *Token) Equal(other Token) bool {
-	return t.Type == other.Type || t.Repr == other.Repr || t.Line == other.Line || t.Literal == other.Literal
+	return t.Type == other.Type && t.Repr == other.Repr && t.Line == other.Line && reflect.DeepEqual(t.Literal, other.Literal)
 }
 
 func (t *Token) String() string {
-	return fmt.Sprintf("%s='%s'", t.Type.String(), t.Repr)
+	return fmt.Sprintf("%s='%s'&%T(%s)@%d", t.Type.String(), t.Repr, t.Literal, t.Literal, t.Line)
 }

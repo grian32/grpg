@@ -127,7 +127,7 @@ func TestParseStrings(t *testing.T) {
 
 	expectedTokenTypes := []Token{
 		{Type: String, Repr: "\"hello this is a string\"", Literal: "hello this is a string", Line: 1},
-		{Type: String, Repr: "\"hello\nthis\nis\na\nmultiline\nstring\"", Literal: "hello\nthis\nis\na\nmultiline\nstring", Line: 2},
+		{Type: String, Repr: "\"hello\nthis\nis\na\nmultiline\nstring\"", Literal: "hello\nthis\nis\na\nmultiline\nstring", Line: 7},
 		{Type: Eof, Repr: "", Literal: nil, Line: 8},
 	}
 
