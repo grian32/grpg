@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"grpgscript/util"
 	"log"
+	"strconv"
 )
 
 type Scanner struct {
@@ -115,7 +116,12 @@ func (s *Scanner) Int() {
 		s.Advance()
 	}
 
-	s.AddToken(Int, s.Source[s.start:s.current])
+	value, err := strconv.Atoi(s.Source[s.start:s.current])
+	if err != nil {
+		fmt.Printf("Error converting integer to string @ line %d", s.line)
+		return
+	}
+	s.AddToken(Int, value)
 }
 
 func (s *Scanner) AddToken(token TokenType, literal any) {
