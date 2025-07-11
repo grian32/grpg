@@ -2,6 +2,7 @@ package lex
 
 import (
 	"cmp"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -13,55 +14,55 @@ var (
 	doubleSymbols  []byte
 	symbolComments []byte
 	numbers        []byte
+	strings        []byte
 )
 
 func init() {
-	// TODO: surely i can abstract this somehow :S
-	file, err1 := os.Open("../testdata/symbols.grpgscript")
-	bytes, err2 := io.ReadAll(file)
-	if err := cmp.Or(err1, err2); err != nil {
-		log.Fatalf("Error reading symbols file: %v", err)
+	files := []string{
+		"../testdata/symbols.grpgscript",
+		"../testdata/doublesymbols.grpgscript",
+		"../testdata/symbolscomments.grpgscript",
+		"../testdata/numbers.grpgscript",
+		"../testdata/strings.grpgscript",
 	}
-	singleSymbols = bytes
+	// doesn't work if i store this in a struct, idk why :(
+	arrays := []*[]byte{
+		&singleSymbols,
+		&doubleSymbols,
+		&symbolComments,
+		&numbers,
+		&strings,
+	}
 
-	file, err1 = os.Open("../testdata/doublesymbols.grpgscript")
-	bytes, err2 = io.ReadAll(file)
-	if err := cmp.Or(err1, err2); err != nil {
-		log.Fatalf("Error reading double symbols file: %v", err)
+	for idx, name := range files {
+		file, err1 := os.Open(name)
+		bytes, err2 := io.ReadAll(file)
+		if err := cmp.Or(err1, err2); err != nil {
+			log.Fatalf("Error reading %s file: %v", name, err)
+		}
+		// required to modify the arr
+		*arrays[idx] = bytes
 	}
-	doubleSymbols = bytes
 
-	file, err1 = os.Open("../testdata/symbolscomments.grpgscript")
-	bytes, err2 = io.ReadAll(file)
-	if err := cmp.Or(err1, err2); err != nil {
-		log.Fatalf("Error reading symbols comments file: %v", err)
-	}
-	symbolComments = bytes
-
-	file, err1 = os.Open("../testdata/numbers.grpgscript")
-	bytes, err2 = io.ReadAll(file)
-	if err := cmp.Or(err1, err2); err != nil {
-		log.Fatalf("Error reading symbols comments file: %v", err)
-	}
-	numbers = bytes
+	fmt.Println(singleSymbols)
 }
 
-func BenchmarkSingleSymbols(b *testing.B) {
-	scanner := NewScanner(string(singleSymbols))
-	scanner.ScanTokens()
-}
+func BenchmarkLex(b *testing.B) {
+	benches := []struct {
+		name string
+		data string
+	}{
+		{"SingleSymbols", string(singleSymbols)},
+		{"DoubleSymbols", string(doubleSymbols)},
+		{"SymbolsComments", string(symbolComments)},
+		{"Numbers", string(numbers)},
+		{"Strings", string(strings)},
+	}
 
-func BenchmarkDoubleSymbols(b *testing.B) {
-	scanner := NewScanner(string(doubleSymbols))
-	scanner.ScanTokens()
-}
-
-func BenchmarkSymbolsComments(b *testing.B) {
-	scanner := NewScanner(string(symbolComments))
-	scanner.ScanTokens()
-}
-
-func BenchmarkNumbers(b *testing.B) {
-	scanner := NewScanner(string(numbers))
-	scanner.ScanTokens()
+	for _, bench := range benches {
+		b.Run(bench.name, func(b *testing.B) {
+			scanner := NewScanner(bench.data)
+			scanner.ScanTokens()
+		})
+	}
 }
