@@ -2,6 +2,7 @@ package gbuf
 
 import (
 	"bytes"
+	"cmp"
 	"testing"
 )
 
@@ -309,8 +310,10 @@ func TestGBuf_Bytes(t *testing.T) {
 func TestGBuf_ReadByte(t *testing.T) {
 	buf := NewGBuf([]byte{0x00, 0x01})
 
-	firstByte, err := buf.ReadByte()
-	secondByte, err := buf.ReadByte()
+	firstByte, err1 := buf.ReadByte()
+	secondByte, err2 := buf.ReadByte()
+
+	err := cmp.Or(err1, err2)
 
 	if firstByte != 0x00 || secondByte != 0x01 || err != nil {
 		t.Errorf("GBuf_ReadByte()=%b, %b & %v want match for %b, %b", firstByte, secondByte, err, 0x00, 0x01)
