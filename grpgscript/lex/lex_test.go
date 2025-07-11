@@ -7,17 +7,9 @@ import (
 	"testing"
 )
 
-func TestParseSymbols(t *testing.T) {
-	file, err1 := os.Open("../testdata/symbols.grpgscript")
-	bytes, err2 := io.ReadAll(file)
-	if err := cmp.Or(err1, err2); err != nil {
-		t.Errorf("Error reading symbols file: %v", err)
-	}
-
-	scanner := NewScanner(string(bytes))
-	scanner.ScanTokens()
-
-	expectedTokenTypes := []Token{
+// testdata
+var (
+	symbolsData = []Token{
 		{Type: LeftParen, Repr: "(", Literal: nil, Line: 1},
 		{Type: LeftBrace, Repr: "{", Literal: nil, Line: 1},
 		{Type: RightBrace, Repr: "}", Literal: nil, Line: 1},
@@ -30,25 +22,7 @@ func TestParseSymbols(t *testing.T) {
 		{Type: Semicolon, Repr: ";", Literal: nil, Line: 1},
 		{Type: Eof, Repr: "", Literal: nil, Line: 1},
 	}
-
-	output := scanner.Tokens
-
-	if !tokenSliceEquals(expectedTokenTypes, output) {
-		t.Errorf("Wanted %v, got %v", expectedTokenTypes, output)
-	}
-}
-
-func TestParseDoubleSymbols(t *testing.T) {
-	file, err1 := os.Open("../testdata/doublesymbols.grpgscript")
-	bytes, err2 := io.ReadAll(file)
-	if err := cmp.Or(err1, err2); err != nil {
-		t.Errorf("Error reading symbols file: %v", err)
-	}
-
-	scanner := NewScanner(string(bytes))
-	scanner.ScanTokens()
-
-	expectedTokenTypes := []Token{
+	doubleSymbolsData = []Token{
 		{Type: BangEqual, Repr: "!=", Literal: nil, Line: 1},
 		{Type: EqualEqual, Repr: "==", Literal: nil, Line: 1},
 		{Type: GreaterEqual, Repr: ">=", Literal: nil, Line: 1},
@@ -59,86 +33,59 @@ func TestParseDoubleSymbols(t *testing.T) {
 		{Type: Bang, Repr: "!", Literal: nil, Line: 1},
 		{Type: Eof, Repr: "", Literal: nil, Line: 1},
 	}
-
-	output := scanner.Tokens
-
-	if !tokenSliceEquals(expectedTokenTypes, output) {
-		t.Errorf("Wanted %v, got %v", expectedTokenTypes, output)
-	}
-}
-
-func TestParseSymbolsComments(t *testing.T) {
-	file, err1 := os.Open("../testdata/symbolscomments.grpgscript")
-	bytes, err2 := io.ReadAll(file)
-	if err := cmp.Or(err1, err2); err != nil {
-		t.Errorf("Error reading symbols file: %v", err)
-	}
-
-	scanner := NewScanner(string(bytes))
-	scanner.ScanTokens()
-
-	expectedTokenTypes := []Token{
+	symbolsCommentsData = []Token{
 		{Type: BangEqual, Repr: "!=", Literal: nil, Line: 2},
 		{Type: Bang, Repr: "!", Literal: nil, Line: 3},
 		{Type: Bang, Repr: "!", Literal: nil, Line: 4},
 		{Type: Eof, Repr: "", Literal: nil, Line: 4},
 	}
-
-	output := scanner.Tokens
-
-	if !tokenSliceEquals(expectedTokenTypes, output) {
-		t.Errorf("Wanted %v, got %v", expectedTokenTypes, output)
-	}
-}
-
-func TestParseInt(t *testing.T) {
-	file, err1 := os.Open("../testdata/numbers.grpgscript")
-	bytes, err2 := io.ReadAll(file)
-	if err := cmp.Or(err1, err2); err != nil {
-		t.Errorf("Error reading symbols file: %v", err)
-	}
-
-	scanner := NewScanner(string(bytes))
-	scanner.ScanTokens()
-
-	expectedTokenTypes := []Token{
+	intsData = []Token{
 		{Type: Int, Repr: "123456", Literal: 123456, Line: 1},
 		{Type: Int, Repr: "99999999999", Literal: 99999999999, Line: 2},
 		{Type: Int, Repr: "421124142", Literal: 421124142, Line: 3},
 		{Type: Eof, Repr: "", Literal: nil, Line: 3},
 	}
-
-	output := scanner.Tokens
-
-	if !tokenSliceEquals(expectedTokenTypes, output) {
-		t.Errorf("Wanted %v, got %v", expectedTokenTypes, output)
-	}
-}
-
-func TestParseStrings(t *testing.T) {
-	file, err1 := os.Open("../testdata/strings.grpgscript")
-	bytes, err2 := io.ReadAll(file)
-	if err := cmp.Or(err1, err2); err != nil {
-		t.Errorf("Error reading symbols file: %v", err)
-	}
-
-	scanner := NewScanner(string(bytes))
-	scanner.ScanTokens()
-
-	expectedTokenTypes := []Token{
+	stringsData = []Token{
 		{Type: String, Repr: "\"hello this is a string\"", Literal: "hello this is a string", Line: 1},
 		{Type: String, Repr: "\"hello\nthis\nis\na\nmultiline\nstring\"", Literal: "hello\nthis\nis\na\nmultiline\nstring", Line: 7},
 		{Type: Eof, Repr: "", Literal: nil, Line: 8},
 	}
+)
 
-	output := scanner.Tokens
+func TestLex(t *testing.T) {
+	tests := []struct {
+		name      string
+		inputFile string
+		expected  []Token
+	}{
+		{"ParseSymbols", "../testdata/symbols.grpgscript", symbolsData},
+		{"ParseDoubleSymbols", "../testdata/doublesymbols.grpgscript", doubleSymbolsData},
+		{"ParseSymbolsComments", "../testdata/symbolscomments.grpgscript", symbolsCommentsData},
+		{"ParseInt", "../testdata/numbers.grpgscript", intsData},
+		{"ParseStrings", "../testdata/strings.grpgscript", stringsData},
+	}
 
-	if !tokenSliceEquals(expectedTokenTypes, output) {
-		t.Errorf("Wanted %v, got %v", expectedTokenTypes, output)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			file, err1 := os.Open(test.inputFile)
+			bytes, err2 := io.ReadAll(file)
+
+			if err := cmp.Or(err1, err2); err != nil {
+				t.Errorf("Error reading file %s, on test %s: %v", test.inputFile, test.name, err)
+			}
+
+			scanner := NewScanner(string(bytes))
+			scanner.ScanTokens()
+
+			output := scanner.Tokens
+
+			if !tokenSliceEquals(test.expected, output) {
+				t.Errorf("Wanted %v, got %v on test %s", test.expected, output, test.name)
+			}
+		})
 	}
 }
 
-// FIXME: some part of this is cooked when it comes to comparing line numbers :S
 func tokenSliceEquals(a, b []Token) bool {
 	if len(a) != len(b) {
 		return false
