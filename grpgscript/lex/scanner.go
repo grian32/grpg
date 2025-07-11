@@ -1,6 +1,7 @@
 package lex
 
 import (
+	"fmt"
 	"grpgscript/util"
 	"log"
 )
@@ -69,6 +70,8 @@ func (s *Scanner) ScanToken() {
 		s.AddToken(s.IfNextIsT('=', GreaterEqual, Greater), nil)
 	case '<':
 		s.AddToken(s.IfNextIsT('=', LessEqual, Less), nil)
+	case '"':
+		s.String()
 	case '/':
 		if s.NextIs('/') {
 			for s.Peek() != '\n' && !s.IsAtEnd() {
@@ -87,6 +90,24 @@ func (s *Scanner) ScanToken() {
 			log.Printf("Unrecognized char %c, %d", char, s.line)
 		}
 	}
+}
+
+func (s *Scanner) String() {
+	for s.Peek() != '"' && !s.IsAtEnd() {
+		if s.Peek() == '\n' {
+			s.line++
+		}
+		s.Advance()
+	}
+
+	if s.IsAtEnd() {
+		fmt.Printf("Unterminated string %d", s.line)
+	}
+
+	s.Advance()
+
+	// TODO: escapes? maybe?
+	s.AddToken(String, s.Source[s.start+1:s.current-1])
 }
 
 func (s *Scanner) Int() {

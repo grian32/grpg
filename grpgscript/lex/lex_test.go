@@ -115,6 +115,30 @@ func TestParseInt(t *testing.T) {
 	}
 }
 
+func TestParseStrings(t *testing.T) {
+	file, err1 := os.Open("../testdata/strings.grpgscript")
+	bytes, err2 := io.ReadAll(file)
+	if err := cmp.Or(err1, err2); err != nil {
+		t.Errorf("Error reading symbols file: %v", err)
+	}
+
+	scanner := NewScanner(string(bytes))
+	scanner.ScanTokens()
+
+	expectedTokenTypes := []Token{
+		{Type: String, Repr: "\"hello this is a string\"", Literal: "hello this is a string", Line: 1},
+		{Type: String, Repr: "\"hello\nthis\nis\na\nmultiline\nstring\"", Literal: "hello\nthis\nis\na\nmultiline\nstring", Line: 2},
+		{Type: Eof, Repr: "", Literal: nil, Line: 8},
+	}
+
+	output := scanner.Tokens
+
+	if !tokenSliceEquals(expectedTokenTypes, output) {
+		t.Errorf("Wanted %v, got %v", expectedTokenTypes, output)
+	}
+}
+
+// FIXME: some part of this is cooked when it comes to comparing line numbers :S
 func tokenSliceEquals(a, b []Token) bool {
 	if len(a) != len(b) {
 		return false
