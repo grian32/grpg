@@ -68,7 +68,7 @@ func (buf *GBuf) ReadString() (string, error) {
 
 func (buf *GBuf) ReadByte() (byte, error) {
 	if buf.pos+1 > len(buf.slice) {
-		return 0x00, errors.New("not enough byte to read bytes")
+		return 0x00, errors.New("not enough space left in buf to read byte")
 	}
 	val := buf.slice[buf.pos]
 	buf.pos += 1
