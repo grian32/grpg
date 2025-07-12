@@ -1,5 +1,5 @@
 fnc helloWorld() {
-    return "Hello, world!\n";
+    return "Hello, world!\n"
 }
 
-printf("%s\n", helloWorld());
+printf("%s\n", helloWorld())

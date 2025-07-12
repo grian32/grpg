@@ -55,7 +55,6 @@ var (
 		{Type: LeftParen, Repr: "(", Literal: nil, Line: 1},
 		{Type: String, Repr: "\"Hello, world!\\n\"", Literal: "Hello, world!\\n", Line: 1},
 		{Type: RightParen, Repr: ")", Literal: nil, Line: 1},
-		{Type: Semicolon, Repr: ";", Literal: nil, Line: 1},
 		{Type: Eof, Repr: "", Literal: nil, Line: 1},
 	}
 	functionsData = []Token{
@@ -66,7 +65,6 @@ var (
 		{Type: LeftBrace, Repr: "{", Literal: nil, Line: 1},
 		{Type: Return, Repr: "return", Literal: nil, Line: 2},
 		{Type: String, Repr: "\"Hello, world!\\n\"", Literal: "Hello, world!\\n", Line: 2},
-		{Type: Semicolon, Repr: ";", Literal: nil, Line: 2},
 		{Type: RightBrace, Repr: "}", Literal: nil, Line: 3},
 		{Type: Identifier, Repr: "printf", Literal: nil, Line: 5},
 		{Type: LeftParen, Repr: "(", Literal: nil, Line: 5},
@@ -76,7 +74,6 @@ var (
 		{Type: LeftParen, Repr: "(", Literal: nil, Line: 5},
 		{Type: RightParen, Repr: ")", Literal: nil, Line: 5},
 		{Type: RightParen, Repr: ")", Literal: nil, Line: 5},
-		{Type: Semicolon, Repr: ";", Literal: nil, Line: 5},
 		{Type: Eof, Repr: "", Literal: nil, Line: 5},
 	}
 )
@@ -87,7 +84,7 @@ func TestLex(t *testing.T) {
 		inputFile string
 		expected  []Token
 	}{
-		{"ParseSymbols", "../testdata/symbols.grigscript", symbolsData},
+		{"ParseSymbols", "../testdata/symbols.grpgscript", symbolsData},
 		{"ParseDoubleSymbols", "../testdata/doublesymbols.grpgscript", doubleSymbolsData},
 		{"ParseSymbolsComments", "../testdata/symbolscomments.grpgscript", symbolsCommentsData},
 		{"ParseInt", "../testdata/numbers.grpgscript", intsData},
