@@ -14,6 +14,8 @@ var (
 	symbolComments []byte
 	numbers        []byte
 	strings        []byte
+	helloWorld     []byte
+	functions      []byte
 )
 
 func init() {
@@ -23,6 +25,8 @@ func init() {
 		"../testdata/symbolscomments.grpgscript",
 		"../testdata/numbers.grpgscript",
 		"../testdata/strings.grpgscript",
+		"../testdata/helloworld.grpgscript",
+		"../testdata/functions.grpgscript",
 	}
 	// doesn't work if i store this in a struct, idk why :(
 	arrays := []*[]byte{
@@ -31,6 +35,8 @@ func init() {
 		&symbolComments,
 		&numbers,
 		&strings,
+		&helloWorld,
+		&functions,
 	}
 
 	for idx, name := range files {
@@ -54,6 +60,8 @@ func BenchmarkLex(b *testing.B) {
 		{"SymbolsComments", string(symbolComments)},
 		{"Numbers", string(numbers)},
 		{"Strings", string(strings)},
+		{"HelloWorld", string(helloWorld)},
+		{"Functions", string(functions)},
 	}
 
 	for _, bench := range benches {
