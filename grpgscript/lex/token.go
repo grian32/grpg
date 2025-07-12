@@ -36,12 +36,14 @@ var tokenTypeToString = map[TokenType]string{
 	And:    "And",
 	Else:   "Else",
 	False:  "False",
+	True:   "True",
 	Fnc:    "Fnc",
 	If:     "If",
 	Nil:    "Nil",
 	Or:     "Or",
 	Return: "Return",
 	Var:    "Var",
+	For:    "For",
 
 	Eof: "Eof",
 }
