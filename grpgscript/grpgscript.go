@@ -23,5 +23,5 @@ func RunFile(path string) {
 func Run(bytes []byte) {
 	scanner := lex.NewScanner(string(bytes))
 	scanner.ScanTokens()
-	fmt.Println(scanner.Tokens)
+	fmt.Println(lex.TokenSliceString(scanner.Tokens))
 }

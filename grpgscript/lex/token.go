@@ -107,6 +107,27 @@ func (t *Token) Equal(other Token) bool {
 	return t.Type == other.Type && t.Repr == other.Repr && t.Line == other.Line && reflect.DeepEqual(t.Literal, other.Literal)
 }
 
-func (t *Token) String() string {
-	return fmt.Sprintf("%s='%s'&%T(%s)@%d", t.Type.String(), t.Repr, t.Literal, t.Literal, t.Line)
+// String should only be used for testing
+func (t Token) String() string {
+	var literalStr string
+	if t.Literal != nil {
+		literalStr = fmt.Sprintf("%v (%T)", t.Literal, t.Literal)
+	} else {
+		literalStr = "nil"
+	}
+
+	return fmt.Sprintf("{%v %q %s %d}", t.Type, t.Repr, literalStr, t.Line)
+}
+
+func TokenSliceString(slice []Token) string {
+	str := "["
+	for idx, token := range slice {
+		str += token.String()
+		if idx != len(slice)-1 {
+			str += ", "
+		}
+	}
+	str += "]"
+
+	return str
 }

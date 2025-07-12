@@ -74,7 +74,7 @@ var (
 		{Type: LeftParen, Repr: "(", Literal: nil, Line: 5},
 		{Type: RightParen, Repr: ")", Literal: nil, Line: 5},
 		{Type: RightParen, Repr: ")", Literal: nil, Line: 5},
-		{Type: Eof, Repr: "", Literal: nil, Line: 5},
+		{Type: Eof, Repr: "", Literal: nil, Line: 4},
 	}
 )
 
@@ -108,7 +108,7 @@ func TestLex(t *testing.T) {
 			output := scanner.Tokens
 
 			if !tokenSliceEquals(test.expected, output) {
-				t.Errorf("Wanted %v, got %v on test %s", test.expected, output, test.name)
+				t.Errorf("Wanted %v, got %v on test %s", TokenSliceString(test.expected), TokenSliceString(output), test.name)
 			}
 		})
 	}
