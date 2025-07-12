@@ -1,4 +1,4 @@
-fnc helloWorld() : str {
+fnc helloWorld() {
     return "Hello, world!\n";
 }
 

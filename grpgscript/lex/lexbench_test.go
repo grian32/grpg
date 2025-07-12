@@ -2,7 +2,6 @@ package lex
 
 import (
 	"cmp"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -43,8 +42,6 @@ func init() {
 		// required to modify the arr
 		*arrays[idx] = bytes
 	}
-
-	fmt.Println(singleSymbols)
 }
 
 func BenchmarkLex(b *testing.B) {

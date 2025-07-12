@@ -28,6 +28,20 @@ var oneLengthTokenMap = map[rune]TokenType{
 	'*': Star,
 }
 
+var reservedIdentifierMap = map[string]TokenType{
+	"and":    And,
+	"else":   Else,
+	"false":  False,
+	"true":   True,
+	"fnc":    Fnc,
+	"if":     If,
+	"nil":    Nil,
+	"or":     Or,
+	"return": Return,
+	"var":    Var,
+	"for":    For,
+}
+
 func NewScanner(src string) *Scanner {
 	return &Scanner{
 		Source: src,
@@ -87,9 +101,25 @@ func (s *Scanner) ScanToken() {
 	default:
 		if util.IsDigit(char) {
 			s.Int()
+		} else if util.IsAlpha(char) {
+			s.Literal()
 		} else {
 			log.Printf("Unrecognized char %c, %d", char, s.line)
 		}
+	}
+}
+
+func (s *Scanner) Literal() {
+	for util.IsAlphaNumeric(s.Peek()) {
+		s.Advance()
+	}
+
+	text := s.Source[s.start:s.current]
+	reservedType, exists := reservedIdentifierMap[text]
+	if !exists {
+		s.AddToken(Identifier, nil)
+	} else {
+		s.AddToken(reservedType, nil)
 	}
 }
 

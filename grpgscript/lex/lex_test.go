@@ -50,6 +50,35 @@ var (
 		{Type: String, Repr: "\"hello\nthis\nis\na\nmultiline\nstring\"", Literal: "hello\nthis\nis\na\nmultiline\nstring", Line: 7},
 		{Type: Eof, Repr: "", Literal: nil, Line: 8},
 	}
+	helloWorldData = []Token{
+		{Type: Identifier, Repr: "printf", Literal: nil, Line: 1},
+		{Type: LeftParen, Repr: "(", Literal: nil, Line: 1},
+		{Type: String, Repr: "\"Hello, world!\\n\"", Literal: "Hello, world!\\n", Line: 1},
+		{Type: RightParen, Repr: ")", Literal: nil, Line: 1},
+		{Type: Semicolon, Repr: ";", Literal: nil, Line: 1},
+		{Type: Eof, Repr: "", Literal: nil, Line: 1},
+	}
+	functionsData = []Token{
+		{Type: Fnc, Repr: "fnc", Literal: nil, Line: 1},
+		{Type: Identifier, Repr: "helloWorld", Literal: nil, Line: 1},
+		{Type: LeftParen, Repr: "(", Literal: nil, Line: 1},
+		{Type: RightParen, Repr: ")", Literal: nil, Line: 1},
+		{Type: LeftBrace, Repr: "{", Literal: nil, Line: 1},
+		{Type: Return, Repr: "return", Literal: nil, Line: 2},
+		{Type: String, Repr: "\"Hello, world!\\n\"", Literal: "Hello, world!\\n", Line: 2},
+		{Type: Semicolon, Repr: ";", Literal: nil, Line: 2},
+		{Type: RightBrace, Repr: "}", Literal: nil, Line: 3},
+		{Type: Identifier, Repr: "printf", Literal: nil, Line: 5},
+		{Type: LeftParen, Repr: "(", Literal: nil, Line: 5},
+		{Type: String, Repr: "\"%s\\n\"", Literal: "%s\\n", Line: 5},
+		{Type: Comma, Repr: ",", Literal: nil, Line: 5},
+		{Type: Identifier, Repr: "helloWorld", Line: 5},
+		{Type: LeftParen, Repr: "(", Literal: nil, Line: 5},
+		{Type: RightParen, Repr: ")", Literal: nil, Line: 5},
+		{Type: RightParen, Repr: ")", Literal: nil, Line: 5},
+		{Type: Semicolon, Repr: ";", Literal: nil, Line: 5},
+		{Type: Eof, Repr: "", Literal: nil, Line: 5},
+	}
 )
 
 func TestLex(t *testing.T) {
@@ -58,11 +87,13 @@ func TestLex(t *testing.T) {
 		inputFile string
 		expected  []Token
 	}{
-		{"ParseSymbols", "../testdata/symbols.grpgscript", symbolsData},
+		{"ParseSymbols", "../testdata/symbols.grigscript", symbolsData},
 		{"ParseDoubleSymbols", "../testdata/doublesymbols.grpgscript", doubleSymbolsData},
 		{"ParseSymbolsComments", "../testdata/symbolscomments.grpgscript", symbolsCommentsData},
 		{"ParseInt", "../testdata/numbers.grpgscript", intsData},
 		{"ParseStrings", "../testdata/strings.grpgscript", stringsData},
+		{"ParseHelloWorld", "../testdata/helloworld.grpgscript", helloWorldData},
+		{"ParseFunction", "../testdata/functions.grpgscript", functionsData},
 	}
 
 	for _, test := range tests {

@@ -83,12 +83,14 @@ const (
 	And
 	Else
 	False
+	True
 	Fnc
 	If
 	Nil
 	Or
 	Return
 	Var
+	For
 
 	Eof
 )
