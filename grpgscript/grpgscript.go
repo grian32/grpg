@@ -3,7 +3,7 @@ package main
 import (
 	"cmp"
 	"fmt"
-	"grpgscript/lex"
+	"grpgscript/lex_old"
 	"io"
 	"log"
 	"os"
@@ -21,7 +21,7 @@ func RunFile(path string) {
 }
 
 func Run(bytes []byte) {
-	scanner := lex.NewScanner(string(bytes))
+	scanner := lex_old.NewScanner(string(bytes))
 	scanner.ScanTokens()
-	fmt.Println(lex.TokenSliceString(scanner.Tokens))
+	fmt.Println(lex_old.TokenSliceString(scanner.Tokens))
 }
