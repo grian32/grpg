@@ -12,6 +12,16 @@ type Lexer struct {
 	ch           byte
 }
 
+var singleCharTokens = map[byte]token.TokenType{
+	';': token.SEMICOLON,
+	'(': token.LPAREN,
+	')': token.RPAREN,
+	'{': token.LBRACE,
+	'}': token.RBRACE,
+	',': token.COMMA,
+	'*': token.ASTERISK,
+}
+
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readChar()
@@ -42,47 +52,30 @@ func (l *Lexer) NextToken() token.Token {
 
 	l.skipWhitespace()
 
+	singleCharToken, exists := singleCharTokens[l.ch]
+	if exists {
+		tok = newToken(singleCharToken, l.ch)
+		// need to advance to the next char over, this behaviour is replicated below before returning.
+		// not necessary for ints/literals as those advance before returning on readint/literal
+		l.readChar()
+		return tok
+	}
+
 	switch l.ch {
 	case '=':
-		if l.peekChar() == '=' {
-			ch := l.ch
-			l.readChar()
-			tok = token.Token{Type: token.EQ, Literal: string(ch) + string(l.ch)}
-		} else {
-			tok = newToken(token.ASSIGN, l.ch)
-		}
-	case ';':
-		tok = newToken(token.SEMICOLON, l.ch)
-	case '(':
-		tok = newToken(token.LPAREN, l.ch)
-	case ')':
-		tok = newToken(token.RPAREN, l.ch)
-	case ',':
-		tok = newToken(token.COMMA, l.ch)
+		tok = l.ifNextIsDoubleLen('=', token.EQ, token.ASSIGN)
 	case '+':
 		tok = newToken(token.PLUS, l.ch)
 	case '-':
 		tok = newToken(token.MINUS, l.ch)
 	case '!':
-		if l.peekChar() == '=' {
-			ch := l.ch
-			l.readChar()
-			tok = token.Token{Type: token.NOT_EQ, Literal: string(ch) + string(l.ch)}
-		} else {
-			tok = newToken(token.BANG, l.ch)
-		}
+		tok = l.ifNextIsDoubleLen('=', token.NOT_EQ, token.BANG)
 	case '/':
 		tok = newToken(token.SLASH, l.ch)
-	case '*':
-		tok = newToken(token.ASTERISK, l.ch)
 	case '<':
 		tok = newToken(token.LT, l.ch)
 	case '>':
 		tok = newToken(token.GT, l.ch)
-	case '{':
-		tok = newToken(token.LBRACE, l.ch)
-	case '}':
-		tok = newToken(token.RBRACE, l.ch)
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -123,6 +116,16 @@ func (l *Lexer) readInt() string {
 	}
 
 	return l.input[startPos:l.position]
+}
+
+func (l *Lexer) ifNextIsDoubleLen(char byte, t, f token.TokenType) token.Token {
+	if l.peekChar() == char {
+		ch := l.ch
+		l.readChar()
+		return token.Token{Type: t, Literal: string(ch) + string(l.ch)}
+	} else {
+		return newToken(f, l.ch)
+	}
 }
 
 func (l *Lexer) skipWhitespace() {
