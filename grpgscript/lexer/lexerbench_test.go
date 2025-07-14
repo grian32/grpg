@@ -26,11 +26,13 @@ if (5 < 10) {
 10 == 10;
 10 != 9;
 `
-	l := New(input)
+	for b.Loop() {
+		l := New(input)
 
-	var tokenArr []token.Token
+		var tokenArr []token.Token
 
-	for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-		tokenArr = append(tokenArr, tok)
+		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
+			tokenArr = append(tokenArr, tok)
+		}
 	}
 }
