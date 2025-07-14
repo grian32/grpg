@@ -1,15 +1,15 @@
 package util
 
-func IsDigit(char rune) bool {
+func IsDigit(char byte) bool {
 	return char >= '0' && char <= '9'
 }
 
-func IsAlpha(char rune) bool {
+func IsAlpha(char byte) bool {
 	return (char >= 'a' && char <= 'z') ||
 		(char >= 'A' && char <= 'Z') ||
 		char == '_'
 }
 
-func IsAlphaNumeric(char rune) bool {
+func IsAlphaNumeric(char byte) bool {
 	return IsAlpha(char) || IsDigit(char)
 }
