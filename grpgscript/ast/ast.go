@@ -44,11 +44,11 @@ func (p *Program) String() string {
 
 type VarStatement struct {
 	Token token.Token // token.let
-	Name *Identifier
+	Name  *Identifier
 	Value Expression
 }
 
-func (vs *VarStatement) statementNode() { /* noop */}
+func (vs *VarStatement) statementNode()       { /* noop */ }
 func (vs *VarStatement) TokenLiteral() string { return vs.Token.Literal }
 func (vs *VarStatement) String() string {
 	var out bytes.Buffer
@@ -69,16 +69,16 @@ type Identifier struct {
 	Value string
 }
 
-func (i *Identifier) expressionNode() { /* noop */}
+func (i *Identifier) expressionNode()      { /* noop */ }
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
-func (i *Identifier) String() string { return i.Value }
+func (i *Identifier) String() string       { return i.Value }
 
 type ReturnStatement struct {
-	Token token.Token
+	Token       token.Token
 	ReturnValue Expression
 }
 
-func (rs *ReturnStatement) statementNode() { /* noop */ }
+func (rs *ReturnStatement) statementNode()       { /* noop */ }
 func (rs *ReturnStatement) TokenLiteral() string { return rs.Token.Literal }
 func (rs *ReturnStatement) String() string {
 	var out bytes.Buffer
@@ -94,13 +94,12 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
-
 type ExpressionStatement struct {
-	Token token.Token
+	Token      token.Token
 	Expression Expression
 }
 
-func (es *ExpressionStatement) statementNode() { /* noop */}
+func (es *ExpressionStatement) statementNode()       { /* noop */ }
 func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal }
 func (es *ExpressionStatement) String() string {
 	if es.Expression != nil {
@@ -109,3 +108,12 @@ func (es *ExpressionStatement) String() string {
 
 	return ""
 }
+
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+
+func (il *IntegerLiteral) expressionNode()      { /* noop */ }
+func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
+func (il *IntegerLiteral) String() string       { return il.Token.Literal }
