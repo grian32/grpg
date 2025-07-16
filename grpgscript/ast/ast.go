@@ -117,3 +117,15 @@ type IntegerLiteral struct {
 func (il *IntegerLiteral) expressionNode()      { /* noop */ }
 func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
 func (il *IntegerLiteral) String() string       { return il.Token.Literal }
+
+type PrefixExpression struct {
+	Token    token.Token
+	Operator string
+	Right    Expression
+}
+
+func (pe *PrefixExpression) expressionNode()      { /* noop */ }
+func (pe *PrefixExpression) TokenLiteral() string { return pe.Token.Literal }
+func (pe *PrefixExpression) String() string {
+	return "(" + pe.Operator + pe.Right.String() + ")"
+}
