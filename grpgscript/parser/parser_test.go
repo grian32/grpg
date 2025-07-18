@@ -291,6 +291,18 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"!(true == true)",
 			"(!(true == true))",
 		},
+		{
+			"a + add(b * c) + d",
+			"((a + add((b * c))) + d)",
+		},
+		{
+			"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
+			"add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+		},
+		{
+			"add(a + b + c * d / f + g)",
+			"add((((a + b) + ((c * d) / f)) + g))",
+		},
 	}
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
@@ -511,7 +523,93 @@ func TestFunctionParameterParsing(t *testing.T) {
 		for i, ident := range tt.expectedParams {
 			testLiteralExpression(t, function.Parameters[i], ident)
 		}
+	}
+}
 
+func TestCallExpressionParsing(t *testing.T) {
+	input := `add(1, 2 * 3, 4 + 5);`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements, got=%d\n", 1, len(program.Statements))
+	}
+
+	expr, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Errorf("program.Statements[0] not *ast.ExpressionStatement, got %T", expr)
+	}
+
+	call, ok := expr.Expression.(*ast.CallExpresion)
+	if !ok {
+		t.Errorf("expr not *ast.CallExpression, got %T", call)
+	}
+
+	if !testIdentifier(t, call.Function, "add") {
+		return
+	}
+
+	if len(call.Arguments) != 3 {
+		t.Errorf("call.Arguments isn't 3, got %d", len(call.Arguments))
+	}
+
+	testLiteralExpression(t, call.Arguments[0], 1)
+	testInfixExpression(t, call.Arguments[1], 2, "*", 3)
+	testInfixExpression(t, call.Arguments[2], 4, "+", 5)
+}
+
+func TestCallParameterParsing(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedIdent string
+		expectedArgs  []string
+	}{
+		{
+			input:         "add();",
+			expectedIdent: "add",
+			expectedArgs:  []string{},
+		},
+		{
+			input:         "add(1);",
+			expectedIdent: "add",
+			expectedArgs:  []string{"1"},
+		},
+		{
+			input:         "add(1, 2 * 3, 4 + 5);",
+			expectedIdent: "add",
+			expectedArgs:  []string{"1", "(2 * 3)", "(4 + 5)"},
+		},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		stmt := program.Statements[0].(*ast.ExpressionStatement)
+		call, ok := stmt.Expression.(*ast.CallExpresion)
+
+		if !ok {
+			t.Fatalf("stmt.Expression is not *ast.CallExpression, got %T", call)
+		}
+
+		if !testIdentifier(t, call.Function, tt.expectedIdent) {
+			return
+		}
+
+		if len(call.Arguments) != len(tt.expectedArgs) {
+			t.Errorf("call.Argument isn't %d, got %d", len(tt.expectedArgs), len(call.Arguments))
+		}
+
+		for i, arg := range tt.expectedArgs {
+			if call.Arguments[i].String() != arg {
+				t.Errorf("argument %d wrong, want %s, got %s", i, arg, call.Arguments[i])
+			}
+		}
 	}
 }
 
