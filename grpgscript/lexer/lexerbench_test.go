@@ -5,6 +5,9 @@ import (
 	"testing"
 )
 
+// BenchmarkNextToken
+// This isn't meant to be used as an actual benchmark due to how it appends, real usage has parser
+// calling lexer.NextToken(), It's mainly meant to be used just to track any possible performance regressions.
 func BenchmarkNextToken(b *testing.B) {
 	input := `var five = 5;
 var ten = 10;
