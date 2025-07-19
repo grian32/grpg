@@ -1,5 +1,0 @@
-fnc helloWorld() {
-    return "Hello, world!\n"
-}
-
-printf("%s\n", helloWorld())
