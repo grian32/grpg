@@ -3,6 +3,7 @@ package repl
 import (
 	"bufio"
 	"fmt"
+	"grpgscript/evaluator"
 	"grpgscript/lexer"
 	"grpgscript/parser"
 	"io"
@@ -31,7 +32,10 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		io.WriteString(out, program.String()+"\n")
+		evaluated := evaluator.Eval(program)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect()+"\n")
+		}
 	}
 }
 
