@@ -33,8 +33,24 @@ func Eval(node ast.Node) object.Object {
 		left := Eval(node.Left)
 		right := Eval(node.Right)
 		return evalInfixExpression(node.Operator, left, right)
+	case *ast.BlockStatement:
+		return evalStatements(node.Statements)
+	case *ast.IfExpression:
+		return evalIfExpression(node)
 	default:
 		panic(fmt.Sprintf("unexpected ast.Node: %#v", node))
+	}
+}
+
+func evalIfExpression(node *ast.IfExpression) object.Object {
+	condition := Eval(node.Condition)
+
+	if condition == TRUE {
+		return Eval(node.Consequence)
+	} else if node.Alternative != nil {
+		return Eval(node.Alternative)
+	} else {
+		return NULL
 	}
 }
 
@@ -42,6 +58,10 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 	switch {
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
+	case operator == "==":
+		return boolLookup[left == right]
+	case operator == "!=":
+		return boolLookup[left != right]
 	default:
 		return NULL
 	}
@@ -60,6 +80,14 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 		return &object.Integer{Value: leftValue * rightValue}
 	case "/":
 		return &object.Integer{Value: leftValue / rightValue}
+	case "<":
+		return boolLookup[leftValue < rightValue]
+	case ">":
+		return boolLookup[leftValue > rightValue]
+	case "!=":
+		return boolLookup[leftValue != rightValue]
+	case "==":
+		return boolLookup[leftValue == rightValue]
 	default:
 		return NULL
 	}
