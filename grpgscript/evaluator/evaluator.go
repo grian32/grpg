@@ -6,11 +6,14 @@ import (
 	"grpgscript/object"
 )
 
-var NULL = &object.Null{}
-
+var (
+	NULL  = &object.Null{}
+	TRUE  = &object.Boolean{Value: true}
+	FALSE = &object.Boolean{Value: false}
+)
 var boolLookup = map[bool]*object.Boolean{
-	true:  &object.Boolean{Value: true},
-	false: &object.Boolean{Value: false},
+	true:  TRUE,
+	false: FALSE,
 }
 
 func Eval(node ast.Node) object.Object {
@@ -23,9 +26,48 @@ func Eval(node ast.Node) object.Object {
 		return &object.Integer{Value: node.Value}
 	case *ast.Boolean:
 		return boolLookup[node.Value]
+	case *ast.PrefixExpression:
+		right := Eval(node.Right)
+		return evalPrefixExpression(node.Operator, right)
 	default:
 		panic(fmt.Sprintf("unexpected ast.Node: %#v", node))
 	}
+}
+
+func evalPrefixExpression(operator string, right object.Object) object.Object {
+	switch operator {
+	case "!":
+		return evalBangOperatorExpression(right)
+	case "-":
+		return evalMinuxPrefixOperatorExpression(right)
+	default:
+		return NULL
+	}
+}
+
+func evalBangOperatorExpression(right object.Object) object.Object {
+	// this is technically redunant cuz default returns null but this is in place of errors later
+	if right.Type() != object.BOOLEAN_OBJ {
+		return NULL
+	}
+
+	switch right {
+	case TRUE:
+		return FALSE
+	case FALSE:
+		return TRUE
+	default:
+		return NULL
+	}
+}
+
+func evalMinuxPrefixOperatorExpression(right object.Object) object.Object {
+	if right.Type() != object.INTEGER_OBJ {
+		return NULL
+	}
+
+	value := right.(*object.Integer).Value
+	return &object.Integer{Value: -value}
 }
 
 func evalStatements(stmts []ast.Statement) object.Object {
