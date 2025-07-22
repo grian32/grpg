@@ -120,9 +120,8 @@ func evalArrayIndexExpression(left, index object.Object) object.Object {
 
 	max := int64(len(arr.Elements) - 1)
 
-	// TODO: maybe error, dunno
 	if idx < 0 || idx > max {
-		return NULL
+		return newError("index %d out of bounds on array of size %d", idx, len(arr.Elements))
 	}
 
 	return arr.Elements[idx]
