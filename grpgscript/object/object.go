@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"grpgscript/ast"
+	"hash/fnv"
 	"strings"
 )
 
@@ -20,6 +21,7 @@ const (
 	STRING_OBJ       = "STRING"
 	BUILTIN_OBJ      = "BUILTIN"
 	ARRAY_OBJ        = "ARRAY"
+	HASH_OBJ         = "HASH"
 )
 
 type Object interface {
@@ -108,4 +110,56 @@ func (a *Array) Inspect() string {
 	}
 
 	return "[" + strings.Join(elements, ", ") + "]"
+}
+
+type HashPair struct {
+	Key   Object
+	Value Object
+}
+
+type Hash struct {
+	Pairs map[HashKey]HashPair
+}
+
+func (h *Hash) Type() ObjectType { return HASH_OBJ }
+func (h *Hash) Inspect() string {
+	elements := []string{}
+	for _, v := range h.Pairs {
+		elements = append(elements, v.Key.Inspect()+":"+v.Value.Inspect())
+	}
+
+	return "{" + strings.Join(elements, ", ") + "}"
+}
+
+// TODO: Granted, there’s one more thing we could do before moving on: we could optimize the performance of the HashKey() methods by caching their return values, but that sounds like a nice exercise for the performance-minded reader.
+type HashKey struct {
+	Type  ObjectType
+	Value uint64
+}
+
+type Hashable interface {
+	HashKey() HashKey
+}
+
+func (b *Boolean) HashKey() HashKey {
+	var value uint64
+
+	if b.Value {
+		value = 1
+	} else {
+		value = 0
+	}
+
+	return HashKey{Type: b.Type(), Value: value}
+}
+
+func (i *Integer) HashKey() HashKey {
+	return HashKey{Type: i.Type(), Value: uint64(i.Value)}
+}
+
+func (s *String) HashKey() HashKey {
+	h := fnv.New64a()
+	h.Write([]byte(s.Value))
+
+	return HashKey{Type: s.Type(), Value: h.Sum64()}
 }
