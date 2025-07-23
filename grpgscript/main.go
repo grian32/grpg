@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"grpgscript/repl"
+	"grpgscript/run"
 	"os"
 )
 
@@ -15,9 +15,9 @@ func main() {
 	} else if len(os.Args) == 2 {
 		if os.Args[1] == "repl" {
 			fmt.Printf("Welcome to GRPGScript REPL:\n")
-			repl.Start(os.Stdin, os.Stdout)
+			run.Start(os.Stdin, os.Stdout)
 		} else {
-			RunFile(os.Args[1])
+			run.RunFile(os.Args[1])
 		}
 	} else {
 		fmt.Println(usageStr)

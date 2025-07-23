@@ -1,4 +1,4 @@
-package main
+package run
 
 import (
 	"cmp"
@@ -30,7 +30,7 @@ func Run(str string) {
 	program := p.ParseProgram()
 
 	if len(p.Errors()) != 0 {
-		printParserErrors(os.Stdout, p.Errors())
+		PrintParserErrors(os.Stdout, p.Errors())
 		return
 	}
 
@@ -43,7 +43,7 @@ func Run(str string) {
 }
 
 // TODO: dupe from repl
-func printParserErrors(out io.Writer, errors []string) {
+func PrintParserErrors(out io.Writer, errors []string) {
 	for _, msg := range errors {
 		io.WriteString(out, "\t"+msg+"\n")
 	}
