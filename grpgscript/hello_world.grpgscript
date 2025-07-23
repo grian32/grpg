@@ -1,0 +1,5 @@
+var helloWorld = fnc() { 
+    return "Hello, World!";
+}
+
+println(helloWorld());

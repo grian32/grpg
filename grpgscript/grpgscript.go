@@ -2,6 +2,10 @@ package main
 
 import (
 	"cmp"
+	"grpgscript/evaluator"
+	"grpgscript/lexer"
+	"grpgscript/object"
+	"grpgscript/parser"
 	"io"
 	"log"
 	"os"
@@ -15,11 +19,32 @@ func RunFile(path string) {
 		log.Fatalf("Failed to run file with path %s %v", path, err)
 	}
 
-	Run(bytes)
+	Run(string(bytes))
 }
 
-func Run(bytes []byte) {
-	// scanner := lex_old.NewScanner(string(bytes))
-	// scanner.ScanTokens()
-	// fmt.Println(lex_old.TokenSliceString(scanner.Tokens))
+func Run(str string) {
+	l := lexer.New(str)
+	p := parser.New(l)
+	env := object.NewEnvironment()
+
+	program := p.ParseProgram()
+
+	if len(p.Errors()) != 0 {
+		printParserErrors(os.Stdout, p.Errors())
+		return
+	}
+
+	evaluated := evaluator.Eval(program, env)
+	if evaluated != nil {
+		if evaluated.Type() != object.NULL_OBJ {
+			io.WriteString(os.Stdout, evaluated.Inspect()+"\n")
+		}
+	}
+}
+
+// TODO: dupe from repl
+func printParserErrors(out io.Writer, errors []string) {
+	for _, msg := range errors {
+		io.WriteString(out, "\t"+msg+"\n")
+	}
 }
