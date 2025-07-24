@@ -35,7 +35,7 @@ func init() {
 	}
 	grassPngBytes, err = io.ReadAll(grass)
 	if err != nil {
-		log.Fatal("Error loading stone png bytes while initializing format tests")
+		log.Fatal("Error loading grass png bytes while initializing format tests")
 	}
 }
 
