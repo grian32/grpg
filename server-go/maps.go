@@ -35,13 +35,19 @@ func LoadCollisionMaps(game *shared.Game) {
 			}
 
 			buf := gbuf.NewGBuf(bytes)
-			header := grpgmap.ReadHeader(buf)
+			header, err := grpgmap.ReadHeader(buf)
+			if err != nil {
+				log.Fatalf("Error reading grpgmap header for file %s", fullPath)
+			}
 
 			if string(header.Magic[:]) != "GRPGMAP\x00" {
 				log.Fatalf("File %s isn't GRPGMAP", fullPath)
 			}
 
-			tiles := grpgmap.ReadTiles(buf)
+			tiles, err := grpgmap.ReadTiles(buf)
+			if err != nil {
+				log.Fatalf("Error reading grpgmap tiles for file %s", fullPath)
+			}
 
 			for idx, tile := range tiles {
 				if tile.Type == grpgtex.OBJ {

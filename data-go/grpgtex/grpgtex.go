@@ -2,8 +2,8 @@ package grpgtex
 
 import (
 	"bytes"
+	"cmp"
 	"grpg/data-go/gbuf"
-	"log"
 )
 
 type Header struct {
@@ -56,56 +56,38 @@ func WriteTextures(buf *gbuf.GBuf, textures []Texture) {
 	}
 }
 
-func ReadHeader(buf *gbuf.GBuf) Header {
-	magic, err := buf.ReadBytes(8)
-	if err != nil {
-		log.Fatal(err)
+func ReadHeader(buf *gbuf.GBuf) (Header, error) {
+	magic, err1 := buf.ReadBytes(8)
+	version, err2 := buf.ReadUint16()
+
+	if err := cmp.Or(err1, err2); err != nil {
+		return Header{}, err
 	}
-	version, err := buf.ReadUint16()
-	if err != nil {
-		log.Fatal(err)
-	}
+
 	return Header{
 		Magic:   [8]byte(magic),
 		Version: version,
-	}
+	}, nil
 }
 
-func ReadTextures(buf *gbuf.GBuf) []Texture {
+func ReadTextures(buf *gbuf.GBuf) ([]Texture, error) {
 	var textures []Texture
 
 	textureLen, err := buf.ReadUint32()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	for range textureLen {
-		internalIdLen, err := buf.ReadUint32()
-		if err != nil {
-			log.Fatal(err)
-		}
-		internalIdString, err := buf.ReadBytes(int(internalIdLen))
-		if err != nil {
-			log.Fatal(err)
-		}
+		internalIdLen, err1 := buf.ReadUint32()
+		internalIdString, err2 := buf.ReadBytes(int(internalIdLen))
+		internalIdInt, err3 := buf.ReadUint16()
+		pngBytesLen, err4 := buf.ReadUint32()
+		pngBytes, err5 := buf.ReadBytes(int(pngBytesLen))
+		texType, err6 := buf.ReadByte()
 
-		internalIdInt, err := buf.ReadUint16()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		pngBytesLen, err := buf.ReadUint32()
-		if err != nil {
-			log.Fatal(err)
-		}
-		pngBytes, err := buf.ReadBytes(int(pngBytesLen))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		texType, err := buf.ReadByte()
-		if err != nil {
-			log.Fatal(err)
+		if err := cmp.Or(err1, err2, err3, err4, err5, err6); err != nil {
+			return nil, err
 		}
 
 		textures = append(textures, Texture{
@@ -116,5 +98,5 @@ func ReadTextures(buf *gbuf.GBuf) []Texture {
 		})
 	}
 
-	return textures
+	return textures, nil
 }

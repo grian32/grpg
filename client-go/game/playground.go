@@ -5,7 +5,6 @@ import (
 	"client/util"
 	"cmp"
 	"fmt"
-	rl "github.com/gen2brain/raylib-go/raylib"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgmap"
 	"grpg/data-go/grpgtex"
@@ -13,6 +12,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 type Playground struct {
@@ -23,6 +24,7 @@ type Playground struct {
 }
 
 func (p *Playground) Setup() {
+	// TODO: move this out
 	p.Font = rl.LoadFont("./assets/font.ttf")
 
 	p.Textures = make(map[uint16]rl.Texture2D)
@@ -31,17 +33,25 @@ func (p *Playground) Setup() {
 	grpgTexFile, err1 := os.Open("../../grpg-assets/textures.pak")
 	grpgTexBytes, err2 := io.ReadAll(grpgTexFile)
 
+	if err := cmp.Or(err1, err2); err != nil {
+		log.Fatal("Failed reading GRPGTEX file")
+	}
+
 	buf := gbuf.NewGBuf(grpgTexBytes)
-	header := grpgtex.ReadHeader(buf)
+	header, err := grpgtex.ReadHeader(buf)
+	if err != nil {
+		log.Fatalf("failed reading grpgtex header: %v", err)
+	}
+
 	if string(header.Magic[:]) != "GRPGTEX\x00" {
 		log.Fatal("File is not GRPGTEX file.")
 	}
 
 	log.Printf("Succesfully loaded GRPGTEX file with version %d\n", header.Version)
 
-	textures := grpgtex.ReadTextures(buf)
-	if err := cmp.Or(err1, err2); err != nil {
-		log.Fatal("Failed reading GRPGTEX file")
+	textures, err := grpgtex.ReadTextures(buf)
+	if err != nil {
+		log.Fatalf("failed reading grpgtex textures: %v", err)
 	}
 
 	for _, tex := range textures {
@@ -70,13 +80,20 @@ func (p *Playground) Setup() {
 			}
 
 			buf := gbuf.NewGBuf(bytes)
-			header := grpgmap.ReadHeader(buf)
+			header, err := grpgmap.ReadHeader(buf)
+			if err != nil {
+				log.Fatalf("reading grpgmap header errored: %v. file: %s", err, fullPath)
+			}
 
 			if string(header.Magic[:]) != "GRPGMAP\x00" {
 				log.Fatalf("File %s isn't GRPGMAP", fullPath)
 			}
 
-			tiles := grpgmap.ReadTiles(buf)
+			tiles, err := grpgmap.ReadTiles(buf)
+			if err != nil {
+				log.Fatalf("reading grpgmap tiles errored: %v. file: %s", err, fullPath)
+			}
+
 			chunkPos := util.Vector2I{X: int32(header.ChunkX), Y: int32(header.ChunkY)}
 
 			p.Maps[chunkPos] = tiles

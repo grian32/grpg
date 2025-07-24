@@ -1,11 +1,13 @@
 package main
 
 import (
-	"github.com/sqweek/dialog"
+	"fmt"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgmap"
 	"io"
 	"os"
+
+	"github.com/sqweek/dialog"
 )
 
 func SaveMap() {
@@ -76,6 +78,7 @@ func LoadMap() {
 	}
 
 	file, err := os.Open(fileToLoad)
+	defer file.Close()
 	if err != nil {
 		dialog.Message("Error loading file").Error()
 		return
@@ -88,7 +91,11 @@ func LoadMap() {
 	}
 
 	buf := gbuf.NewGBuf(fileBytes)
-	header := grpgmap.ReadHeader(buf)
+	header, err := grpgmap.ReadHeader(buf)
+	if err != nil {
+		fmt.Println("reading grpgmap header errored: %w. file: %s", err, fileToLoad)
+		return
+	}
 
 	if string(header.Magic[:]) != "GRPGMAP\x00" {
 		dialog.Message("File isn't valid GRPGMAP format.").Error()
@@ -98,7 +105,11 @@ func LoadMap() {
 	chunkX = int32(header.ChunkX)
 	chunkY = int32(header.ChunkY)
 
-	tiles := grpgmap.ReadTiles(buf)
+	tiles, err := grpgmap.ReadTiles(buf)
+	if err != nil {
+		fmt.Println("reading grpgmap tiles errored: %w. file: %s", err, fileToLoad)
+		return
+	}
 
 	for idx, tile := range tiles {
 		gridTextures[idx] = texturesById[tile.InternalId].InternalIdString

@@ -110,7 +110,10 @@ func TestReadHeaderVer1(t *testing.T) {
 		0x00, 0x01, // ver1
 	})
 
-	output := ReadHeader(buf)
+	output, err := ReadHeader(buf)
+	if err != nil {
+		t.Errorf("ReadHeader errored: %v", err)
+	}
 
 	if output != expectedHeader {
 		t.Errorf("ReadHeader=%q, want match for %#q", output, expectedHeader)
@@ -128,7 +131,10 @@ func TestReadHeaderVerMax(t *testing.T) {
 		0xFF, 0xFF, // ver1
 	})
 
-	output := ReadHeader(buf)
+	output, err := ReadHeader(buf)
+	if err != nil {
+		t.Errorf("ReadHeader errored: %v", err)
+	}
 
 	if output != expectedHeader {
 		t.Errorf("ReadHeader=%q, want match for %#q", output, expectedHeader)
@@ -169,7 +175,10 @@ func TestReadTextures(t *testing.T) {
 	buf.WriteBytes(stonePngBytes)
 	buf.WriteByte(byte(OBJ))
 
-	output := ReadTextures(buf)
+	output, err := ReadTextures(buf)
+	if err != nil {
+		t.Errorf("ReadTextures errored: %v", err)
+	}
 
 	if !output[0].Equals(expected[0]) || !output[1].Equals(expected[1]) {
 		t.Errorf("ReadHeader=%q, want match for %#q", output, expected)

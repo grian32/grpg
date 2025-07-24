@@ -3,8 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	g "github.com/AllenDang/giu"
-	"github.com/sqweek/dialog"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgtex"
 	"image"
@@ -12,6 +10,9 @@ import (
 	"io"
 	"log"
 	"os"
+
+	g "github.com/AllenDang/giu"
+	"github.com/sqweek/dialog"
 )
 
 type GiuTextureTyped struct {
@@ -42,6 +43,7 @@ func LoadTextures() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer file.Close()
 
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
@@ -49,17 +51,27 @@ func LoadTextures() {
 	}
 
 	buf := gbuf.NewGBuf(fileBytes)
-	header := grpgtex.ReadHeader(buf)
+	header, err := grpgtex.ReadHeader(buf)
+	if err != nil {
+		fmt.Printf("reading grpgtex header errored: %w. file: %s\n", err, out)
+		return
+	}
 	correctMagic := "GRPGTEX\x00"
 
 	// move this to some notification system or something
 	if string(header.Magic[:]) != correctMagic {
-		log.Fatal("File entered for texture loading has the wrong magic header.")
+		fmt.Println("File entered for texture loading has the wrong magic header.")
+		return
 	} else {
 		fmt.Printf("Successfully loaded GRPGTex file with version %d\n", header.Version)
 	}
 
-	grpgTextures := grpgtex.ReadTextures(buf)
+	grpgTextures, err := grpgtex.ReadTextures(buf)
+	if err != nil {
+		fmt.Printf("reading grpgtex textures errored: %w. file: %s\n", err, out)
+		return
+	}
+
 	for _, tex := range grpgTextures {
 		pngImage, err := png.Decode(bytes.NewReader(tex.PNGBytes))
 		if err != nil {

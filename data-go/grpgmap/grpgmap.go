@@ -1,9 +1,9 @@
 package grpgmap
 
 import (
+	"cmp"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgtex"
-	"log"
 )
 
 type Header struct {
@@ -25,22 +25,13 @@ func WriteHeader(buf *gbuf.GBuf, header Header) {
 	buf.WriteUint16(header.ChunkY)
 }
 
-func ReadHeader(buf *gbuf.GBuf) Header {
-	magic, err := buf.ReadBytes(8)
-	if err != nil {
-		log.Fatal(err)
-	}
-	version, err := buf.ReadUint16()
-	if err != nil {
-		log.Fatal(err)
-	}
-	chunkX, err := buf.ReadUint16()
-	if err != nil {
-		log.Fatal(err)
-	}
-	chunkY, err := buf.ReadUint16()
-	if err != nil {
-		log.Fatal(err)
+func ReadHeader(buf *gbuf.GBuf) (Header, error) {
+	magic, err1 := buf.ReadBytes(8)
+	version, err2 := buf.ReadUint16()
+	chunkX, err3 := buf.ReadUint16()
+	chunkY, err4 := buf.ReadUint16()
+	if err := cmp.Or(err1, err2, err3, err4); err != nil {
+		return Header{}, err
 	}
 
 	return Header{
@@ -48,7 +39,7 @@ func ReadHeader(buf *gbuf.GBuf) Header {
 		Version: version,
 		ChunkX:  chunkX,
 		ChunkY:  chunkY,
-	}
+	}, nil
 }
 
 func WriteTiles(buf *gbuf.GBuf, tiles [256]Tile) {
@@ -58,17 +49,14 @@ func WriteTiles(buf *gbuf.GBuf, tiles [256]Tile) {
 	}
 }
 
-func ReadTiles(buf *gbuf.GBuf) [256]Tile {
+func ReadTiles(buf *gbuf.GBuf) ([256]Tile, error) {
 	arr := [256]Tile{}
 
 	for idx := range 256 {
-		internalId, err := buf.ReadUint16()
-		if err != nil {
-			log.Fatal(err)
-		}
-		texType, err := buf.ReadByte()
-		if err != nil {
-			log.Fatal(err)
+		internalId, err1 := buf.ReadUint16()
+		texType, err2 := buf.ReadByte()
+		if err := cmp.Or(err1, err2); err != nil {
+			return [256]Tile{}, err
 		}
 
 		tile := Tile{
@@ -79,5 +67,5 @@ func ReadTiles(buf *gbuf.GBuf) [256]Tile {
 		arr[idx] = tile
 	}
 
-	return arr
+	return arr, nil
 }
