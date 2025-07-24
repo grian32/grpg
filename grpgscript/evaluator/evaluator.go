@@ -178,7 +178,6 @@ func evalArrayIndexExpression(left, index object.Object) object.Object {
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-
 	switch fn := fn.(type) {
 	case *object.Function:
 		extendedEnv := extendFunctionEnv(fn, args)
