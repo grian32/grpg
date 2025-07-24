@@ -580,6 +580,49 @@ func TestCallExpressionParsing(t *testing.T) {
 	testInfixExpression(t, call.Arguments[2], 4, "+", 5)
 }
 
+func TestCallExpressionDSLParsing(t *testing.T) {
+	input := `
+		onEvent(3) {
+
+		}
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements, got=%d\n", 1, len(program.Statements))
+	}
+
+	expr, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Errorf("program.Statements[0] not *ast.ExpressionStatement, got %T", expr)
+	}
+
+	call, ok := expr.Expression.(*ast.CallExpresion)
+	if !ok {
+		t.Errorf("expr not *ast.CallExpression, got %T", call)
+	}
+
+	if !testIdentifier(t, call.Function, "onEvent") {
+		return
+	}
+
+	if len(call.Arguments) != 2 {
+		t.Errorf("call.Arguments isn't 2, got %d", len(call.Arguments))
+	}
+
+	testLiteralExpression(t, call.Arguments[0], 3)
+
+	_, ok = call.Arguments[1].(*ast.FunctionLiteral)
+
+	if !ok {
+		t.Errorf("call.Arguments[1] is not function literal.")
+	}
+}
+
 func TestCallParameterParsing(t *testing.T) {
 	tests := []struct {
 		input         string
