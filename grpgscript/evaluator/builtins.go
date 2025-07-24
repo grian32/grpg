@@ -49,18 +49,30 @@ var builtins = map[string]*object.Builtin{
 			}
 
 			firstArrArg, ok1 := args[0].(*object.Array)
-			secondArrayArg, ok2 := args[1].(*object.Array)
+			secondArrArg, ok2 := args[1].(*object.Array)
+
+			if len(firstArrArg.Elements) == 0 && len(secondArrArg.Elements) == 0 {
+				return &object.Array{Elements: []object.Object{}}
+			}
+
+			if len(firstArrArg.Elements) == 0 {
+				return secondArrArg
+			}
+
+			if len(secondArrArg.Elements) == 0 {
+				return firstArrArg
+			}
 
 			if !(ok1 && ok2) {
 				return newError("one or both of the arguments to concat are not arrays")
 			}
 
 			// it's fine to check only first elem since arrays are guaranteed to be of the same type on all elems due to eval
-			if firstArrArg.Elements[0].Type() != secondArrayArg.Elements[0].Type() {
+			if firstArrArg.Elements[0].Type() != secondArrArg.Elements[0].Type() {
 				return newError("both arrays passed to concat must be of the same element type")
 			}
 
-			concattedElems := slices.Concat(firstArrArg.Elements, secondArrayArg.Elements)
+			concattedElems := slices.Concat(firstArrArg.Elements, secondArrArg.Elements)
 
 			newArr := &object.Array{Elements: concattedElems}
 
