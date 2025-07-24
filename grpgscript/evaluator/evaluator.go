@@ -215,6 +215,10 @@ func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Ob
 }
 
 func evalArrayExpressions(exps []ast.Expression, env *object.Environment) []object.Object {
+	if len(exps) == 0 {
+		return []object.Object{}
+	}
+
 	first := Eval(exps[0], env)
 
 	result := []object.Object{first}
