@@ -2,13 +2,22 @@ package evaluator
 
 import (
 	"fmt"
+	"grpgscript/ast"
 	"grpgscript/object"
 	"slices"
 )
 
+type BuiltinDSLResult struct {
+	Body *ast.BlockStatement
+	Env  *object.Environment
+}
+
+func (bdr *BuiltinDSLResult) Type() object.ObjectType { return "BUILTINDSLRESULT" }
+func (bdr *BuiltinDSLResult) Inspect() string         { return "BUILTINDSLRESULT" }
+
 var builtins = map[string]*object.Builtin{
 	"len": {
-		Fn: func(args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			if len(args) != 1 {
 				return newError("wrong number of arguments. got=%d, want=1", len(args))
 			}
@@ -24,7 +33,7 @@ var builtins = map[string]*object.Builtin{
 		},
 	},
 	"println": {
-		Fn: func(args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			for _, arg := range args {
 				fmt.Println(arg.Inspect())
 			}
@@ -33,17 +42,17 @@ var builtins = map[string]*object.Builtin{
 		},
 	},
 	"push": {
-		Fn: func(args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return pushUnshift(PUSH, args...)
 		},
 	},
 	"unshift": {
-		Fn: func(args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return pushUnshift(UNSHIFT, args...)
 		},
 	},
 	"concat": {
-		Fn: func(args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			if len(args) != 2 {
 				return newError("wrong number of argument, got=%d, want=2", len(args))
 			}
@@ -77,6 +86,34 @@ var builtins = map[string]*object.Builtin{
 			newArr := &object.Array{Elements: concattedElems}
 
 			return newArr
+		},
+	},
+	"onHarvest": {
+		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+			id := args[0].(*object.Integer)
+			fmt.Printf("on harvest id: %d\n", id.Value)
+
+			fn := args[1].(*object.Function)
+
+			enclosedEnv := object.NewEnclosedEnvinronment(env)
+			enclosedEnv.Set("setState", &object.Builtin{
+				Fn: func(env *object.Environment, args ...object.Object) object.Object {
+					fmt.Println("setting state")
+					return NULL
+				},
+			})
+
+			enclosedEnv.Set("setPlayerInv", &object.Builtin{
+				Fn: func(env *object.Environment, args ...object.Object) object.Object {
+					fmt.Println("adding to player")
+					return NULL
+				},
+			})
+
+			return &BuiltinDSLResult{
+				Body: fn.Body,
+				Env:  enclosedEnv,
+			}
 		},
 	},
 }

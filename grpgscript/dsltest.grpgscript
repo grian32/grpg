@@ -1,0 +1,7 @@
+onHarvest(3) {
+    setState()
+    setPlayerInv()
+}
+
+setState()
+setPlayerInv()

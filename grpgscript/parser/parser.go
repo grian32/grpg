@@ -328,6 +328,19 @@ func (p *Parser) parseFunctionExpression() ast.Expression {
 func (p *Parser) parseCallExpression(left ast.Expression) ast.Expression {
 	exp := &ast.CallExpresion{Token: p.curToken, Function: left}
 	exp.Arguments = p.parseExpressionList(token.RPAREN)
+
+	if p.peekTokenIs(token.LBRACE) {
+		p.NextToken()
+
+		fnc := &ast.FunctionLiteral{
+			Token:      token.Token{Type: token.FUNCTION, Literal: "fnc"},
+			Parameters: []*ast.Identifier{},
+			Body:       p.parseBlockStatement(),
+		}
+
+		exp.Arguments = append(exp.Arguments, fnc)
+	}
+
 	return exp
 }
 

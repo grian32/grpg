@@ -78,7 +78,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return args[0]
 		}
 
-		return applyFunction(function, args)
+		return applyFunction(function, args, env)
 	case *ast.ArrayLiteral:
 		elements := evalArrayExpressions(node.Elements, env)
 
@@ -177,14 +177,21 @@ func evalArrayIndexExpression(left, index object.Object) object.Object {
 	return arr.Elements[idx]
 }
 
-func applyFunction(fn object.Object, args []object.Object) object.Object {
+func applyFunction(fn object.Object, args []object.Object, env *object.Environment) object.Object {
 	switch fn := fn.(type) {
 	case *object.Function:
 		extendedEnv := extendFunctionEnv(fn, args)
 		evaluated := Eval(fn.Body, extendedEnv)
 		return unwrapReturnValue(evaluated)
 	case *object.Builtin:
-		return fn.Fn(args...)
+		builtinResult := fn.Fn(env, args...)
+		switch result := builtinResult.(type) {
+		case *BuiltinDSLResult:
+			Eval(result.Body, result.Env)
+			return NULL
+		default:
+			return result
+		}
 	default:
 		return newError("not a function, %s", fn.Type())
 	}
