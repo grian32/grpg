@@ -88,34 +88,34 @@ var builtins = map[string]*object.Builtin{
 			return newArr
 		},
 	},
-	"onHarvest": {
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
-			id := args[0].(*object.Integer)
-			fmt.Printf("on harvest id: %d\n", id.Value)
+	// "onHarvest": {
+	// 	Fn: func(env *object.Environment, args ...object.Object) object.Object {
+	// 		id := args[0].(*object.Integer)
+	// 		fmt.Printf("on harvest id: %d\n", id.Value)
 
-			fn := args[1].(*object.Function)
+	// 		fn := args[1].(*object.Function)
 
-			enclosedEnv := object.NewEnclosedEnvinronment(env)
-			enclosedEnv.Set("setState", &object.Builtin{
-				Fn: func(env *object.Environment, args ...object.Object) object.Object {
-					fmt.Println("setting state")
-					return NULL
-				},
-			})
+	// 		enclosedEnv := object.NewEnclosedEnvinronment(env)
+	// 		enclosedEnv.Set("setState", &object.Builtin{
+	// 			Fn: func(env *object.Environment, args ...object.Object) object.Object {
+	// 				fmt.Println("setting state")
+	// 				return NULL
+	// 			},
+	// 		})
 
-			enclosedEnv.Set("setPlayerInv", &object.Builtin{
-				Fn: func(env *object.Environment, args ...object.Object) object.Object {
-					fmt.Println("adding to player")
-					return NULL
-				},
-			})
+	// 		enclosedEnv.Set("setPlayerInv", &object.Builtin{
+	// 			Fn: func(env *object.Environment, args ...object.Object) object.Object {
+	// 				fmt.Println("adding to player")
+	// 				return NULL
+	// 			},
+	// 		})
 
-			return &BuiltinDSLResult{
-				Body: fn.Body,
-				Env:  enclosedEnv,
-			}
-		},
-	},
+	// 		return &BuiltinDSLResult{
+	// 			Body: fn.Body,
+	// 			Env:  enclosedEnv,
+	// 		}
+	// 	},
+	// },
 }
 
 type PushUnshift byte
