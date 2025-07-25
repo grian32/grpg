@@ -2,11 +2,12 @@ package main
 
 import (
 	"errors"
-	"github.com/pelletier/go-toml/v2"
 	"grpg/data-go/grpgtex"
 	"image/png"
 	"io"
 	"os"
+
+	"github.com/pelletier/go-toml/v2"
 )
 
 type ManifestConfig struct {
@@ -28,6 +29,7 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 		if err != nil {
 			return nil, err
 		}
+		defer f.Close()
 
 		pngConfig, err := png.DecodeConfig(f)
 		if err != nil {
@@ -66,6 +68,7 @@ func ParseManifestFile(path string) ([]GRPGTexManifestEntry, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	bytes, err := io.ReadAll(file)
 	if err != nil {

@@ -78,11 +78,11 @@ func LoadMap() {
 	}
 
 	file, err := os.Open(fileToLoad)
-	defer file.Close()
 	if err != nil {
 		dialog.Message("Error loading file").Error()
 		return
 	}
+	defer file.Close()
 
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {

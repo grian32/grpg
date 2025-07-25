@@ -25,10 +25,12 @@ func init() {
 	if err != nil {
 		log.Fatal("Error loading stone texture while initializing format tests")
 	}
+	defer stone.Close()
 	grass, err = os.Open("../testdata/grass_texture.png")
 	if err != nil {
 		log.Fatal("Error loading grass texture while initializing format tests")
 	}
+	defer grass.Close()
 	stonePngBytes, err = io.ReadAll(stone)
 	if err != nil {
 		log.Fatal("Error loading stone png bytes while initializing format tests")

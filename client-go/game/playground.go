@@ -37,6 +37,8 @@ func (p *Playground) Setup() {
 		log.Fatal("Failed reading GRPGTEX file")
 	}
 
+	defer grpgTexFile.Close()
+
 	buf := gbuf.NewGBuf(grpgTexBytes)
 	header, err := grpgtex.ReadHeader(buf)
 	if err != nil {
@@ -78,6 +80,7 @@ func (p *Playground) Setup() {
 			if err := cmp.Or(err1, err2); err != nil {
 				log.Fatalf("Error reading map file, %v", err)
 			}
+			defer file.Close()
 
 			buf := gbuf.NewGBuf(bytes)
 			header, err := grpgmap.ReadHeader(buf)

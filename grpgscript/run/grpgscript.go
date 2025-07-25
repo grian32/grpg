@@ -16,8 +16,9 @@ func RunFile(path string) {
 	bytes, err2 := io.ReadAll(f)
 
 	if err := cmp.Or(err1, err2); err != nil {
-		log.Fatalf("Failed to run file with path %s %v", path, err)
+		log.Fatalf("Failed to read file with path %s %v", path, err)
 	}
+	defer f.Close()
 
 	Run(string(bytes))
 }

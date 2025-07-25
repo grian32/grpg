@@ -26,6 +26,7 @@ func StartConn() net.Conn {
 }
 
 func ReadServerPackets(conn net.Conn, packetChan chan<- ChanPacket) {
+	defer conn.Close()
 	reader := bufio.NewReader(conn)
 
 	for {
