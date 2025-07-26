@@ -1,15 +1,24 @@
 # texture-packer
 
-Packs PNG textures into a texture.pak, this basically contains a "map" of texture ids to their PNG files.
+Packs PNG textures into a texture.pak, this basically contains a "map" of texture ids to their PNG files, along with some extra metadata.
 
 Manifest File Format:
-```
-texture_name=texture_file_path.png
+
+```toml
+texture = [
+    { name = "texture_name", id = 0, path = "texture_file_path.png", type = "TILE" },
+    { name = "texture_name_2", id = 1, path = "texture_file_path.png_2", type = "OBJ" },
+]
 ```
 
-`texture_name` is the internal name for the texture, while `texture_file_path.png` is the path to the texture in PWD, outputs a textures.pak in PWD
+`texture` is an array of textures metadata definitions:
 
-If another program is using the textures.pak, and you change the `texture_name`, aforementioned programs may break as that is what it uses as a reference.
+- `name` is the internal name for the texture, this is used for editors etc.
+- `id` is the internal
+- `path` is the path to the texture in relation to current working dir
+- `type` is the type used by the texture format and translated into other formats.
+
+If you change the `id` for a texture, this may break compatibility with other software such as map files etc that were created using a previous textures.pak file, as that's the id it uses to reference each textures.
 
 # Endianness
 
