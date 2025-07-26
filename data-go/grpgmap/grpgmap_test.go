@@ -41,41 +41,59 @@ func TestReadWriteHeader(t *testing.T) {
 	})
 }
 
-func TestWriteReadTiles(t *testing.T) {
-	tileArr := [256]Tile{}
-	expectedBytes := [768]byte{} // (2 bytes for uint16, 1 byte for textype byte) * 256 = 768
+func TestWriteReadZone(t *testing.T) {
+	expectedZone := Zone{}
+	expectedBytes := [1280]byte{} // 2 * 256 for tile layer, 3 * 256 for obj layer
 
 	for idx := range 128 {
-		tileArr[idx] = Tile{0, grpgtex.TILE}
-		offset := idx * 3
-		expectedBytes[offset] = 0x00
-		expectedBytes[offset+1] = 0x00
-		expectedBytes[offset+2] = 0x01
+		expectedZone.Tiles[uint16(idx)] = 0x00
+
+		tileOffset := idx * 2
+
+		expectedBytes[tileOffset] = 0x00
+		expectedBytes[tileOffset+1] = 0x00
+
+		objOffset := (idx * 3) + 512
+
+		expectedZone.Objs[idx] = Obj{InternalId: 0, Type: grpgtex.OBJ}
+
+		expectedBytes[objOffset] = 0x00
+		expectedBytes[objOffset+1] = 0x00
+		expectedBytes[objOffset+2] = 0x01
 	}
 
 	for idx := 128; idx < 256; idx++ {
-		tileArr[idx] = Tile{1, grpgtex.OBJ}
-		offset := idx * 3
-		expectedBytes[offset] = 0x00
-		expectedBytes[offset+1] = 0x01
-		expectedBytes[offset+2] = 0x02
+		expectedZone.Tiles[uint16(idx)] = 0x01
+
+		tileOffset := idx * 2
+
+		expectedBytes[tileOffset] = 0x00
+		expectedBytes[tileOffset+1] = 0x01
+
+		objOffset := (idx * 3) + 512
+
+		expectedZone.Objs[idx] = Obj{InternalId: 1, Type: grpgtex.OBJ}
+
+		expectedBytes[objOffset] = 0x00
+		expectedBytes[objOffset+1] = 0x01
+		expectedBytes[objOffset+2] = 0x01
 	}
 
 	buf := gbuf.NewEmptyGBuf()
 
-	t.Run("WriteTiles", func(t *testing.T) {
-		WriteTiles(buf, tileArr)
+	t.Run("WriteZone", func(t *testing.T) {
+		WriteZone(buf, expectedZone)
 
 		if !bytes.Equal(buf.Bytes(), expectedBytes[:]) {
-			t.Fatalf("WriteHeader=%x, want match for %x", buf.Bytes(), expectedBytes)
+			t.Fatalf("WriteHeader=%x, want match for %x", buf.Bytes(), expectedBytes[:])
 		}
 	})
 
-	t.Run("ReadTiles", func(t *testing.T) {
-		tiles, err := ReadTiles(buf)
+	t.Run("ReadZone", func(t *testing.T) {
+		zone, err := ReadZone(buf)
 
-		if tiles != tileArr || err != nil {
-			t.Fatalf("WriteHeader=%v, want match for %#v", tiles, tileArr)
+		if zone != expectedZone || err != nil {
+			t.Fatalf("WriteHeader=%v, want match for %#v", zone, expectedZone)
 		}
 	})
 }

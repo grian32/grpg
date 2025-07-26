@@ -13,9 +13,16 @@ type Header struct {
 	ChunkY  uint16
 }
 
-type Tile struct {
+type Obj struct {
 	InternalId uint16
 	Type       grpgtex.TextureType
+}
+
+type Tile uint16
+
+type Zone struct {
+	Tiles [256]Tile
+	Objs  [256]Obj
 }
 
 func WriteHeader(buf *gbuf.GBuf, header Header) {
@@ -42,30 +49,47 @@ func ReadHeader(buf *gbuf.GBuf) (Header, error) {
 	}, nil
 }
 
-func WriteTiles(buf *gbuf.GBuf, tiles [256]Tile) {
-	for _, tile := range tiles {
-		buf.WriteUint16(tile.InternalId)
-		buf.WriteByte(byte(tile.Type))
+func WriteZone(buf *gbuf.GBuf, zone Zone) {
+	for _, tile := range zone.Tiles {
+		buf.WriteUint16(uint16(tile))
+	}
+
+	for _, obj := range zone.Objs {
+		buf.WriteUint16(obj.InternalId)
+		buf.WriteByte(byte(obj.Type))
 	}
 }
 
-func ReadTiles(buf *gbuf.GBuf) ([256]Tile, error) {
-	arr := [256]Tile{}
+func ReadZone(buf *gbuf.GBuf) (Zone, error) {
+	tiles := [256]Tile{}
+	objs := [256]Obj{}
+
+	for idx := range 256 {
+		internalId, err := buf.ReadUint16()
+		if err != nil {
+			return Zone{}, err
+		}
+
+		tiles[idx] = Tile(internalId)
+	}
 
 	for idx := range 256 {
 		internalId, err1 := buf.ReadUint16()
 		texType, err2 := buf.ReadByte()
 		if err := cmp.Or(err1, err2); err != nil {
-			return [256]Tile{}, err
+			return Zone{}, err
 		}
 
-		tile := Tile{
+		objs[idx] = Obj{
 			InternalId: internalId,
 			Type:       grpgtex.TextureType(texType),
 		}
-
-		arr[idx] = tile
 	}
 
-	return arr, nil
+	zone := Zone{
+		Tiles: tiles,
+		Objs:  objs,
+	}
+
+	return zone, nil
 }
