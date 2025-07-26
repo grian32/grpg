@@ -3,7 +3,6 @@ package grpgmap
 import (
 	"bytes"
 	"grpg/data-go/gbuf"
-	"grpg/data-go/grpgtex"
 	"testing"
 )
 
@@ -55,7 +54,7 @@ func TestWriteReadZone(t *testing.T) {
 
 		objOffset := (idx * 3) + 512
 
-		expectedZone.Objs[idx] = Obj{InternalId: 0, Type: grpgtex.OBJ}
+		expectedZone.Objs[idx] = Obj{InternalId: 0, Type: OBJ}
 
 		expectedBytes[objOffset] = 0x00
 		expectedBytes[objOffset+1] = 0x00
@@ -72,7 +71,7 @@ func TestWriteReadZone(t *testing.T) {
 
 		objOffset := (idx * 3) + 512
 
-		expectedZone.Objs[idx] = Obj{InternalId: 1, Type: grpgtex.OBJ}
+		expectedZone.Objs[idx] = Obj{InternalId: 1, Type: OBJ}
 
 		expectedBytes[objOffset] = 0x00
 		expectedBytes[objOffset+1] = 0x01

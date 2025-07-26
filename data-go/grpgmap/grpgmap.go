@@ -3,7 +3,13 @@ package grpgmap
 import (
 	"cmp"
 	"grpg/data-go/gbuf"
-	"grpg/data-go/grpgtex"
+)
+
+type ObjType byte
+
+const (
+	UNDEFINED ObjType = iota
+	OBJ
 )
 
 type Header struct {
@@ -15,7 +21,7 @@ type Header struct {
 
 type Obj struct {
 	InternalId uint16
-	Type       grpgtex.TextureType
+	Type       ObjType
 }
 
 type Tile uint16
@@ -82,7 +88,7 @@ func ReadZone(buf *gbuf.GBuf) (Zone, error) {
 
 		objs[idx] = Obj{
 			InternalId: internalId,
-			Type:       grpgtex.TextureType(texType),
+			Type:       ObjType(texType),
 		}
 	}
 

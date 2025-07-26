@@ -22,7 +22,8 @@ type TextureType byte
 
 const (
 	UNDEFINED TextureType = 0x00
-	OBJ       TextureType = 0x01
+	TILE      TextureType = 0x01
+	OBJ       TextureType = 0x02
 )
 
 func (t Texture) Equals(other Texture) bool {
