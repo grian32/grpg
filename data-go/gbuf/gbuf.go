@@ -19,7 +19,7 @@ func NewGBuf(data []byte) *GBuf {
 
 func NewEmptyGBuf() *GBuf {
 	return &GBuf{
-		slice: []byte{},
+		slice: make([]byte, 0, 128),
 		pos:   0,
 	}
 }
@@ -115,7 +115,7 @@ func (buf *GBuf) WriteByte(val byte) {
 // Clear
 // Replaces the backing slice with an empty one
 func (buf *GBuf) Clear() {
-	buf.slice = make([]byte, 0)
+	buf.slice = make([]byte, 0, 128)
 	buf.pos = 0
 }
 
