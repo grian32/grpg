@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgmap"
-	"grpg/data-go/grpgtex"
 	"io"
 	"log"
 	"os"
@@ -13,10 +12,9 @@ import (
 	"server/util"
 )
 
-func LoadCollisionMaps(game *shared.Game) {
+func LoadCollisionMaps(dir string, game *shared.Game) {
 	game.CollisionMap = make(map[util.Vector2I]struct{})
 
-	dir := "../../grpg-assets/maps/"
 	entries, err := os.ReadDir(dir)
 
 	if err != nil {
@@ -44,13 +42,13 @@ func LoadCollisionMaps(game *shared.Game) {
 				log.Fatalf("File %s isn't GRPGMAP", fullPath)
 			}
 
-			tiles, err := grpgmap.ReadTiles(buf)
+			zone, err := grpgmap.ReadZone(buf)
 			if err != nil {
 				log.Fatalf("Error reading grpgmap tiles for file %s", fullPath)
 			}
 
-			for idx, tile := range tiles {
-				if tile.Type == grpgtex.OBJ {
+			for idx, obj := range zone.Objs {
+				if obj.InternalId != 0 && obj.Type == grpgmap.OBJ {
 					x := (idx % 16) + (int(header.ChunkX) * 16)
 					y := (idx / 16) + (int(header.ChunkY) * 16)
 

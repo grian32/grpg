@@ -5,6 +5,7 @@ import (
 	"grpg/data-go/grpgtex"
 	"image/png"
 	"io"
+	"log"
 	"os"
 
 	"github.com/pelletier/go-toml/v2"
@@ -48,6 +49,10 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 		pngBytes, err := io.ReadAll(f)
 		if err != nil {
 			return nil, err
+		}
+
+		if file.InternalId == 0 {
+			log.Fatalln("Integer ID 0 is reserved.")
 		}
 
 		tex[idx] = grpgtex.Texture{

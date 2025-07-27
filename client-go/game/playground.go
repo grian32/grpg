@@ -3,15 +3,8 @@ package game
 import (
 	"client/shared"
 	"client/util"
-	"cmp"
 	"fmt"
-	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgmap"
-	"grpg/data-go/grpgtex"
-	"io"
-	"log"
-	"os"
-	"path/filepath"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -20,105 +13,17 @@ type Playground struct {
 	Font     rl.Font
 	Game     *shared.Game
 	Textures map[uint16]rl.Texture2D
-	Maps     map[util.Vector2I][256]grpgmap.Tile
+	Zones    map[util.Vector2I]grpgmap.Zone
 }
 
+var assetsDirectory = "../../grpg-assets/"
+
 func (p *Playground) Setup() {
-	// TODO: move this out
+	// TODO: move font out
 	p.Font = rl.LoadFont("./assets/font.ttf")
 
-	p.Textures = make(map[uint16]rl.Texture2D)
-	p.Maps = make(map[util.Vector2I][256]grpgmap.Tile)
-
-	grpgTexFile, err1 := os.Open("../../grpg-assets/textures.pak")
-	grpgTexBytes, err2 := io.ReadAll(grpgTexFile)
-
-	if err := cmp.Or(err1, err2); err != nil {
-		log.Fatal("Failed reading GRPGTEX file")
-	}
-
-	defer grpgTexFile.Close()
-
-	buf := gbuf.NewGBuf(grpgTexBytes)
-	header, err := grpgtex.ReadHeader(buf)
-	if err != nil {
-		log.Fatalf("failed reading grpgtex header: %v", err)
-	}
-
-	if string(header.Magic[:]) != "GRPGTEX\x00" {
-		log.Fatal("File is not GRPGTEX file.")
-	}
-
-	log.Printf("Succesfully loaded GRPGTEX file with version %d\n", header.Version)
-
-	textures, err := grpgtex.ReadTextures(buf)
-	if err != nil {
-		log.Fatalf("failed reading grpgtex textures: %v", err)
-	}
-
-	for _, tex := range textures {
-		rlImage := rl.LoadImageFromMemory(".png", tex.PNGBytes, int32(len(tex.PNGBytes)))
-		rlTex := rl.LoadTextureFromImage(rlImage)
-
-		p.Textures[tex.InternalIdInt] = rlTex
-	}
-
-	dir := "../../grpg-assets/maps/"
-	entries, err := os.ReadDir(dir)
-
-	if err != nil {
-		log.Fatal("Error reading maps directory")
-	}
-
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			fullPath := filepath.Join(dir, entry.Name())
-
-			file, err1 := os.Open(fullPath)
-			bytes, err2 := io.ReadAll(file)
-
-			if err := cmp.Or(err1, err2); err != nil {
-				log.Fatalf("Error reading map file, %v", err)
-			}
-			defer file.Close()
-
-			buf := gbuf.NewGBuf(bytes)
-			header, err := grpgmap.ReadHeader(buf)
-			if err != nil {
-				log.Fatalf("reading grpgmap header errored: %v. file: %s", err, fullPath)
-			}
-
-			if string(header.Magic[:]) != "GRPGMAP\x00" {
-				log.Fatalf("File %s isn't GRPGMAP", fullPath)
-			}
-
-			tiles, err := grpgmap.ReadTiles(buf)
-			if err != nil {
-				log.Fatalf("reading grpgmap tiles errored: %v. file: %s", err, fullPath)
-			}
-
-			chunkPos := util.Vector2I{X: int32(header.ChunkX), Y: int32(header.ChunkY)}
-
-			p.Maps[chunkPos] = tiles
-
-			for idx, tile := range tiles {
-				if tile.Type == grpgtex.OBJ {
-					x := (idx % 16) + (int(header.ChunkX) * 16)
-					y := (idx / 16) + (int(header.ChunkY) * 16)
-
-					p.Game.CollisionMap[util.Vector2I{X: int32(x), Y: int32(y)}] = struct{}{}
-				}
-			}
-
-			if ((header.ChunkX+1)*16)-1 > p.Game.MaxX {
-				p.Game.MaxX = ((header.ChunkX + 1) * 16) - 1
-			}
-
-			if ((header.ChunkY+1)*16)-1 > p.Game.MaxY {
-				p.Game.MaxY = ((header.ChunkY + 1) * 16) - 1
-			}
-		}
-	}
+	p.Textures = loadTextures(assetsDirectory + "textures.pak")
+	p.Zones = loadMaps(assetsDirectory+"maps/", p.Game)
 }
 
 func (p *Playground) Cleanup() {
@@ -175,14 +80,20 @@ func (p *Playground) Render() {
 }
 
 func drawWorld(p *Playground) {
-	mapTiles := p.Maps[util.Vector2I{X: p.Game.Player.ChunkX, Y: p.Game.Player.ChunkY}]
+	mapTiles := p.Zones[util.Vector2I{X: p.Game.Player.ChunkX, Y: p.Game.Player.ChunkY}]
 
 	for i := range 256 {
 		dx := int32(i%16) * p.Game.TileSize
 		dy := int32(i/16) * p.Game.TileSize
 
-		tex := p.Textures[mapTiles[i].InternalId]
+		tex := p.Textures[uint16(mapTiles.Tiles[i])]
 		rl.DrawTexture(tex, dx, dy, rl.White)
+
+		obj := mapTiles.Objs[i]
+		if obj.InternalId != 0 && obj.Type == grpgmap.OBJ {
+			objTex := p.Textures[obj.InternalId]
+			rl.DrawTexture(objTex, dx, dy, rl.White)
+		}
 	}
 }
 

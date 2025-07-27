@@ -23,6 +23,7 @@ var (
 		MaxX:    0,
 		MaxY:    0,
 	}
+	assetsDirectory = "../../grpg-assets/"
 )
 
 type ChanPacket struct {
@@ -32,7 +33,7 @@ type ChanPacket struct {
 }
 
 func main() {
-	LoadCollisionMaps(g)
+	LoadCollisionMaps(assetsDirectory+"maps/", g)
 
 	listener, err := net.Listen("tcp", ":4422")
 	if err != nil {

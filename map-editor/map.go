@@ -29,8 +29,12 @@ func SaveMap() {
 	}
 
 	for idx, id := range gridObjTextures {
+		var structId uint16 = 0
+		if id != -1 {
+			structId = uint16(id)
+		}
 		objArr[idx] = grpgmap.Obj{
-			InternalId: uint16(id),
+			InternalId: structId,
 			Type:       grpgmap.ObjType(TextureTypeToMapType(textures[id].TextureType)),
 		}
 	}
