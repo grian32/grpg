@@ -1,9 +1,10 @@
 package main
 
 import (
-	g "github.com/AllenDang/giu"
 	"grpg/data-go/grpgtex"
 	"sort"
+
+	g "github.com/AllenDang/giu"
 )
 
 type GTexKV struct {
@@ -22,16 +23,16 @@ var (
 )
 
 func BuildSelectorTypeMaps() {
-	for name, tex := range textures {
+	for _, tex := range textures {
 		switch tex.TextureType {
 		case grpgtex.TILE:
 			tiles = append(tiles, GTexKV{
-				key: name,
+				key: tex.InternalIdString,
 				val: tex,
 			})
 		case grpgtex.OBJ:
 			objs = append(objs, GTexKV{
-				key: name,
+				key: tex.InternalIdString,
 				val: tex,
 			})
 		}

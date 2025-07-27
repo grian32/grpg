@@ -2,7 +2,7 @@
 
 Packs PNG textures into a texture.pak, this basically contains a "map" of texture ids to their PNG files, along with some extra metadata.
 
-Manifest File Format:
+## Manifest File Format
 
 ```toml
 texture = [

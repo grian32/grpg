@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgmap"
+	"grpg/data-go/grpgtex"
 	"io"
 	"os"
 
@@ -12,20 +13,25 @@ import (
 
 func SaveMap() {
 	tileArr := [256]grpgmap.Tile{}
+	objArr := [256]grpgmap.Obj{}
 
 	if chunkX == -1 || chunkY == -1 {
 		dialog.Message("Both Chunk X & Chunk Y must be set to save a map.").Error()
 		return
 	}
 
-	for idx, name := range gridTextures {
-		if name == "" {
+	for idx, id := range gridTileTextures {
+		if id == -1 {
 			dialog.Message("All tiles must be filled in to save a map.").Error()
 			return
 		}
-		tileArr[idx] = grpgmap.Tile{
-			InternalId: textures[name].InternalId,
-			Type:       textures[name].TextureType,
+		tileArr[idx] = grpgmap.Tile(id)
+	}
+
+	for idx, id := range gridObjTextures {
+		objArr[idx] = grpgmap.Obj{
+			InternalId: uint16(id),
+			Type:       grpgmap.ObjType(TextureTypeToMapType(textures[id].TextureType)),
 		}
 	}
 
@@ -56,7 +62,12 @@ func SaveMap() {
 		ChunkY:  uint16(chunkY),
 	})
 
-	grpgmap.WriteTiles(buf, tileArr)
+	zone := grpgmap.Zone{
+		Tiles: tileArr,
+		Objs:  objArr,
+	}
+
+	grpgmap.WriteZone(buf, zone)
 
 	_, err = file.Write(buf.Bytes())
 	if err != nil {
@@ -105,13 +116,28 @@ func LoadMap() {
 	chunkX = int32(header.ChunkX)
 	chunkY = int32(header.ChunkY)
 
-	tiles, err := grpgmap.ReadTiles(buf)
+	zone, err := grpgmap.ReadZone(buf)
 	if err != nil {
 		fmt.Println("reading grpgmap tiles errored: %w. file: %s", err, fileToLoad)
 		return
 	}
 
-	for idx, tile := range tiles {
-		gridTextures[idx] = texturesById[tile.InternalId].InternalIdString
+	for idx, tile := range zone.Tiles {
+		gridTileTextures[idx] = int32(tile)
+	}
+
+	for idx, obj := range zone.Objs {
+		gridObjTextures[idx] = int32(obj.InternalId)
+	}
+}
+
+func TextureTypeToMapType(texType grpgtex.TextureType) grpgmap.ObjType {
+	switch texType {
+	case grpgtex.OBJ:
+		return grpgmap.OBJ
+	case grpgtex.TILE, grpgtex.UNDEFINED:
+		return grpgmap.UNDEFINED
+	default:
+		return grpgmap.UNDEFINED
 	}
 }

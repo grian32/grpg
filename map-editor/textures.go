@@ -24,8 +24,7 @@ type GiuTextureTyped struct {
 }
 
 var (
-	textures     = make(map[string]GiuTextureTyped)
-	texturesById = make(map[uint16]GiuTextureTyped)
+	textures = make(map[int32]GiuTextureTyped)
 )
 
 func LoadTextures() {
@@ -88,8 +87,7 @@ func LoadTextures() {
 				FormattedStringId: fmt.Sprintf("%s(id: %d)", internalId, tex.InternalIdInt),
 				TextureType:       tex.Type,
 			}
-			textures[internalId] = typed
-			texturesById[tex.InternalIdInt] = typed
+			textures[int32(tex.InternalIdInt)] = typed
 		})
 	}
 

@@ -1,19 +1,28 @@
 package main
 
 import (
-	"github.com/AllenDang/cimgui-go/imgui"
+	"fmt"
+	"grpg/data-go/grpgtex"
 	"image"
 	"image/color"
+
+	"github.com/AllenDang/cimgui-go/imgui"
 
 	g "github.com/AllenDang/giu"
 )
 
 var (
-	defaultTex   *g.Texture
-	gridTextures = [256]string{}
+	defaultTex       *g.Texture
+	gridTileTextures = [256]int32{}
+	gridObjTextures  = [256]int32{}
 )
 
 func LoadDefaultGridTex() {
+	for idx := range 256 {
+		gridTileTextures[idx] = -1
+		gridObjTextures[idx] = -1
+	}
+
 	rgba, _ := g.LoadImage("./default_editor.png")
 
 	g.NewTextureFromRgba(rgba, func(t *g.Texture) {
@@ -35,14 +44,20 @@ func BuildGrid() g.Widget {
 				minPt := image.Pt(pos.X+(dx*64), pos.Y+(dy*64))
 				maxPt := image.Pt(pos.X+(dx*64)+64, pos.Y+(dy*64)+64)
 
-				texName := gridTextures[dx+dy*16]
-				tex := textures[texName].Texture
-				if texName == "" {
-					tex = defaultTex
+				texTileName := gridTileTextures[dx+dy*16]
+				tileTex := textures[texTileName].Texture
+				if texTileName == -1 {
+					tileTex = defaultTex
 				}
 
-				canvas.AddImage(tex, minPt, maxPt)
+				texObjName := gridObjTextures[dx+dy*16]
+				objTex, objOk := textures[texObjName]
+
+				canvas.AddImage(tileTex, minPt, maxPt)
 				canvas.AddRect(minPt, maxPt, color.RGBA{0, 0, 0, 255}, 0.0, g.DrawFlagsClosed, 1.0)
+				if objOk {
+					canvas.AddImage(objTex.Texture, minPt, maxPt)
+				}
 			}
 		}
 
@@ -56,7 +71,25 @@ func BuildGrid() g.Widget {
 				gridX := int(dx) / 64
 				gridY := int(dy) / 64
 
-				gridTextures[gridX+gridY*16] = currentlySelected.key
+				currPos := gridX + gridY*16
+
+				if eraserEnabled {
+					if gridObjTextures[currPos] != -1 {
+						gridObjTextures[currPos] = -1
+					} else if gridTileTextures[currPos] != -1 {
+						gridTileTextures[currPos] = -1
+					}
+				} else {
+					switch currentlySelected.val.TextureType {
+					case grpgtex.OBJ:
+						gridObjTextures[currPos] = int32(currentlySelected.val.InternalId)
+					case grpgtex.TILE:
+						gridTileTextures[currPos] = int32(currentlySelected.val.InternalId)
+					case grpgtex.UNDEFINED:
+					default:
+						panic(fmt.Sprintf("unexpected grpgtex.TextureType: %#v", currentlySelected.val.TextureType))
+					}
+				}
 			}
 		}
 	})

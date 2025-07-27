@@ -11,9 +11,9 @@ func SetAllEmptyTiles() {
 		dialog.Message("No tile currently selected/textures not loaded.").Error()
 	}
 
-	for idx, _ := range gridTextures {
-		if gridTextures[idx] == "" {
-			gridTextures[idx] = currentlySelected.val.InternalIdString
+	for idx, _ := range gridTileTextures {
+		if gridTileTextures[idx] == -1 {
+			gridTileTextures[idx] = int32(currentlySelected.val.InternalId)
 		}
 	}
 }
@@ -25,8 +25,9 @@ func ClearGrid() {
 		return
 	}
 
-	for idx, _ := range gridTextures {
-		gridTextures[idx] = ""
+	for idx, _ := range gridTileTextures {
+		gridTileTextures[idx] = -1
+		gridObjTextures[idx] = -1
 	}
 }
 
