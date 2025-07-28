@@ -42,13 +42,13 @@ func TestParseManifestFile(t *testing.T) {
 	expected := []GRPGTexManifestEntry{
 		{
 			InternalName: "grass",
-			InternalId:   0,
+			InternalId:   1,
 			FilePath:     "testdata/grass_texture.png",
 			Type:         "TILE",
 		},
 		{
 			InternalName: "stone",
-			InternalId:   1,
+			InternalId:   2,
 			FilePath:     "testdata/stone_texture.png",
 			Type:         "OBJ",
 		},
@@ -68,13 +68,13 @@ func TestBuildGRPGTexFromManifest(t *testing.T) {
 	manifest := []GRPGTexManifestEntry{
 		{
 			InternalName: "grass",
-			InternalId:   0,
+			InternalId:   1,
 			FilePath:     "testdata/grass_texture.png",
 			Type:         "TILE",
 		},
 		{
 			InternalName: "stone",
-			InternalId:   1,
+			InternalId:   2,
 			FilePath:     "testdata/stone_texture.png",
 			Type:         "OBJ",
 		},
@@ -83,13 +83,13 @@ func TestBuildGRPGTexFromManifest(t *testing.T) {
 	expected := []grpgtex.Texture{
 		{
 			InternalIdString: []byte("grass"),
-			InternalIdInt:    0,
+			InternalIdInt:    1,
 			PNGBytes:         grassPngBytes,
 			Type:             grpgtex.TILE,
 		},
 		{
 			InternalIdString: []byte("stone"),
-			InternalIdInt:    1,
+			InternalIdInt:    2,
 			PNGBytes:         stonePngBytes,
 			Type:             grpgtex.OBJ,
 		},
