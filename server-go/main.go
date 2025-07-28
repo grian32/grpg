@@ -74,7 +74,7 @@ func cycle(packets chan ChanPacket) {
 			}
 		}
 
-		diff := expectedTime.Sub(time.Now())
+		diff := time.Until(expectedTime)
 		if diff > 0 {
 			time.Sleep(diff)
 		}
