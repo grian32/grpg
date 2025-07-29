@@ -4,9 +4,10 @@ import (
 	"client/network/c2s"
 	"client/shared"
 	"client/util"
+	"image/color"
+
 	rg "github.com/gen2brain/raylib-go/raygui"
 	rl "github.com/gen2brain/raylib-go/raylib"
-	"image/color"
 )
 
 type LoginScreen struct {

@@ -6,12 +6,13 @@ import (
 	"client/shared"
 	"client/util"
 	"flag"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 var (
 	g = &shared.Game{
-		ScreenWidth:     960,
+		ScreenWidth:     1088,
 		ScreenHeight:    960,
 		TileSize:        64,
 		MaxX:            0,
@@ -30,7 +31,7 @@ func main() {
 
 	flag.Parse()
 
-	rl.InitWindow(960, 960, *windowTitle)
+	rl.InitWindow(g.ScreenWidth, g.ScreenHeight, *windowTitle)
 
 	g.SceneManager.SwitchTo(&game.LoginScreen{
 		Game: g,

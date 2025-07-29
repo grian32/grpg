@@ -115,3 +115,15 @@ func loadMaps(dirPath string, game *shared.Game) map[util.Vector2I]grpgmap.Zone 
 
 	return zoneMap
 }
+
+func loadGameframeRightTexture(texturePath string) rl.Texture2D {
+	file, err1 := os.Open(texturePath)
+	bytes, err2 := io.ReadAll(file)
+
+	if err := cmp.Or(err1, err2); err != nil {
+		log.Fatalf("errored while trying to load gameframe right texture %w", err)
+	}
+
+	image := rl.LoadImageFromMemory(".png", bytes, int32(len(bytes)))
+	return rl.LoadTextureFromImage(image)
+}
