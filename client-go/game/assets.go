@@ -121,7 +121,7 @@ func loadGameframeRightTexture(texturePath string) rl.Texture2D {
 	bytes, err2 := io.ReadAll(file)
 
 	if err := cmp.Or(err1, err2); err != nil {
-		log.Fatalf("errored while trying to load gameframe right texture %w", err)
+		log.Fatalf("errored while trying to load gameframe right texture %s", err.Error())
 	}
 
 	image := rl.LoadImageFromMemory(".png", bytes, int32(len(bytes)))
