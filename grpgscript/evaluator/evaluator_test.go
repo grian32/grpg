@@ -4,6 +4,7 @@ import (
 	"grpgscript/lexer"
 	"grpgscript/object"
 	"grpgscript/parser"
+	"grpgscript/perf"
 	"testing"
 )
 
@@ -291,6 +292,9 @@ func testEval(input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
+
+	perf.ConstFold(program)
+
 	env := object.NewEnvironment()
 
 	return Eval(program, env)

@@ -200,3 +200,36 @@ func BenchmarkEval_ConstFold(b *testing.B) {
 		}
 	})
 }
+
+func BenchmarkBooleanFoldingMicro(b *testing.B) {
+	input := "!(!true)"
+
+	b.Run("NoFold", func(b *testing.B) {
+		l := lexer.New(input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+
+		b.ResetTimer()
+
+		for b.Loop() {
+			env := object.NewEnvironment()
+			result := Eval(program, env)
+			_ = result
+		}
+	})
+
+	b.Run("Fold", func(b *testing.B) {
+		l := lexer.New(input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		perf.ConstFold(program)
+
+		b.ResetTimer()
+
+		for b.Loop() {
+			env := object.NewEnvironment()
+			result := Eval(program, env)
+			_ = result
+		}
+	})
+}
