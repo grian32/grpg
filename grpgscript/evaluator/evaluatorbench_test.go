@@ -1,9 +1,11 @@
 package evaluator
 
 import (
+	"fmt"
 	"grpgscript/lexer"
 	"grpgscript/object"
 	"grpgscript/parser"
+	"grpgscript/perf"
 	"testing"
 )
 
@@ -80,4 +82,117 @@ func BenchmarkEvalBuiltinCalls(b *testing.B) {
 		result := Eval(program, env)
 		_ = result
 	}
+}
+
+const foldTestInput = `
+var x = (1 + 2) * (3 + 4);
+var y = x + 10;
+var z = y * 2;
+
+var a = 5 * 5 + 5 * (2 + 3);
+var b = a + 100;
+var c = -x;
+
+var notTrue = !true;
+var notFalse = !false;
+var doubleNot = !!true;
+var notComparison = !(1 < 2);
+var notEquality = !(1 == 2);
+var notExpression = !(5 + 5 == 10);
+
+b + z - c;
+`
+const foldTestInputLarge = `
+var a = (1 + 2) * (3 + 4);
+var b = -(5 * 6);
+var c = !false;
+var d = !!true;
+var e = !(1 < 2);
+var f = !!((2 + 2) == 4);
+var g = !((10 - 5) > 2);
+var h = -(3 + 2) * -(1 + 1);
+var i = -(-(1 + 1));
+var j = !(!(!(false)));
+
+var k = 100 + 200 - 50 * 2;
+var l = (3 * 3 + 3 * (2 + 3)) / 3;
+var m = -(100 - 50);
+var n = !((5 + 5) == 10);
+var o = ((3 < 4) == false);
+var p = ((10 > 5) == true);
+var q = ((true == !false) == true);
+var r = -(-(-(10)));
+var s = !!(!(!!true));
+var t = (2 + 2 + 2 + 2 + 2 + 2 + 2) * 0;
+
+a + b + h + i + k + l + m + r + t;
+`
+
+func BenchmarkEval_NoConstFold(b *testing.B) {
+	// TODO: maybe abstract?
+	b.Run("NormalInput", func(b *testing.B) {
+		l := lexer.New(foldTestInput)
+		p := parser.New(l)
+		program := p.ParseProgram()
+
+		b.ResetTimer()
+
+		for b.Loop() {
+			env := object.NewEnvironment()
+			result := Eval(program, env)
+			_ = result
+		}
+	})
+
+	b.Run("LargeInput", func(b *testing.B) {
+		l := lexer.New(foldTestInputLarge)
+		p := parser.New(l)
+		program := p.ParseProgram()
+
+		if len(p.Errors()) > 0 {
+			for _, err := range p.Errors() {
+				fmt.Println("Parse error:", err)
+			}
+		}
+
+		b.ResetTimer()
+
+		for b.Loop() {
+			env := object.NewEnvironment()
+			result := Eval(program, env)
+			_ = result
+		}
+	})
+}
+
+func BenchmarkEval_ConstFold(b *testing.B) {
+	b.Run("NormalInput", func(b *testing.B) {
+		l := lexer.New(foldTestInput)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		perf.ConstFold(program)
+
+		b.ResetTimer()
+
+		for b.Loop() {
+			env := object.NewEnvironment()
+			result := Eval(program, env)
+			_ = result
+		}
+	})
+
+	b.Run("LargeInput", func(b *testing.B) {
+		l := lexer.New(foldTestInputLarge)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		perf.ConstFold(program)
+
+		b.ResetTimer()
+
+		for b.Loop() {
+			env := object.NewEnvironment()
+			result := Eval(program, env)
+			_ = result
+		}
+	})
 }
