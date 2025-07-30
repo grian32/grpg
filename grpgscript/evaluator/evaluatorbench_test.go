@@ -51,6 +51,8 @@ fib(getMap(true)) + fib(getMap(false))
 	p := parser.New(l)
 	program := p.ParseProgram()
 
+	perf.ConstFold(program)
+
 	b.ResetTimer()
 
 	for b.Loop() {
@@ -74,6 +76,8 @@ func BenchmarkEvalBuiltinCalls(b *testing.B) {
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
+
+	perf.ConstFold(program)
 
 	b.ResetTimer()
 
