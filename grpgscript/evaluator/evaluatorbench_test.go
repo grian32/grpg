@@ -1,7 +1,6 @@
 package evaluator
 
 import (
-	"fmt"
 	"grpgscript/lexer"
 	"grpgscript/object"
 	"grpgscript/parser"
@@ -133,78 +132,24 @@ a + b + h + i + k + l + m + r + t;
 `
 
 func BenchmarkEval_NoConstFold(b *testing.B) {
-	// TODO: maybe abstract?
-	b.Run("NormalInput", func(b *testing.B) {
-		l := lexer.New(foldTestInput)
-		p := parser.New(l)
-		program := p.ParseProgram()
-
-		b.ResetTimer()
-
-		for b.Loop() {
-			env := object.NewEnvironment()
-			result := Eval(program, env)
-			_ = result
-		}
-	})
-
-	b.Run("LargeInput", func(b *testing.B) {
-		l := lexer.New(foldTestInputLarge)
-		p := parser.New(l)
-		program := p.ParseProgram()
-
-		if len(p.Errors()) > 0 {
-			for _, err := range p.Errors() {
-				fmt.Println("Parse error:", err)
-			}
-		}
-
-		b.ResetTimer()
-
-		for b.Loop() {
-			env := object.NewEnvironment()
-			result := Eval(program, env)
-			_ = result
-		}
-	})
+	runBenchWithoutFolding(b, "NormalInput", foldTestInput)
+	runBenchWithoutFolding(b, "LargeInput", foldTestInputLarge)
 }
 
 func BenchmarkEval_ConstFold(b *testing.B) {
-	b.Run("NormalInput", func(b *testing.B) {
-		l := lexer.New(foldTestInput)
-		p := parser.New(l)
-		program := p.ParseProgram()
-		perf.ConstFold(program)
-
-		b.ResetTimer()
-
-		for b.Loop() {
-			env := object.NewEnvironment()
-			result := Eval(program, env)
-			_ = result
-		}
-	})
-
-	b.Run("LargeInput", func(b *testing.B) {
-		l := lexer.New(foldTestInputLarge)
-		p := parser.New(l)
-		program := p.ParseProgram()
-		perf.ConstFold(program)
-
-		b.ResetTimer()
-
-		for b.Loop() {
-			env := object.NewEnvironment()
-			result := Eval(program, env)
-			_ = result
-		}
-	})
+	runBenchWithFolding(b, "NormalInput", foldTestInput)
+	runBenchWithFolding(b, "LargeInput", foldTestInputLarge)
 }
 
 func BenchmarkBooleanFoldingMicro(b *testing.B) {
 	input := "!(!true)"
 
-	b.Run("NoFold", func(b *testing.B) {
+	runBenchWithoutFolding(b, "NoFold", input)
+	runBenchWithFolding(b, "Fold", input)
+}
+
+func runBenchWithoutFolding(b *testing.B, name, input string) {
+	b.Run(name, func(b *testing.B) {
 		l := lexer.New(input)
 		p := parser.New(l)
 		program := p.ParseProgram()
@@ -217,11 +162,14 @@ func BenchmarkBooleanFoldingMicro(b *testing.B) {
 			_ = result
 		}
 	})
+}
 
-	b.Run("Fold", func(b *testing.B) {
+func runBenchWithFolding(b *testing.B, name, input string) {
+	b.Run(name, func(b *testing.B) {
 		l := lexer.New(input)
 		p := parser.New(l)
 		program := p.ParseProgram()
+
 		perf.ConstFold(program)
 
 		b.ResetTimer()
