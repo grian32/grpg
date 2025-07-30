@@ -65,11 +65,11 @@ func foldExpr(expr ast.Expression) ast.Expression {
 		case "-":
 			if intLit, ok := right.(*ast.IntegerLiteral); ok {
 				return &ast.IntegerLiteral{Value: -intLit.Value}
-			} else if boolLit, ok := right.(*ast.Boolean); ok {
-				return &ast.Boolean{Value: !boolLit.Value}
 			}
 		case "!":
-
+			if boolLit, ok := right.(*ast.Boolean); ok {
+				return &ast.Boolean{Value: !boolLit.Value}
+			}
 		}
 	default:
 		return expr
