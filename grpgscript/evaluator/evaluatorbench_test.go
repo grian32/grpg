@@ -103,13 +103,6 @@ var notComparison = !(1 < 2);
 var notEquality = !(1 == 2);
 var notExpression = !(5 + 5 == 10);
 
-var arrLen = len([1, 2, 3, 4]);
-var strLen = len("hello");
-var mapLen = len({"a": 1, "b": 2, "c": 3});
-
-var foldedArr = [1 + 2, 3 * 4, !(false)];
-var foldedMap = {"a": 5 * 5, "b": 1 + 1};
-
 b + z - c;
 `
 const foldTestInputLarge = `
