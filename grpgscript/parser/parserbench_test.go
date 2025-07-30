@@ -22,6 +22,8 @@ if (5 < 10) {
 }
 `
 
+	b.ResetTimer()
+
 	for b.Loop() {
 		l := lexer.New(input)
 		p := New(l)
