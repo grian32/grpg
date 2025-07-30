@@ -56,7 +56,6 @@ func foldExpr(expr ast.Expression) ast.Expression {
 				return &ast.IntegerLiteral{Value: leftInt.Value - rightInt.Value}
 			}
 		}
-
 	case *ast.PrefixExpression:
 		right := foldExpr(e.Right)
 		e.Right = right
@@ -71,6 +70,11 @@ func foldExpr(expr ast.Expression) ast.Expression {
 				return &ast.Boolean{Value: !boolLit.Value}
 			}
 		}
+	case *ast.CallExpresion:
+		for idx, arg := range e.Arguments {
+			e.Arguments[idx] = foldExpr(arg)
+		}
+		return e
 	default:
 		return expr
 	}
