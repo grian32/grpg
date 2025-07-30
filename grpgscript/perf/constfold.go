@@ -74,6 +74,19 @@ func foldExpr(expr ast.Expression) ast.Expression {
 		for idx, arg := range e.Arguments {
 			e.Arguments[idx] = foldExpr(arg)
 		}
+
+		if ident, ok := e.Function.(*ast.Identifier); ok && len(e.Arguments) == 1 {
+			switch ident.Value {
+			case "len":
+				switch arg := e.Arguments[0].(type) {
+				case *ast.StringLiteral:
+					return &ast.IntegerLiteral{Value: int64(len(arg.Value))}
+				case *ast.ArrayLiteral:
+					return &ast.IntegerLiteral{Value: int64(len(arg.Elements))}
+				}
+			}
+		}
+
 		return e
 	default:
 		return expr

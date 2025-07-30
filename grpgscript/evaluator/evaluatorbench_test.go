@@ -103,11 +103,14 @@ var notComparison = !(1 < 2);
 var notEquality = !(1 == 2);
 var notExpression = !(5 + 5 == 10);
 
-var add = fnc (x, y) {
-	return x + y;
-};
+var arrLen = len([1, 2, 3, 4]);
+var strLen = len("hello");
+var mapLen = len({"a": 1, "b": 2, "c": 3});
 
-b + z - c + add(5 * 3, 4 + 4);
+var foldedArr = [1 + 2, 3 * 4, !(false)];
+var foldedMap = {"a": 5 * 5, "b": 1 + 1};
+
+b + z - c;
 `
 const foldTestInputLarge = `
 var a = (1 + 2) * (3 + 4);
@@ -132,11 +135,7 @@ var r = -(-(-(10)));
 var s = !!(!(!!true));
 var t = (2 + 2 + 2 + 2 + 2 + 2 + 2) * 0;
 
-var add = fnc (x, y) {
-	return x + y;
-};
-
-a + b + h + i + k + l + m + r + t + add(234 * 421, 422 * 22) + add(2 / 2, 4 + 4);
+a + b + h + i + k + l + m + r + t;
 `
 
 func BenchmarkEval_NoConstFold(b *testing.B) {
