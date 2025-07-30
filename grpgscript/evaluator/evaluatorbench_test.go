@@ -33,7 +33,7 @@ var arr = [1,2,3,4];
 
 fib(arr[3]) + 3;
 
-var map = {"hey": 5, "bye": 6}l
+var map = {"hey": 5, "bye": 6}
 
 var getMap = fnc(bool) {
 	if (bool) {
