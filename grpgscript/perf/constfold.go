@@ -44,6 +44,9 @@ func foldExpr(expr ast.Expression) ast.Expression {
 		leftInt, leftOk := left.(*ast.IntegerLiteral)
 		rightInt, rightOk := right.(*ast.IntegerLiteral)
 
+		leftBool, leftBoolOk := left.(*ast.Boolean)
+		rightBool, rightBoolOk := right.(*ast.Boolean)
+
 		if leftOk && rightOk {
 			switch e.Operator {
 			case "+":
@@ -54,6 +57,25 @@ func foldExpr(expr ast.Expression) ast.Expression {
 				return &ast.IntegerLiteral{Value: leftInt.Value / rightInt.Value}
 			case "-":
 				return &ast.IntegerLiteral{Value: leftInt.Value - rightInt.Value}
+			case "<":
+				return &ast.Boolean{Value: leftInt.Value < rightInt.Value}
+			case ">":
+				return &ast.Boolean{Value: leftInt.Value > rightInt.Value}
+			case "==":
+				return &ast.Boolean{Value: leftInt.Value == rightInt.Value}
+			case "!=":
+				return &ast.Boolean{Value: leftInt.Value != rightInt.Value}
+			}
+		}
+
+		// this should also handle stuff like (2 < 3) != false,
+		// since 2 < 3 gets folded down to true, and then true != false gets handled by this
+		if leftBoolOk && rightBoolOk {
+			switch e.Operator {
+			case "==":
+				return &ast.Boolean{Value: leftBool.Value == rightBool.Value}
+			case "!=":
+				return &ast.Boolean{Value: leftBool.Value != rightBool.Value}
 			}
 		}
 	case *ast.PrefixExpression:
