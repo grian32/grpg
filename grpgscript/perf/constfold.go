@@ -41,13 +41,13 @@ func foldExpr(expr ast.Expression) ast.Expression {
 		e.Left = left
 		e.Right = right
 
-		leftInt, leftOk := left.(*ast.IntegerLiteral)
-		rightInt, rightOk := right.(*ast.IntegerLiteral)
+		leftInt, leftIntOk := left.(*ast.IntegerLiteral)
+		rightInt, rightIntOk := right.(*ast.IntegerLiteral)
 
 		leftBool, leftBoolOk := left.(*ast.Boolean)
 		rightBool, rightBoolOk := right.(*ast.Boolean)
 
-		if leftOk && rightOk {
+		if leftIntOk && rightIntOk {
 			switch e.Operator {
 			case "+":
 				return &ast.IntegerLiteral{Value: leftInt.Value + rightInt.Value}
