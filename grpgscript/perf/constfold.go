@@ -17,6 +17,7 @@ func foldStmt(stmt ast.Statement) ast.Statement {
 		for idx, bStmt := range s.Statements {
 			s.Statements[idx] = foldStmt(bStmt)
 		}
+		return s
 	case *ast.ExpressionStatement:
 		s.Expression = foldExpr(s.Expression)
 		return s
@@ -29,8 +30,6 @@ func foldStmt(stmt ast.Statement) ast.Statement {
 	default:
 		panic(fmt.Sprintf("unexpected ast.Statement: %#v", s))
 	}
-
-	return nil
 }
 
 func foldExpr(expr ast.Expression) ast.Expression {
