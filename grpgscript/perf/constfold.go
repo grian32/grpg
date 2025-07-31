@@ -54,7 +54,9 @@ func foldExpr(expr ast.Expression) ast.Expression {
 			case "*":
 				return &ast.IntegerLiteral{Value: leftInt.Value * rightInt.Value}
 			case "/":
-				return &ast.IntegerLiteral{Value: leftInt.Value / rightInt.Value}
+				if rightInt.Value != 0 {
+					return &ast.IntegerLiteral{Value: leftInt.Value / rightInt.Value}
+				}
 			case "-":
 				return &ast.IntegerLiteral{Value: leftInt.Value - rightInt.Value}
 			case "<":
