@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"fmt"
 	"grpgscript/lexer"
 	"grpgscript/object"
 	"grpgscript/parser"
@@ -148,6 +149,43 @@ func BenchmarkBooleanFoldingMicro(b *testing.B) {
 	runBenchWithFolding(b, "Fold", input)
 }
 
+const deadCodeTestInput = `
+var a = fnc() {
+	if (true) {
+		return "Hello";
+	} else {
+		return "Bye!";
+	}
+}
+
+var b = fnc() {
+	if (false) {
+		return "Hello";
+	} else {
+		return "Bye!";
+	}
+}
+
+var x = a()
+var y = b()
+
+y;
+`
+
+const deadCodeTestInputLarge = `
+
+`
+
+func BenchmarkEval_NoElimDeadCode(b *testing.B) {
+	runBenchWithoutDeadCodeElim(b, "NormalInput", deadCodeTestInput)
+	runBenchWithoutDeadCodeElim(b, "LargeInput", deadCodeTestInputLarge)
+}
+
+func BenchmarkEval_ElimDeadCode(b *testing.B) {
+	runBenchWithDeadCodeElim(b, "NormalInput", deadCodeTestInput)
+	runBenchWithDeadCodeElim(b, "LargeInput", deadCodeTestInputLarge)
+}
+
 func runBenchWithoutFolding(b *testing.B, name, input string) {
 	b.Run(name, func(b *testing.B) {
 		l := lexer.New(input)
@@ -171,6 +209,47 @@ func runBenchWithFolding(b *testing.B, name, input string) {
 		program := p.ParseProgram()
 
 		perf.ConstFold(program)
+
+		b.ResetTimer()
+
+		for b.Loop() {
+			env := object.NewEnvironment()
+			result := Eval(program, env)
+			_ = result
+		}
+	})
+}
+
+func runBenchWithoutDeadCodeElim(b *testing.B, name, input string) {
+	b.Run(name, func(b *testing.B) {
+		l := lexer.New(input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+
+		perf.ConstFold(program)
+
+		fmt.Println(program)
+
+		b.ResetTimer()
+
+		for b.Loop() {
+			env := object.NewEnvironment()
+			result := Eval(program, env)
+			_ = result
+		}
+	})
+}
+
+func runBenchWithDeadCodeElim(b *testing.B, name, input string) {
+	b.Run(name, func(b *testing.B) {
+		l := lexer.New(input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+
+		perf.ConstFold(program)
+		perf.ElimDeadCode(program)
+
+		fmt.Println(program)
 
 		b.ResetTimer()
 

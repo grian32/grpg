@@ -12,7 +12,7 @@ import (
 
 var (
 	g = &shared.Game{
-		ScreenWidth:     1088,
+		ScreenWidth:     1152,
 		ScreenHeight:    960,
 		TileSize:        64,
 		MaxX:            0,

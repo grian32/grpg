@@ -10,11 +10,12 @@ import (
 )
 
 type Playground struct {
-	Font           rl.Font
-	Game           *shared.Game
-	GameframeRight rl.Texture2D
-	Textures       map[uint16]rl.Texture2D
-	Zones          map[util.Vector2I]grpgmap.Zone
+	Font             rl.Font
+	Game             *shared.Game
+	GameframeRight   rl.Texture2D
+	Textures         map[uint16]rl.Texture2D
+	Zones            map[util.Vector2I]grpgmap.Zone
+	CurrActionString string
 }
 
 var assetsDirectory = "../../grpg-assets/"
@@ -22,6 +23,7 @@ var assetsDirectory = "../../grpg-assets/"
 func (p *Playground) Setup() {
 	// TODO: move font out
 	p.Font = rl.LoadFont("./assets/font.ttf")
+	p.CurrActionString = "Current Action: None :("
 
 	p.Textures = loadTextures(assetsDirectory + "textures.pak")
 	p.Zones = loadMaps(assetsDirectory+"maps/", p.Game)
@@ -131,7 +133,7 @@ func drawGameFrame(p *Playground) {
 	// rl.DrawTextEx(p.Font, "inventory or something", rl.Vector2{X: 768, Y: 0}, 24, 0, rl.White)
 	rl.DrawTexture(p.GameframeRight, 768, 0, rl.White)
 	rl.DrawRectangle(0, 768, 960-192, 192, rl.Blue)
-	rl.DrawTextEx(p.Font, "something else eventually", rl.Vector2{X: 0, Y: 768}, 24, 0, rl.White)
+	rl.DrawTextEx(p.Font, p.CurrActionString, rl.Vector2{X: 0, Y: 768}, 24, 0, rl.White)
 	playerCoords := fmt.Sprintf("X: %d, Y: %d", p.Game.Player.X, p.Game.Player.Y)
 	rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 0, Y: 800}, 24, 0, rl.White)
 }
