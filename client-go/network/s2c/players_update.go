@@ -10,14 +10,14 @@ import (
 type PlayersUpdate struct{}
 
 func (p PlayersUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
-	var lst []shared.RemotePlayer
-
 	playersLen, err := buf.ReadUint16()
 
 	if err != nil {
 		fmt.Printf("Failed to read players update\n")
 		return
 	}
+
+	sentNames := map[string]struct{}{}
 
 	for _ = range playersLen {
 		name, err1 := buf.ReadString()
@@ -35,9 +35,22 @@ func (p PlayersUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		if name == game.Player.Name {
 			game.Player.Move(newX, newY)
 		} else {
-			lst = append(lst, shared.NewRemotePlayer(newX, newY, shared.DOWN, name, game))
+			// TODO: could store in something, to avoid realloc
+			sentNames[name] = struct{}{}
+			player, exists := game.OtherPlayers[name]
+			if exists {
+				player.Move(newX, newY)
+			} else {
+				game.OtherPlayers[name] = shared.NewRemotePlayer(newX, newY, shared.DOWN, name)
+			}
 		}
 	}
 
-	game.OtherPlayers = lst
+	for existingName, _ := range game.OtherPlayers {
+		_, nameExists := sentNames[existingName]
+
+		if !nameExists {
+			delete(game.OtherPlayers, existingName)
+		}
+	}
 }

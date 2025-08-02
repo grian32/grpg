@@ -16,7 +16,7 @@ type Game struct {
 	TileSize        int32
 	SceneManager    *GSceneManager
 	Player          *LocalPlayer
-	OtherPlayers    []RemotePlayer
+	OtherPlayers    map[string]*RemotePlayer
 	Conn            net.Conn
 	ShowFailedLogin bool
 }

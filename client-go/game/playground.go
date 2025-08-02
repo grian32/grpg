@@ -37,6 +37,7 @@ func (p *Playground) Setup() {
 
 func (p *Playground) Cleanup() {
 	rl.UnloadFont(p.Font)
+	// TODO: unload all textures :S
 }
 
 func (p *Playground) Loop() {
@@ -57,6 +58,10 @@ func (p *Playground) Loop() {
 	}
 
 	player.Update(p.Game)
+
+	for _, rp := range p.Game.OtherPlayers {
+		rp.Update(p.Game)
+	}
 
 	var cameraX = 4 * p.Game.TileSize
 	var cameraY = 4 * p.Game.TileSize
@@ -148,7 +153,7 @@ func drawPlayer(p *Playground) {
 
 func drawOtherPlayers(p *Playground) {
 	for _, player := range p.Game.OtherPlayers {
-		rl.DrawRectangle(player.RealX, player.RealY, 64, 64, rl.SkyBlue)
+		rl.DrawTexture(p.PlayerTextures[player.Facing], player.RealX, player.RealY, rl.White)
 		rl.DrawTextEx(
 			p.Font,
 			player.Name,

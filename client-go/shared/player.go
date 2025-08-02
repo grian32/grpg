@@ -72,13 +72,48 @@ type RemotePlayer struct {
 	Name         string
 }
 
-func NewRemotePlayer(x, y int32, facing Direction, name string, game *Game) RemotePlayer {
-	return RemotePlayer{
+func NewRemotePlayer(x, y int32, facing Direction, name string) *RemotePlayer {
+	return &RemotePlayer{
 		X:      x,
 		Y:      y,
-		RealX:  (x % 16) * game.TileSize,
-		RealY:  (y % 16) * game.TileSize,
 		Facing: facing,
 		Name:   name,
 	}
+}
+
+func (rp *RemotePlayer) Move(newX, newY int32) {
+	rp.X = newX
+	rp.Y = newY
+}
+
+func (rp *RemotePlayer) Update(game *Game) {
+	targetX := (rp.X % 16) * game.TileSize
+	targetY := (rp.Y % 16) * game.TileSize
+
+	// just logged in, basically.
+	if rp.PrevX == 0 && rp.PrevY == 0 {
+		rp.RealX = targetX
+		rp.RealY = targetY
+
+		rp.PrevX = rp.X
+		rp.PrevY = rp.Y
+		return
+	}
+
+	const speed = 16.0
+
+	if rp.RealX < targetX {
+		rp.RealX += speed
+	} else if rp.RealX > targetX {
+		rp.RealX -= speed
+	}
+
+	if rp.RealY < targetY {
+		rp.RealY += speed
+	} else if rp.RealY > targetY {
+		rp.RealY -= speed
+	}
+
+	rp.PrevX = rp.X
+	rp.PrevY = rp.Y
 }
