@@ -56,34 +56,7 @@ func (p *Playground) Loop() {
 		player.SendMovePacket(p.Game, player.X+1, player.Y)
 	}
 
-	// TODO: move player updates to a function on player.. also do this on remote players,
-	// TODO: keep track whether the player/remote player has recently moved.
-	targetX := (player.X % 16) * p.Game.TileSize
-	targetY := (player.Y % 16) * p.Game.TileSize
-
-	const speed = 16.0
-
-	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
-
-	if crossedZone {
-		player.RealX = targetX
-		player.RealY = targetY
-	} else {
-		if player.RealX < targetX {
-			player.RealX += speed
-		} else if player.RealX > targetX {
-			player.RealX -= speed
-		}
-
-		if player.RealY < targetY {
-			player.RealY += speed
-		} else if player.RealY > targetY {
-			player.RealY -= speed
-		}
-	}
-
-	player.PrevX = player.X
-	player.PrevY = player.Y
+	player.Update(p.Game)
 
 	var cameraX = 4 * p.Game.TileSize
 	var cameraY = 4 * p.Game.TileSize
@@ -95,6 +68,10 @@ func (p *Playground) Loop() {
 	if player.RealY <= 12*p.Game.TileSize {
 		cameraY = util.MinI(player.RealY-(9*p.Game.TileSize), 0)
 	}
+
+	const speed = 16.0
+
+	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
 
 	if crossedZone {
 		p.CameraTarget.X = float32(cameraX)

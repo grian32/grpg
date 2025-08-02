@@ -36,6 +36,32 @@ func (lp *LocalPlayer) SendMovePacket(game *Game, x, y int32) {
 }
 
 func (lp *LocalPlayer) Update(game *Game) {
+	targetX := (lp.X % 16) * game.TileSize
+	targetY := (lp.Y % 16) * game.TileSize
+
+	const speed = 16.0
+
+	crossedZone := lp.PrevX/16 != lp.ChunkX || lp.PrevY/16 != lp.ChunkY
+
+	if crossedZone {
+		lp.RealX = targetX
+		lp.RealY = targetY
+	} else {
+		if lp.RealX < targetX {
+			lp.RealX += speed
+		} else if lp.RealX > targetX {
+			lp.RealX -= speed
+		}
+
+		if lp.RealY < targetY {
+			lp.RealY += speed
+		} else if lp.RealY > targetY {
+			lp.RealY -= speed
+		}
+	}
+
+	lp.PrevX = lp.X
+	lp.PrevY = lp.Y
 }
 
 type RemotePlayer struct {
