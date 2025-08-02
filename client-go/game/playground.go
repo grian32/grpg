@@ -16,6 +16,8 @@ type Playground struct {
 	PlayerTextures   map[shared.Direction]rl.Texture2D
 	Textures         map[uint16]rl.Texture2D
 	Zones            map[util.Vector2I]grpgmap.Zone
+	CameraTarget     rl.Vector2
+	PrevCameraTarget rl.Vector2
 	CurrActionString string
 }
 
@@ -80,17 +82,10 @@ func (p *Playground) Loop() {
 
 	player.PrevX = player.X
 	player.PrevY = player.Y
-}
-
-func (p *Playground) Render() {
-	rl.ClearBackground(rl.Black)
-
-	player := p.Game.Player
 
 	var cameraX = 4 * p.Game.TileSize
 	var cameraY = 4 * p.Game.TileSize
 
-	// eh just hardcode these prob
 	if player.RealX <= 12*p.Game.TileSize {
 		cameraX = util.MinI(player.RealX-(9*p.Game.TileSize), 0)
 	}
@@ -99,9 +94,32 @@ func (p *Playground) Render() {
 		cameraY = util.MinI(player.RealY-(9*p.Game.TileSize), 0)
 	}
 
+	if crossedZone {
+		p.CameraTarget.X = float32(cameraX)
+		p.CameraTarget.Y = float32(cameraY)
+	} else {
+		if p.CameraTarget.X < float32(cameraX) {
+			p.CameraTarget.X += float32(speed)
+		} else if p.CameraTarget.X > float32(cameraX) {
+			p.CameraTarget.X -= float32(speed)
+		}
+
+		if p.CameraTarget.Y < float32(cameraY) {
+			p.CameraTarget.Y += float32(speed)
+		} else if p.CameraTarget.Y > float32(cameraY) {
+			p.CameraTarget.Y -= float32(speed)
+		}
+	}
+
+	p.PrevCameraTarget = p.CameraTarget
+}
+
+func (p *Playground) Render() {
+	rl.ClearBackground(rl.Black)
+
 	camera := rl.Camera2D{
 		Offset:   rl.Vector2{X: 0, Y: 0},
-		Target:   rl.Vector2{X: float32(cameraX), Y: float32(cameraY)},
+		Target:   p.CameraTarget,
 		Rotation: 0,
 		Zoom:     1,
 	}
