@@ -13,6 +13,7 @@ type Playground struct {
 	Font             rl.Font
 	Game             *shared.Game
 	GameframeRight   rl.Texture2D
+	PlayerTextures   map[shared.Direction]rl.Texture2D
 	Textures         map[uint16]rl.Texture2D
 	Zones            map[util.Vector2I]grpgmap.Zone
 	CurrActionString string
@@ -28,6 +29,8 @@ func (p *Playground) Setup() {
 	p.Textures = loadTextures(assetsDirectory + "textures.pak")
 	p.Zones = loadMaps(assetsDirectory+"maps/", p.Game)
 	p.GameframeRight = loadGameframeRightTexture(assetsDirectory + "used/gameframe_right_2.png")
+
+	p.PlayerTextures = loadPlayerTextures(assetsDirectory + "used/")
 }
 
 func (p *Playground) Cleanup() {
@@ -38,14 +41,45 @@ func (p *Playground) Loop() {
 	player := p.Game.Player
 
 	if rl.IsKeyPressed(rl.KeyW) {
+		player.Facing = shared.UP
 		player.SendMovePacket(p.Game, player.X, player.Y-1)
 	} else if rl.IsKeyPressed(rl.KeyS) {
+		player.Facing = shared.DOWN
 		player.SendMovePacket(p.Game, player.X, player.Y+1)
 	} else if rl.IsKeyPressed(rl.KeyA) {
+		player.Facing = shared.LEFT
 		player.SendMovePacket(p.Game, player.X-1, player.Y)
 	} else if rl.IsKeyPressed(rl.KeyD) {
+		player.Facing = shared.RIGHT
 		player.SendMovePacket(p.Game, player.X+1, player.Y)
 	}
+
+	targetX := (player.X % 16) * p.Game.TileSize
+	targetY := (player.Y % 16) * p.Game.TileSize
+
+	const speed = 16.0
+
+	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
+
+	if crossedZone {
+		player.RealX = targetX
+		player.RealY = targetY
+	} else {
+		if player.RealX < targetX {
+			player.RealX += speed
+		} else if player.RealX > targetX {
+			player.RealX -= speed
+		}
+
+		if player.RealY < targetY {
+			player.RealY += speed
+		} else if player.RealY > targetY {
+			player.RealY -= speed
+		}
+	}
+
+	player.PrevX = player.X
+	player.PrevY = player.Y
 }
 
 func (p *Playground) Render() {
@@ -103,14 +137,15 @@ func drawWorld(p *Playground) {
 
 // TODO: generalize this code
 func drawPlayer(p *Playground) {
-	rl.DrawRectangle(p.Game.Player.RealX, p.Game.Player.RealY, 64, 64, rl.SkyBlue)
+	// rl.DrawRectangle(p.Game.Player.RealX, p.Game.Player.RealY, 64, 64, rl.SkyBlue)
+	rl.DrawTexture(p.PlayerTextures[p.Game.Player.Facing], p.Game.Player.RealX, p.Game.Player.RealY, rl.White)
 	rl.DrawTextEx(
 		p.Font,
 		p.Game.Player.Name,
 		rl.Vector2{X: float32(p.Game.Player.RealX), Y: float32(p.Game.Player.RealY)},
 		16,
 		0,
-		rl.Red,
+		rl.White,
 	)
 }
 

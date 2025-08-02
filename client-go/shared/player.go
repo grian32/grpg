@@ -4,13 +4,17 @@ import (
 	"client/network/c2s"
 )
 
+// TODO: separate this to a local/remote player :S
 type Player struct {
 	X      int32
 	Y      int32
+	PrevX  int32
+	PrevY  int32
 	RealX  int32
 	RealY  int32
 	ChunkX int32
 	ChunkY int32
+	Facing Direction
 	Name   string
 }
 
@@ -18,8 +22,8 @@ func (p *Player) Move(newX, newY int32, game *Game) {
 	p.X = newX
 	p.Y = newY
 
-	p.RealX = (p.X % 16) * game.TileSize
-	p.RealY = (p.Y % 16) * game.TileSize
+	// p.RealX = (p.X % 16) * game.TileSize
+	// p.RealY = (p.Y % 16) * game.TileSize
 
 	p.ChunkX = p.X / 16
 	p.ChunkY = p.Y / 16

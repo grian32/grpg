@@ -19,7 +19,7 @@ var (
 		MaxY:            0,
 		CollisionMap:    make(map[util.Vector2I]struct{}),
 		SceneManager:    &shared.GSceneManager{},
-		Player:          &shared.Player{X: 0, Y: 0, RealX: 0, RealY: 0, Name: ""},
+		Player:          &shared.Player{X: 0, Y: 0, RealX: 0, RealY: 0, Facing: shared.UP, Name: ""},
 		OtherPlayers:    []shared.Player{},
 		Conn:            network.StartConn(),
 		ShowFailedLogin: false,
