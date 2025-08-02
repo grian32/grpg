@@ -56,6 +56,9 @@ func main() {
 
 		rl.EndDrawing()
 	}
+
+	// if i defer this it tries to double free ofr whatever reason, not sure why exactly lol.
+	g.SceneManager.CurrentScene.Cleanup()
 }
 
 func processPackets(packetChan <-chan network.ChanPacket, g *shared.Game) {

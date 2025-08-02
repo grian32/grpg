@@ -36,8 +36,19 @@ func (p *Playground) Setup() {
 }
 
 func (p *Playground) Cleanup() {
-	rl.UnloadFont(p.Font)
-	// TODO: unload all textures :S
+	if p.Font.Texture.ID != 0 {
+		rl.UnloadFont(p.Font)
+	}
+
+	for _, tex := range p.Textures {
+		rl.UnloadTexture(tex)
+	}
+
+	rl.UnloadTexture(p.GameframeRight)
+
+	for _, tex := range p.PlayerTextures {
+		rl.UnloadTexture(tex)
+	}
 }
 
 func (p *Playground) Loop() {
