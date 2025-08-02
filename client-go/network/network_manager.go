@@ -40,8 +40,6 @@ func ReadServerPackets(conn net.Conn, packetChan chan<- ChanPacket) {
 
 		var bytes []byte
 
-		// the kotlin one anymore, basically reads the amount of players and then reads bytes assuming 8 char player
-		// names
 		if packetData.Length == -1 {
 			lenBytes := make([]byte, 2)
 			_, err = io.ReadFull(reader, lenBytes)
