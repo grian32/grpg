@@ -10,7 +10,7 @@ import (
 type PlayersUpdate struct{}
 
 func (p PlayersUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
-	var lst []shared.Player
+	var lst []shared.RemotePlayer
 
 	playersLen, err := buf.ReadUint16()
 
@@ -33,17 +33,9 @@ func (p PlayersUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		newY := int32(y)
 
 		if name == game.Player.Name {
-			game.Player.Move(newX, newY, game)
+			game.Player.Move(newX, newY)
 		} else {
-			lst = append(lst, shared.Player{
-				X:      newX,
-				Y:      newY,
-				RealX:  (newX % 16) * game.TileSize,
-				RealY:  (newY % 16) * game.TileSize,
-				ChunkX: newX / 16,
-				ChunkY: newY / 16,
-				Name:   name,
-			})
+			lst = append(lst, shared.NewRemotePlayer(newX, newY, shared.DOWN, name, game))
 		}
 	}
 

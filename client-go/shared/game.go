@@ -15,8 +15,8 @@ type Game struct {
 	CollisionMap    map[util.Vector2I]struct{}
 	TileSize        int32
 	SceneManager    *GSceneManager
-	Player          *Player
-	OtherPlayers    []Player
+	Player          *LocalPlayer
+	OtherPlayers    []RemotePlayer
 	Conn            net.Conn
 	ShowFailedLogin bool
 }

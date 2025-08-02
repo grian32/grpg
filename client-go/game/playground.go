@@ -56,6 +56,8 @@ func (p *Playground) Loop() {
 		player.SendMovePacket(p.Game, player.X+1, player.Y)
 	}
 
+	// TODO: move player updates to a function on player.. also do this on remote players,
+	// TODO: keep track whether the player/remote player has recently moved.
 	targetX := (player.X % 16) * p.Game.TileSize
 	targetY := (player.Y % 16) * p.Game.TileSize
 
