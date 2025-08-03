@@ -57,7 +57,8 @@ func main() {
 		rl.EndDrawing()
 	}
 
-	// if i defer this it tries to double free ofr whatever reason, not sure why exactly lol.
+	// if i defer this it tries to double free for w/e reason, not sure why
+	// it should be called first if i defer it last, but ¯\_(ツ)_/¯
 	g.SceneManager.CurrentScene.Cleanup()
 }
 
