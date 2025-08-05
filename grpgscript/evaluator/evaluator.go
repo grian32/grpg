@@ -309,15 +309,19 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 }
 
 func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
-	if operator != "+" {
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
-	}
 	leftValue := left.(*object.String).Value
 	rightValue := right.(*object.String).Value
 
-	// TODO: == & !=
-
-	return &object.String{Value: leftValue + rightValue}
+	switch operator {
+	case "+":
+		return &object.String{Value: leftValue + rightValue}
+	case "==":
+		return &object.Boolean{Value: leftValue == rightValue}
+	case "!=":
+		return &object.Boolean{Value: leftValue != rightValue}
+	default:
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
 }
 
 func evalIntegerInfixExpression(operator string, left, right object.Object) object.Object {
