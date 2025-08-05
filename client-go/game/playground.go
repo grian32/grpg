@@ -76,6 +76,34 @@ func (p *Playground) Loop() {
 		rp.Update(p.Game)
 	}
 
+	// needs to be done last but crossed zone check must be doing before player is updated as that changes prev x/y
+	updateCamera(p, crossedZone)
+}
+
+func (p *Playground) Render() {
+	rl.ClearBackground(rl.Black)
+
+	camera := rl.Camera2D{
+		Offset:   rl.Vector2{X: 0, Y: 0},
+		Target:   p.CameraTarget,
+		Rotation: 0,
+		Zoom:     1,
+	}
+
+	rl.BeginMode2D(camera)
+
+	drawWorld(p)
+	drawOtherPlayers(p)
+	drawPlayer(p)
+
+	rl.EndMode2D()
+
+	drawGameFrame(p)
+}
+
+func updateCamera(p *Playground, crossedZone bool) {
+	player := p.Game.Player
+
 	var cameraX = 4 * p.Game.TileSize
 	var cameraY = 4 * p.Game.TileSize
 
@@ -107,27 +135,6 @@ func (p *Playground) Loop() {
 	}
 
 	p.PrevCameraTarget = p.CameraTarget
-}
-
-func (p *Playground) Render() {
-	rl.ClearBackground(rl.Black)
-
-	camera := rl.Camera2D{
-		Offset:   rl.Vector2{X: 0, Y: 0},
-		Target:   p.CameraTarget,
-		Rotation: 0,
-		Zoom:     1,
-	}
-
-	rl.BeginMode2D(camera)
-
-	drawWorld(p)
-	drawOtherPlayers(p)
-	drawPlayer(p)
-
-	rl.EndMode2D()
-
-	drawGameFrame(p)
 }
 
 func drawWorld(p *Playground) {
