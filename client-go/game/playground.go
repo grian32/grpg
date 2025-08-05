@@ -70,7 +70,8 @@ func (p *Playground) Loop() {
 
 	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
 
-	player.Update(p.Game)
+	// pass crossed zone here as im already computing it for camera
+	player.Update(p.Game, crossedZone)
 
 	for _, rp := range p.Game.OtherPlayers {
 		rp.Update(p.Game)

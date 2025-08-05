@@ -35,13 +35,11 @@ func (lp *LocalPlayer) SendMovePacket(game *Game, x, y int32) {
 	})
 }
 
-func (lp *LocalPlayer) Update(game *Game) {
+func (lp *LocalPlayer) Update(game *Game, crossedZone bool) {
 	targetX := (lp.X % 16) * game.TileSize
 	targetY := (lp.Y % 16) * game.TileSize
 
 	const speed = 16.0
-
-	crossedZone := lp.PrevX/16 != lp.ChunkX || lp.PrevY/16 != lp.ChunkY
 
 	if crossedZone {
 		lp.RealX = targetX
