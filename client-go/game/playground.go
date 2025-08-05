@@ -68,6 +68,8 @@ func (p *Playground) Loop() {
 		player.SendMovePacket(p.Game, player.X+1, player.Y)
 	}
 
+	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
+
 	player.Update(p.Game)
 
 	for _, rp := range p.Game.OtherPlayers {
@@ -86,8 +88,6 @@ func (p *Playground) Loop() {
 	}
 
 	const speed = 16.0
-
-	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
 
 	if crossedZone {
 		p.CameraTarget.X = float32(cameraX)
