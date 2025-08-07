@@ -8,15 +8,13 @@ import (
 
 func TestReadWriteHeader(t *testing.T) {
 	expectedHeader := Header{
-		Magic:   [8]byte{'G', 'R', 'P', 'G', 'M', 'A', 'P', 0x00},
-		Version: 1,
-		ChunkX:  1,
-		ChunkY:  1,
+		Magic:  [8]byte{'G', 'R', 'P', 'G', 'M', 'A', 'P', 0x00},
+		ChunkX: 1,
+		ChunkY: 1,
 	}
 
 	expectedBytes := []byte{
 		'G', 'R', 'P', 'G', 'M', 'A', 'P', 0x00, // magic
-		0x00, 0x01, // version
 		0x00, 0x01, // chunkX
 		0x00, 0x01, // chunkY
 	}
