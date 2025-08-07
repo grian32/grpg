@@ -7,8 +7,7 @@ import (
 )
 
 type Header struct {
-	Magic   [8]byte
-	Version uint16
+	Magic [8]byte
 }
 
 type Texture struct {
@@ -21,13 +20,12 @@ func (t Texture) Equals(other Texture) bool {
 	return bytes.Equal(t.InternalIdString, other.InternalIdString) && bytes.Equal(t.PNGBytes, other.PNGBytes)
 }
 
-func WriteHeader(buf *gbuf.GBuf, version uint16) {
+func WriteHeader(buf *gbuf.GBuf) {
 	header := Header{
-		Magic:   [8]byte{'G', 'R', 'P', 'G', 'T', 'E', 'X', 0},
-		Version: version,
+		Magic: [8]byte{'G', 'R', 'P', 'G', 'T', 'E', 'X', 0},
 	}
 	buf.WriteBytes(header.Magic[:])
-	buf.WriteUint16(version)
+
 }
 
 func WriteTextures(buf *gbuf.GBuf, textures []Texture) {
@@ -47,15 +45,13 @@ func WriteTextures(buf *gbuf.GBuf, textures []Texture) {
 
 func ReadHeader(buf *gbuf.GBuf) (Header, error) {
 	magic, err1 := buf.ReadBytes(8)
-	version, err2 := buf.ReadUint16()
 
-	if err := cmp.Or(err1, err2); err != nil {
+	if err := cmp.Or(err1); err != nil {
 		return Header{}, err
 	}
 
 	return Header{
-		Magic:   [8]byte(magic),
-		Version: version,
+		Magic: [8]byte(magic),
 	}, nil
 }
 

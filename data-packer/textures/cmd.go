@@ -25,7 +25,7 @@ func RunTexCmd(c *cobra.Command, _ []string, opts *TexOptions) error {
 
 	buf := gbuf.NewEmptyGBuf()
 
-	grpgtex.WriteHeader(buf, 1)
+	grpgtex.WriteHeader(buf)
 
 	manifestData, err := ParseManifestFile(manifest)
 	if err != nil {

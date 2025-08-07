@@ -37,8 +37,6 @@ func loadTextures(path string) map[uint16]rl.Texture2D {
 		log.Fatal("File is not GRPGTEX file.")
 	}
 
-	log.Printf("Succesfully loaded GRPGTEX file with version %d\n", header.Version)
-
 	textures, err := grpgtex.ReadTextures(buf)
 	if err != nil {
 		log.Fatalf("failed reading grpgtex textures: %v", err)

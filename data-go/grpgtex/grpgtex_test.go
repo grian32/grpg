@@ -41,26 +41,13 @@ func init() {
 	}
 }
 
-func TestWriteHeaderVer1(t *testing.T) {
+func TestWriteHeader(t *testing.T) {
 	expectedBytes := []byte{
 		'G', 'R', 'P', 'G', 'T', 'E', 'X', 0, // magic
-		0x00, 0x01, // ver1
 	}
 
-	WriteHeader(buf, 1)
-	if !bytes.Equal(expectedBytes, buf.Bytes()) {
-		t.Errorf("WriteHeader(buf, 1)= %q, want match for %#q", buf.Bytes(), expectedBytes)
-	}
-	buf.Clear()
-}
+	WriteHeader(buf)
 
-func TestWriteHeaderVerMax(t *testing.T) {
-	expectedBytes := []byte{
-		'G', 'R', 'P', 'G', 'T', 'E', 'X', 0, // magic
-		0xFF, 0xFF, // ver1
-	}
-
-	WriteHeader(buf, 65535)
 	if !bytes.Equal(expectedBytes, buf.Bytes()) {
 		t.Errorf("WriteHeader(buf, 1)= %q, want match for %#q", buf.Bytes(), expectedBytes)
 	}
@@ -98,36 +85,13 @@ func TestWriteTextures(t *testing.T) {
 	}
 }
 
-func TestReadHeaderVer1(t *testing.T) {
+func TestReadHeader(t *testing.T) {
 	expectedHeader := Header{
-		Magic:   [8]byte{'G', 'R', 'P', 'G', 'T', 'E', 'X', 0},
-		Version: 1,
+		Magic: [8]byte{'G', 'R', 'P', 'G', 'T', 'E', 'X', 0},
 	}
 
 	buf := gbuf.NewGBuf([]byte{
 		'G', 'R', 'P', 'G', 'T', 'E', 'X', 0, // magic
-		0x00, 0x01, // ver1
-	})
-
-	output, err := ReadHeader(buf)
-	if err != nil {
-		t.Errorf("ReadHeader errored: %v", err)
-	}
-
-	if output != expectedHeader {
-		t.Errorf("ReadHeader=%q, want match for %#q", output, expectedHeader)
-	}
-}
-
-func TestReadHeaderVerMax(t *testing.T) {
-	expectedHeader := Header{
-		Magic:   [8]byte{'G', 'R', 'P', 'G', 'T', 'E', 'X', 0},
-		Version: 65535,
-	}
-
-	buf := gbuf.NewGBuf([]byte{
-		'G', 'R', 'P', 'G', 'T', 'E', 'X', 0, // magic
-		0xFF, 0xFF, // ver1
 	})
 
 	output, err := ReadHeader(buf)
