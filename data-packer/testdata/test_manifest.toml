@@ -1,4 +1,4 @@
 texture = [
-    { name = "grass", id = 1, path = "testdata/grass_texture.png", type = "TILE" },
-    { name = "stone", id = 2, path = "testdata/stone_texture.png", type = "OBJ" },
+    { name = "grass", id = 1, path = "testdata/grass_texture.png" },
+    { name = "stone", id = 2, path = "testdata/stone_texture.png" },
 ]

@@ -16,13 +16,13 @@ var (
 func init() {
 	var err error
 
-	stone, err := os.Open("./testdata/stone_texture.png")
+	stone, err := os.Open("../testdata/stone_texture.png")
 	if err != nil {
 		log.Fatal("Error loading stone texture while initializing format tests")
 	}
 	defer stone.Close()
 
-	grass, err := os.Open("./testdata/grass_texture.png")
+	grass, err := os.Open("../testdata/grass_texture.png")
 	if err != nil {
 		log.Fatal("Error loading grass texture while initializing format tests")
 	}
@@ -44,17 +44,15 @@ func TestParseManifestFile(t *testing.T) {
 			InternalName: "grass",
 			InternalId:   1,
 			FilePath:     "testdata/grass_texture.png",
-			Type:         "TILE",
 		},
 		{
 			InternalName: "stone",
 			InternalId:   2,
 			FilePath:     "testdata/stone_texture.png",
-			Type:         "OBJ",
 		},
 	}
 
-	filePath := "./testdata/test_manifest.toml"
+	filePath := "../testdata/test_manifest.toml"
 
 	output, err := ParseManifestFile(filePath)
 
@@ -69,14 +67,12 @@ func TestBuildGRPGTexFromManifest(t *testing.T) {
 		{
 			InternalName: "grass",
 			InternalId:   1,
-			FilePath:     "testdata/grass_texture.png",
-			Type:         "TILE",
+			FilePath:     "../testdata/grass_texture.png",
 		},
 		{
 			InternalName: "stone",
 			InternalId:   2,
-			FilePath:     "testdata/stone_texture.png",
-			Type:         "OBJ",
+			FilePath:     "../testdata/stone_texture.png",
 		},
 	}
 
@@ -85,13 +81,11 @@ func TestBuildGRPGTexFromManifest(t *testing.T) {
 			InternalIdString: []byte("grass"),
 			InternalIdInt:    1,
 			PNGBytes:         grassPngBytes,
-			Type:             grpgtex.TILE,
 		},
 		{
 			InternalIdString: []byte("stone"),
 			InternalIdInt:    2,
 			PNGBytes:         stonePngBytes,
-			Type:             grpgtex.OBJ,
 		},
 	}
 

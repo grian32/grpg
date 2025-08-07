@@ -28,7 +28,7 @@ func main() {
 	}
 
 	texCmd.Flags().StringVarP(&texOpts.Manifest, "manifest", "m", "", "The path to the texture manifest.")
-	texCmd.Flags().StringVarP(&texOpts.Output, "output", "o", "textures.pak", "The output path.")
+	texCmd.Flags().StringVarP(&texOpts.Output, "output", "o", "textures.grpgtex", "The output path.")
 
 	cmd.AddCommand(texCmd)
 

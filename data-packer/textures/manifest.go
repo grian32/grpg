@@ -19,7 +19,6 @@ type GRPGTexManifestEntry struct {
 	InternalName string `toml:"name"`
 	InternalId   int    `toml:"id"`
 	FilePath     string `toml:"path"`
-	Type         string `toml:"type"`
 }
 
 func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, error) {
@@ -59,7 +58,6 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 			InternalIdString: []byte(file.InternalName),
 			InternalIdInt:    uint16(file.InternalId),
 			PNGBytes:         pngBytes,
-			Type:             getTextureType(file.Type),
 		}
 
 		f.Close()
@@ -87,19 +85,4 @@ func ParseManifestFile(path string) ([]GRPGTexManifestEntry, error) {
 	}
 
 	return cfg.Textures, nil
-}
-
-var textureTypeMap = map[string]grpgtex.TextureType{
-	"TILE": grpgtex.TILE,
-	"OBJ":  grpgtex.OBJ,
-}
-
-func getTextureType(str string) grpgtex.TextureType {
-	texType, exists := textureTypeMap[str]
-
-	if !exists {
-		return grpgtex.UNDEFINED
-	}
-
-	return texType
 }

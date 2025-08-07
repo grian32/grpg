@@ -15,16 +15,7 @@ type Texture struct {
 	InternalIdString []byte
 	InternalIdInt    uint16
 	PNGBytes         []byte
-	Type             TextureType
 }
-
-type TextureType byte
-
-const (
-	UNDEFINED TextureType = 0x00
-	TILE      TextureType = 0x01
-	OBJ       TextureType = 0x02
-)
 
 func (t Texture) Equals(other Texture) bool {
 	return bytes.Equal(t.InternalIdString, other.InternalIdString) && bytes.Equal(t.PNGBytes, other.PNGBytes)
@@ -51,8 +42,6 @@ func WriteTextures(buf *gbuf.GBuf, textures []Texture) {
 
 		buf.WriteUint32(uint32(len(tex.PNGBytes)))
 		buf.WriteBytes(tex.PNGBytes)
-
-		buf.WriteByte(byte(tex.Type))
 	}
 }
 
@@ -84,9 +73,8 @@ func ReadTextures(buf *gbuf.GBuf) ([]Texture, error) {
 		internalIdInt, err3 := buf.ReadUint16()
 		pngBytesLen, err4 := buf.ReadUint32()
 		pngBytes, err5 := buf.ReadBytes(int(pngBytesLen))
-		texType, err6 := buf.ReadByte()
 
-		if err := cmp.Or(err1, err2, err3, err4, err5, err6); err != nil {
+		if err := cmp.Or(err1, err2, err3, err4, err5); err != nil {
 			return nil, err
 		}
 
@@ -94,7 +82,6 @@ func ReadTextures(buf *gbuf.GBuf) ([]Texture, error) {
 			InternalIdString: internalIdString,
 			InternalIdInt:    internalIdInt,
 			PNGBytes:         pngBytes,
-			Type:             TextureType(texType),
 		})
 	}
 
