@@ -1,0 +1,4 @@
+tiles = [
+    { name = "grass", id = 1, tex_name = "grass_tex" },
+    { name = "water", id = 2, tex_name = "still_water" },
+]
