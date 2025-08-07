@@ -46,9 +46,9 @@ func ReadTiles(buf *gbuf.GBuf) ([]Tile, error) {
 		return nil, err
 	}
 
-	arr := make([]Tile, 0, len)
+	arr := make([]Tile, len)
 
-	for _ = range len {
+	for idx := range len {
 		name, err1 := buf.ReadString()
 		tileId, err2 := buf.ReadUint16()
 		texId, err3 := buf.ReadUint16()
@@ -57,11 +57,11 @@ func ReadTiles(buf *gbuf.GBuf) ([]Tile, error) {
 			return nil, err
 		}
 
-		arr = append(arr, Tile{
+		arr[idx] = Tile{
 			Name:   name,
 			TileId: tileId,
 			TexId:  texId,
-		})
+		}
 	}
 
 	return arr, nil
