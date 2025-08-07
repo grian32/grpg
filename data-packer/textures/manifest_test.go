@@ -41,12 +41,12 @@ func init() {
 func TestParseManifestFile(t *testing.T) {
 	expected := []GRPGTexManifestEntry{
 		{
-			InternalName: "grass",
+			InternalName: "grass_tex",
 			InternalId:   1,
 			FilePath:     "testdata/grass_texture.png",
 		},
 		{
-			InternalName: "stone",
+			InternalName: "still_water",
 			InternalId:   2,
 			FilePath:     "testdata/stone_texture.png",
 		},

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"texture-packer/textures"
+	"texture-packer/tiles"
 
 	"github.com/charmbracelet/fang"
 	"github.com/spf13/cobra"
@@ -31,6 +32,22 @@ func main() {
 	texCmd.Flags().StringVarP(&texOpts.Output, "output", "o", "textures.grpgtex", "The output path.")
 
 	cmd.AddCommand(texCmd)
+
+	tileOpts := &tiles.TilesOptions{}
+
+	tileCmd := &cobra.Command{
+		Use:   "tile",
+		Short: "Packs tiles.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return tiles.RunTileCmd(cmd, args, tileOpts)
+		},
+	}
+
+	tileCmd.Flags().StringVarP(&tileOpts.Manifest, "manifest", "m", "", "The path to the tile manifest.")
+	tileCmd.Flags().StringVarP(&tileOpts.Output, "output", "o", "tiles.grpgtile", "The output path.")
+	tileCmd.Flags().StringVarP(&tileOpts.Textures, "textures", "t", "", "The path to the used grpgtex file.")
+
+	cmd.AddCommand(tileCmd)
 
 	if err := fang.Execute(context.Background(), cmd); err != nil {
 		os.Exit(1)
