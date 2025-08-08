@@ -1,13 +1,11 @@
 package tiles
 
 import (
-	"cmp"
 	"errors"
 	"grpg/data-go/gbuf"
-	"grpg/data-go/grpgtex"
 	"grpg/data-go/grpgtile"
-	"io"
 	"os"
+	"texture-packer/shared"
 
 	"github.com/spf13/cobra"
 )
@@ -31,35 +29,9 @@ func RunTileCmd(c *cobra.Command, _ []string, opts *TilesOptions) error {
 		return errors.New("no textures file provided")
 	}
 
-	texFile, err1 := os.Open(texFilePath)
-	texBytes, err2 := io.ReadAll(texFile)
-
-	if err := cmp.Or(err1, err2); err != nil {
-		return err
-	}
-
-	defer texFile.Close()
-
-	buf := gbuf.NewGBuf(texBytes)
-
-	header, err := grpgtex.ReadHeader(buf)
+	texMap, err := shared.LoadTexturesToMap(texFilePath)
 	if err != nil {
 		return err
-	}
-
-	if header.Magic != [8]byte{'G', 'R', 'P', 'G', 'T', 'E', 'X', 0x00} {
-		return errors.New("textures file inputted is not of GRPGTEX file")
-	}
-
-	textures, err := grpgtex.ReadTextures(buf)
-	if err != nil {
-		return err
-	}
-
-	texMap := make(map[string]uint16)
-
-	for _, tex := range textures {
-		texMap[string(tex.InternalIdString)] = tex.InternalIdInt
 	}
 
 	manifestData, err := ParseManifestFile(manifest)
