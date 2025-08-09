@@ -32,10 +32,7 @@ func SaveMap() {
 		if id != -1 {
 			structId = uint16(id)
 		}
-		objArr[idx] = grpgmap.Obj{
-			InternalId: structId,
-			Type:       grpgmap.OBJ,
-		}
+		objArr[idx] = grpgmap.Obj(structId)
 	}
 
 	fileToSave, err := dialog.File().Title("Please make a file to save to. Warning, this may wipe the file if it already exists.").Save()
@@ -125,18 +122,15 @@ func LoadMap() {
 	}
 
 	for idx, tile := range zone.Tiles {
-		if tile == 0 {
-			continue
-		}
 		gridTiles[idx] = int32(tile)
 		gridTileTextures[idx] = int32(tiles[int32(tile)].TexId)
 	}
 
 	for idx, obj := range zone.Objs {
-		if obj.InternalId == 0 {
+		if obj == 0 {
 			continue
 		}
-		gridObjs[idx] = int32(obj.InternalId)
-		gridObjTextures[idx] = int32(objs[int32(obj.InternalId)].Textures[0])
+		gridObjs[idx] = int32(obj)
+		gridObjTextures[idx] = int32(objs[int32(obj)].Textures[0])
 	}
 }
