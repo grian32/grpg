@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"texture-packer/shared"
 	"texture-packer/textures"
 	"texture-packer/tiles"
 
@@ -33,7 +34,7 @@ func main() {
 
 	cmd.AddCommand(texCmd)
 
-	tileOpts := &tiles.TilesOptions{}
+	tileOpts := &shared.SharedOptions{}
 
 	tileCmd := &cobra.Command{
 		Use:   "tile",

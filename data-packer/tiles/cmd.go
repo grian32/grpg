@@ -10,13 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type TilesOptions struct {
-	Manifest string
-	Output   string
-	Textures string
-}
-
-func RunTileCmd(c *cobra.Command, _ []string, opts *TilesOptions) error {
+func RunTileCmd(c *cobra.Command, _ []string, opts *shared.SharedOptions) error {
 	manifest := opts.Manifest
 	output := opts.Output
 	texFilePath := opts.Textures
