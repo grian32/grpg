@@ -40,7 +40,7 @@ func TestReadWriteHeader(t *testing.T) {
 
 func TestWriteReadZone(t *testing.T) {
 	expectedZone := Zone{}
-	expectedBytes := [1280]byte{} // 2 * 256 for tile layer, 3 * 256 for obj layer
+	expectedBytes := [1024]byte{} // 2 * 256 for tile layer, 2 * 256 for obj layer
 
 	for idx := range 128 {
 		expectedZone.Tiles[uint16(idx)] = 0x00
@@ -50,13 +50,12 @@ func TestWriteReadZone(t *testing.T) {
 		expectedBytes[tileOffset] = 0x00
 		expectedBytes[tileOffset+1] = 0x00
 
-		objOffset := (idx * 3) + 512
+		objOffset := (idx * 2) + 512
 
-		expectedZone.Objs[idx] = Obj{InternalId: 0, Type: OBJ}
+		expectedZone.Objs[idx] = 0x00
 
 		expectedBytes[objOffset] = 0x00
 		expectedBytes[objOffset+1] = 0x00
-		expectedBytes[objOffset+2] = 0x01
 	}
 
 	for idx := 128; idx < 256; idx++ {
@@ -67,13 +66,12 @@ func TestWriteReadZone(t *testing.T) {
 		expectedBytes[tileOffset] = 0x00
 		expectedBytes[tileOffset+1] = 0x01
 
-		objOffset := (idx * 3) + 512
+		objOffset := (idx * 2) + 512
 
-		expectedZone.Objs[idx] = Obj{InternalId: 1, Type: OBJ}
+		expectedZone.Objs[idx] = 1
 
 		expectedBytes[objOffset] = 0x00
 		expectedBytes[objOffset+1] = 0x01
-		expectedBytes[objOffset+2] = 0x01
 	}
 
 	buf := gbuf.NewEmptyGBuf()
@@ -82,7 +80,7 @@ func TestWriteReadZone(t *testing.T) {
 		WriteZone(buf, expectedZone)
 
 		if !bytes.Equal(buf.Bytes(), expectedBytes[:]) {
-			t.Fatalf("WriteHeader=%x, want match for %x", buf.Bytes(), expectedBytes[:])
+			t.Fatalf("WriteZone=%x, want match for %x", buf.Bytes(), expectedBytes[:])
 		}
 	})
 
@@ -90,7 +88,7 @@ func TestWriteReadZone(t *testing.T) {
 		zone, err := ReadZone(buf)
 
 		if zone != expectedZone || err != nil {
-			t.Fatalf("WriteHeader=%v, want match for %#v", zone, expectedZone)
+			t.Fatalf("ReadZone=%v, want match for %#v", zone, expectedZone)
 		}
 	})
 }
