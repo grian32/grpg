@@ -21,10 +21,11 @@ const (
 
 // way this is meant to work is that the idx of Textures serves as the state number, so state 0 = x texture, state 1 = y texture, etc, each state gotta have a texture.
 type Obj struct {
-	Name     string
-	ObjId    uint16
-	Flags    ObjFlags
-	Textures []uint16 // only size 1 if non stateful
+	Name         string
+	ObjId        uint16
+	Flags        ObjFlags
+	Textures     []uint16 // only size 1 if non stateful
+	InteractText string   // only filled in if is interact
 }
 
 // Equal only meant to be used for testing, you probably shouldn't be comparing this type
@@ -62,6 +63,10 @@ func WriteObjs(buf *gbuf.GBuf, objs []Obj) {
 			for _, tex := range obj.Textures {
 				buf.WriteUint16(tex)
 			}
+		}
+
+		if IsFlagSet(obj.Flags, INTERACT) {
+			buf.WriteString(obj.InteractText)
 		}
 	}
 }
@@ -110,11 +115,21 @@ func ReadObjs(buf *gbuf.GBuf) ([]Obj, error) {
 			}
 		}
 
+		interactText := ""
+
+		if IsFlagSet(flags, INTERACT) {
+			interactText, err = buf.ReadString()
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		objArr[idx] = Obj{
-			Name:     name,
-			ObjId:    objId,
-			Flags:    flags,
-			Textures: textures,
+			Name:         name,
+			ObjId:        objId,
+			Flags:        flags,
+			Textures:     textures,
+			InteractText: interactText,
 		}
 	}
 

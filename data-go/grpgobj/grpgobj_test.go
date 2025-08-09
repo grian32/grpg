@@ -41,10 +41,11 @@ func TestReadWriteObjs(t *testing.T) {
 			Textures: []uint16{1},
 		},
 		{
-			Name:     "berry_bush",
-			ObjId:    4,
-			Flags:    ObjFlags(STATE | INTERACT),
-			Textures: []uint16{2, 3},
+			Name:         "berry_bush",
+			ObjId:        4,
+			Flags:        ObjFlags(STATE | INTERACT),
+			Textures:     []uint16{2, 3},
+			InteractText: "Harvest",
 		},
 	}
 
@@ -61,6 +62,7 @@ func TestReadWriteObjs(t *testing.T) {
 		0x03,       // flag, 00 00 00 11
 		0x00, 0x02, // tex len
 		0x00, 0x02, 0x00, 0x03, // tex arr
+		0x00, 0x00, 0x00, 0x07, 'H', 'a', 'r', 'v', 'e', 's', 't', // interact text
 	}
 
 	buf := gbuf.NewEmptyGBuf()
