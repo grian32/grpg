@@ -9,3 +9,4 @@ name = "i_water"
 id = 2
 flags = ["STATE", "INTERACT"]
 textures = ["still_water", "grass_tex"]
+interact_text = "Interact"

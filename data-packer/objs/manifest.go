@@ -1,6 +1,7 @@
 package objs
 
 import (
+	"errors"
 	"io"
 	"os"
 	"slices"
@@ -15,10 +16,11 @@ type ManifestConfig struct {
 }
 
 type GRPGObjManifestEntry struct {
-	Name     string   `toml:"name"`
-	ObjId    uint16   `toml:"id"`
-	Flags    []string `toml:"flags"`
-	Textures []string `toml:"textures"`
+	Name         string   `toml:"name"`
+	ObjId        uint16   `toml:"id"`
+	Flags        []string `toml:"flags"`
+	Textures     []string `toml:"textures"`
+	InteractText string   `toml:"interact_text"`
 }
 
 // Equal only meant to be used for testing, you probably shouldn't be == this type
@@ -26,10 +28,16 @@ func (om *GRPGObjManifestEntry) Equal(other GRPGObjManifestEntry) bool {
 	return om.Name == other.Name && om.ObjId == other.ObjId && slices.Equal(om.Flags, other.Flags) && slices.Equal(om.Textures, other.Textures)
 }
 
-func BuildGRPGObjFromManifest(entries []GRPGObjManifestEntry, texMap map[string]uint16) []grpgobj.Obj {
+func BuildGRPGObjFromManifest(entries []GRPGObjManifestEntry, texMap map[string]uint16) ([]grpgobj.Obj, error) {
 	objArr := make([]grpgobj.Obj, len(entries))
 
 	for idx, entry := range entries {
+		flags := flagsFromStringSlice(entry.Flags)
+
+		if !grpgobj.IsFlagSet(flags, grpgobj.INTERACT) && entry.InteractText != "" {
+			return nil, errors.New("interact_text without interact flag not allowed")
+		}
+
 		texArr := make([]uint16, len(entry.Textures))
 
 		for texIdx, tex := range entry.Textures {
@@ -37,14 +45,15 @@ func BuildGRPGObjFromManifest(entries []GRPGObjManifestEntry, texMap map[string]
 		}
 
 		objArr[idx] = grpgobj.Obj{
-			Name:     entry.Name,
-			ObjId:    entry.ObjId,
-			Flags:    flagsFromStringSlice(entry.Flags),
-			Textures: texArr,
+			Name:         entry.Name,
+			ObjId:        entry.ObjId,
+			Flags:        flags,
+			Textures:     texArr,
+			InteractText: entry.InteractText,
 		}
 	}
 
-	return objArr
+	return objArr, nil
 }
 
 func flagsFromStringSlice(flags []string) grpgobj.ObjFlags {

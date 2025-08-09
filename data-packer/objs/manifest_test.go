@@ -51,9 +51,9 @@ func TestBuildGRPGObjFromManifest(t *testing.T) {
 		},
 	}
 
-	output := BuildGRPGObjFromManifest(manifest, texMap)
+	output, err := BuildGRPGObjFromManifest(manifest, texMap)
 
-	if len(output) != 2 || !output[0].Equal(expectedObjs[0]) || !output[1].Equal(expectedObjs[1]) {
-		t.Errorf("BuildGRPGObjFromManifest=%v, want match for %v", output, expectedObjs)
+	if len(output) != 2 || !output[0].Equal(expectedObjs[0]) || !output[1].Equal(expectedObjs[1]) || err != nil {
+		t.Errorf("BuildGRPGObjFromManifest=%v, %v want match for %v", output, err, expectedObjs)
 	}
 }

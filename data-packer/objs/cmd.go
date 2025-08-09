@@ -33,7 +33,10 @@ func RunObjCommand(c *cobra.Command, _ []string, opts *shared.SharedOptions) err
 		return err
 	}
 
-	objs := BuildGRPGObjFromManifest(manifestData, texMap)
+	objs, err := BuildGRPGObjFromManifest(manifestData, texMap)
+	if err != nil {
+		return err
+	}
 
 	objBuf := gbuf.NewEmptyGBuf()
 
