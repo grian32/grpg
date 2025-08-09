@@ -19,7 +19,7 @@ func SaveMap() {
 		return
 	}
 
-	for idx, id := range gridTileTextures {
+	for idx, id := range gridTiles {
 		if id == -1 {
 			dialog.Message("All tiles must be filled in to save a map.").Error()
 			return
@@ -27,7 +27,7 @@ func SaveMap() {
 		tileArr[idx] = grpgmap.Tile(id)
 	}
 
-	for idx, id := range gridObjTextures {
+	for idx, id := range gridObjs {
 		var structId uint16 = 0
 		if id != -1 {
 			structId = uint16(id)
@@ -125,10 +125,18 @@ func LoadMap() {
 	}
 
 	for idx, tile := range zone.Tiles {
-		gridTileTextures[idx] = int32(tile)
+		if tile == 0 {
+			continue
+		}
+		gridTiles[idx] = int32(tile)
+		gridTileTextures[idx] = int32(tiles[int32(tile)].TexId)
 	}
 
 	for idx, obj := range zone.Objs {
-		gridObjTextures[idx] = int32(obj.InternalId)
+		if obj.InternalId == 0 {
+			continue
+		}
+		gridObjs[idx] = int32(obj.InternalId)
+		gridObjTextures[idx] = int32(objs[int32(obj.InternalId)].Textures[0])
 	}
 }

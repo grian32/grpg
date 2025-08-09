@@ -13,7 +13,9 @@ import (
 var (
 	defaultTex       *g.Texture
 	gridTileTextures = [256]int32{}
+	gridTiles        = [256]int32{}
 	gridObjTextures  = [256]int32{}
+	gridObjs         = [256]int32{}
 )
 
 func LoadDefaultGridTex() {
@@ -82,8 +84,10 @@ func BuildGrid() g.Widget {
 					switch typeSelected {
 					case OBJ:
 						gridObjTextures[currPos] = currentlySelectedTexId
+						gridObjs[currPos] = currentlySelectedInternalId
 					case TILE:
 						gridTileTextures[currPos] = currentlySelectedTexId
+						gridTiles[currPos] = currentlySelectedInternalId
 					case UNDEFINED:
 						panic(fmt.Sprintf("unexpected main.PlaceTypeSelected: %#v", typeSelected))
 					default:

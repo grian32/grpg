@@ -11,7 +11,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"sort"
 
 	"grpg/data-go/grpgobj"
 
@@ -25,9 +24,9 @@ type GiuTextureTyped struct {
 }
 
 var (
-	textures     = make(map[int32]GiuTextureTyped)
-	tiles        []grpgtile.Tile
-	objs         []grpgobj.Obj
+	textures          = make(map[int32]GiuTextureTyped)
+	tiles             = make(map[int32]grpgtile.Tile)
+	objs              = make(map[int32]grpgobj.Obj)
 	objsLoaded   bool = false
 	tilesLoaded  bool = false
 	assetsLoaded bool = false
@@ -91,11 +90,9 @@ func LoadTiles() {
 		fmt.Printf("error reading tiles %w\n", err)
 	}
 
-	tiles = grpgTiles
-
-	sort.Slice(tiles, func(i, j int) bool {
-		return tiles[i].TileId < tiles[j].TileId
-	})
+	for _, tile := range grpgTiles {
+		tiles[int32(tile.TileId)] = tile
+	}
 
 	tilesLoaded = true
 
@@ -124,11 +121,9 @@ func LoadObjs() {
 		fmt.Printf("error reading objs %w\n", err)
 	}
 
-	objs = grpgObjs
-
-	sort.Slice(objs, func(i, j int) bool {
-		return objs[i].ObjId < objs[j].ObjId
-	})
+	for _, obj := range grpgObjs {
+		objs[int32(obj.ObjId)] = obj
+	}
 
 	objsLoaded = true
 
