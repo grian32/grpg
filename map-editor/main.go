@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/AllenDang/cimgui-go/imgui"
-	g "github.com/AllenDang/giu"
 	"image/color"
 	"sync"
+
+	"github.com/AllenDang/cimgui-go/imgui"
+	g "github.com/AllenDang/giu"
 )
 
 var (
@@ -41,6 +42,8 @@ func loop() {
 	g.Window("Controls").Pos(editorWindowPos.X, editorWindowPos.Y+editorWindowSize.Y+10).Flags(g.WindowFlagsNoCollapse|g.WindowFlagsNoMove|g.WindowFlagsNoResize|g.WindowFlagsAlwaysAutoResize).Layout(
 		g.Row(
 			g.Button("Load Textures").OnClick(LoadTextures),
+			g.Button("Load Objs").OnClick(LoadObjs),
+			g.Button("Load Tiles").OnClick(LoadTiles),
 			g.Button("Save Map").OnClick(SaveMap),
 			g.Button("Load Map").OnClick(LoadMap),
 			g.Button("Set all empty tiles to currently selected").OnClick(SetAllEmptyTiles),
@@ -61,8 +64,8 @@ func loop() {
 
 	g.Window("Selector").Pos(editorWindowPos.X+editorWindowSize.X+10, editorWindowPos.Y).Flags(g.WindowFlagsNoCollapse | g.WindowFlagsNoMove | g.WindowFlagsNoResize | g.WindowFlagsAlwaysAutoResize).Layout(
 		g.TabBar().TabItems(
-			g.TabItem("Tiles").Layout(BuildSelectorTab(tiles)),
-			g.TabItem("Objs").Layout(BuildSelectorTab(objs)),
+			g.TabItem("Tiles").Layout(BuildTileSelectorTab(tiles)),
+			g.TabItem("Objs").Layout(BuildObjSelectorTabs(objs)),
 		),
 	)
 }

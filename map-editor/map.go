@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgmap"
-	"grpg/data-go/grpgtex"
 	"io"
 	"os"
 
@@ -35,7 +34,7 @@ func SaveMap() {
 		}
 		objArr[idx] = grpgmap.Obj{
 			InternalId: structId,
-			Type:       grpgmap.ObjType(TextureTypeToMapType(textures[id].TextureType)),
+			Type:       grpgmap.OBJ,
 		}
 	}
 
@@ -60,10 +59,9 @@ func SaveMap() {
 
 	buf := gbuf.NewEmptyGBuf()
 	grpgmap.WriteHeader(buf, grpgmap.Header{
-		Magic:   [8]byte{'G', 'R', 'P', 'G', 'M', 'A', 'P', 0x00},
-		Version: 1,
-		ChunkX:  uint16(chunkX),
-		ChunkY:  uint16(chunkY),
+		Magic:  [8]byte{'G', 'R', 'P', 'G', 'M', 'A', 'P', 0x00},
+		ChunkX: uint16(chunkX),
+		ChunkY: uint16(chunkY),
 	})
 
 	zone := grpgmap.Zone{
@@ -132,16 +130,5 @@ func LoadMap() {
 
 	for idx, obj := range zone.Objs {
 		gridObjTextures[idx] = int32(obj.InternalId)
-	}
-}
-
-func TextureTypeToMapType(texType grpgtex.TextureType) grpgmap.ObjType {
-	switch texType {
-	case grpgtex.OBJ:
-		return grpgmap.OBJ
-	case grpgtex.TILE, grpgtex.UNDEFINED:
-		return grpgmap.UNDEFINED
-	default:
-		return grpgmap.UNDEFINED
 	}
 }

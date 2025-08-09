@@ -1,77 +1,83 @@
 package main
 
 import (
-	"grpg/data-go/grpgtex"
-	"sort"
+	"grpg/data-go/grpgobj"
+	"grpg/data-go/grpgtile"
 
 	g "github.com/AllenDang/giu"
 )
 
-type GTexKV struct {
-	key string
-	val GiuTextureTyped
-}
+type PlaceTypeSelected byte
 
-var (
-	tiles                    = make([]GTexKV, 0)
-	objs                     = make([]GTexKV, 0)
-	currentlySelected GTexKV = GTexKV{
-		key: "_undefined",
-		val: GiuTextureTyped{},
-	}
-	textureSelected = false
+const (
+	UNDEFINED PlaceTypeSelected = iota
+	TILE
+	OBJ
 )
 
-func BuildSelectorTypeMaps() {
-	for _, tex := range textures {
-		switch tex.TextureType {
-		case grpgtex.TILE:
-			tiles = append(tiles, GTexKV{
-				key: tex.InternalIdString,
-				val: tex,
-			})
-		case grpgtex.OBJ:
-			objs = append(objs, GTexKV{
-				key: tex.InternalIdString,
-				val: tex,
-			})
-		}
-	}
+var (
+	currentlySelected      string            = "_undefined"
+	currentlySelectedTexId int32             = -1
+	typeSelected           PlaceTypeSelected = UNDEFINED
+	textureSelected        bool              = false
+)
 
-	// sort to provide some consistency since maps are unordered.
-	sort.Slice(tiles, func(i, j int) bool {
-		return tiles[i].key < tiles[j].key
-	})
-	sort.Slice(objs, func(i, j int) bool {
-		return objs[i].key < objs[j].key
-	})
-}
-
-func BuildSelectorTab(data []GTexKV) g.Widget {
+func BuildTileSelectorTab(data []grpgtile.Tile) g.Widget {
 	col1 := make([]g.Widget, 0)
 	col2 := make([]g.Widget, 0)
 
 	for i := range len(data) {
-		// check even in case data is of uneven length
 		if i%2 == 0 {
-			col1 = append(col1, buildTextureColumn(data[i]))
+			col1 = append(col1, buildTileColElem(data[i]))
 		} else {
-			col2 = append(col2, buildTextureColumn(data[i]))
+			col2 = append(col2, buildTileColElem(data[i]))
 		}
 	}
 
 	return g.Column(g.Row(g.Column(col1...), g.Column(col2...)), buildCurrentlySelected())
 }
 
-func buildTextureColumn(kv GTexKV) g.Widget {
+func buildTileColElem(d grpgtile.Tile) g.Widget {
 	return g.Column(
-		g.ImageButton(kv.val.Texture).OnClick(func() {
-			currentlySelected = kv
+		g.ImageButton(textures[int32(d.TexId)].Texture).OnClick(func() {
+			currentlySelected = d.Name
+			currentlySelectedTexId = int32(d.TexId)
+			typeSelected = TILE
 			textureSelected = true
 			eraserEnabled = false
 			g.Update()
 		}),
-		g.Label(kv.val.FormattedStringId),
+		g.Label(d.Name),
+	)
+}
+
+func BuildObjSelectorTabs(data []grpgobj.Obj) g.Widget {
+	col1 := make([]g.Widget, 0)
+	col2 := make([]g.Widget, 0)
+
+	for i := range len(data) {
+		if i%2 == 0 {
+			col1 = append(col1, buildObjColElem(data[i]))
+		} else {
+			col2 = append(col2, buildObjColElem(data[i]))
+		}
+	}
+
+	return g.Column(g.Row(g.Column(col1...), g.Column(col2...)), buildCurrentlySelected())
+}
+
+func buildObjColElem(d grpgobj.Obj) g.Widget {
+	name := d.Name + getFlagsName(d.Flags)
+	return g.Column(
+		g.ImageButton(textures[int32(d.Textures[0])].Texture).OnClick(func() {
+			currentlySelected = name
+			currentlySelectedTexId = int32(d.Textures[0])
+			typeSelected = OBJ
+			textureSelected = true
+			eraserEnabled = false
+			g.Update()
+		}),
+		g.Label(name),
 	)
 }
 
@@ -81,11 +87,11 @@ func buildCurrentlySelected() g.Widget {
 			g.Label("Currently Selected: "),
 			g.Label("Eraser!"),
 		)
-	} else if currentlySelected.key != "_undefined" {
+	} else if currentlySelected != "_undefined" {
 		return g.Column(
 			g.Label("Currently Selected: "),
-			g.Image(currentlySelected.val.Texture),
-			g.Label(currentlySelected.val.FormattedStringId),
+			g.Image(textures[currentlySelectedTexId].Texture),
+			g.Label(currentlySelected),
 		)
 	} else {
 		return g.Column(
@@ -93,4 +99,18 @@ func buildCurrentlySelected() g.Widget {
 			g.Label("None :("),
 		)
 	}
+}
+
+func getFlagsName(flags grpgobj.ObjFlags) string {
+	str := "("
+
+	if grpgobj.IsFlagSet(flags, grpgobj.STATE) {
+		str += "s"
+	}
+
+	if grpgobj.IsFlagSet(flags, grpgobj.INTERACT) {
+		str += "|i"
+	}
+
+	return str + ")"
 }

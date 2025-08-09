@@ -1,0 +1,164 @@
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"grpg/data-go/gbuf"
+	"grpg/data-go/grpgtex"
+	"grpg/data-go/grpgtile"
+	"image"
+	"image/png"
+	"io"
+	"log"
+	"os"
+	"sort"
+
+	"grpg/data-go/grpgobj"
+
+	g "github.com/AllenDang/giu"
+	"github.com/sqweek/dialog"
+)
+
+type GiuTextureTyped struct {
+	Texture    *g.Texture
+	InternalId uint16
+}
+
+var (
+	textures     = make(map[int32]GiuTextureTyped)
+	tiles        []grpgtile.Tile
+	objs         []grpgobj.Obj
+	objsLoaded   bool = false
+	tilesLoaded  bool = false
+	assetsLoaded bool = false
+)
+
+func LoadTextures() {
+	buf := loadFileToGBuf("Please select a textures.grpgtex file.")
+
+	header, err := grpgtex.ReadHeader(buf)
+	if err != nil {
+		fmt.Printf("reading grpgtex header errored: %w.\n", err)
+		return
+	}
+	correctMagic := "GRPGTEX\x00"
+
+	// move this to some notification system or something
+	if string(header.Magic[:]) != correctMagic {
+		fmt.Println("File entered for texture loading has the wrong magic header.")
+		return
+	}
+
+	grpgTextures, err := grpgtex.ReadTextures(buf)
+	if err != nil {
+		fmt.Printf("reading grpgtex textures errored: %w. file: %s\n", err)
+		return
+	}
+
+	for _, tex := range grpgTextures {
+		pngImage, err := png.Decode(bytes.NewReader(tex.PNGBytes))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		g.NewTextureFromRgba(pngImage.(*image.NRGBA), func(texture *g.Texture) {
+			typed := GiuTextureTyped{
+				Texture:    texture,
+				InternalId: tex.InternalIdInt,
+			}
+			textures[int32(tex.InternalIdInt)] = typed
+		})
+	}
+}
+
+func LoadTiles() {
+	buf := loadFileToGBuf("Please select a tiles.grpgtile file.")
+
+	header, err := grpgtile.ReadHeader(buf)
+	if err != nil {
+		fmt.Println("error reading grpgtile header\n")
+		return
+	}
+
+	correctMagic := "GRPGTILE"
+	if header.Magic != correctMagic {
+		fmt.Println("magic header for file isn't GRPGTILE")
+		return
+	}
+
+	grpgTiles, err := grpgtile.ReadTiles(buf)
+	if err != nil {
+		fmt.Printf("error reading tiles %w\n", err)
+	}
+
+	tiles = grpgTiles
+
+	sort.Slice(tiles, func(i, j int) bool {
+		return tiles[i].TileId < tiles[j].TileId
+	})
+
+	tilesLoaded = true
+
+	if tilesLoaded && objsLoaded {
+		assetsLoaded = true
+	}
+}
+
+func LoadObjs() {
+	buf := loadFileToGBuf("Please select a objs.grpgobj file.")
+
+	header, err := grpgobj.ReadHeader(buf)
+	if err != nil {
+		fmt.Println("error reading grpgobj header\n")
+		return
+	}
+
+	correctMagic := "GRPGOBJ\x00"
+	if string(header.Magic[:]) != correctMagic {
+		fmt.Println("magic header for file isn't GRPGOBJ")
+		return
+	}
+
+	grpgObjs, err := grpgobj.ReadObjs(buf)
+	if err != nil {
+		fmt.Printf("error reading objs %w\n", err)
+	}
+
+	objs = grpgObjs
+
+	sort.Slice(objs, func(i, j int) bool {
+		return objs[i].ObjId < objs[j].ObjId
+	})
+
+	objsLoaded = true
+
+	if tilesLoaded && objsLoaded {
+		assetsLoaded = true
+	}
+}
+
+func loadFileToGBuf(dialogTitle string) *gbuf.GBuf {
+	workingDir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	out, err := dialog.File().Title(dialogTitle).SetStartDir(workingDir).Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	file, err := os.Open(out)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	buf := gbuf.NewGBuf(fileBytes)
+	return buf
+}

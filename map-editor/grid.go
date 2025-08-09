@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"grpg/data-go/grpgtex"
 	"image"
 	"image/color"
 
@@ -80,14 +79,15 @@ func BuildGrid() g.Widget {
 						gridTileTextures[currPos] = -1
 					}
 				} else {
-					switch currentlySelected.val.TextureType {
-					case grpgtex.OBJ:
-						gridObjTextures[currPos] = int32(currentlySelected.val.InternalId)
-					case grpgtex.TILE:
-						gridTileTextures[currPos] = int32(currentlySelected.val.InternalId)
-					case grpgtex.UNDEFINED:
+					switch typeSelected {
+					case OBJ:
+						gridObjTextures[currPos] = currentlySelectedTexId
+					case TILE:
+						gridTileTextures[currPos] = currentlySelectedTexId
+					case UNDEFINED:
+						panic(fmt.Sprintf("unexpected main.PlaceTypeSelected: %#v", typeSelected))
 					default:
-						panic(fmt.Sprintf("unexpected grpgtex.TextureType: %#v", currentlySelected.val.TextureType))
+						panic(fmt.Sprintf("unexpected main.PlaceTypeSelected: %#v", typeSelected))
 					}
 				}
 			}

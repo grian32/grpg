@@ -7,13 +7,13 @@ var (
 )
 
 func SetAllEmptyTiles() {
-	if currentlySelected.key == "_undefined" || len(textures) == 0 {
-		dialog.Message("No tile currently selected/textures not loaded.").Error()
+	if currentlySelected == "_undefined" || len(textures) == 0 || !assetsLoaded {
+		dialog.Message("No tile currently selected/assets not loaded.").Error()
 	}
 
 	for idx, _ := range gridTileTextures {
 		if gridTileTextures[idx] == -1 {
-			gridTileTextures[idx] = int32(currentlySelected.val.InternalId)
+			gridTileTextures[idx] = currentlySelectedTexId
 		}
 	}
 }
@@ -34,8 +34,7 @@ func ClearGrid() {
 func EnableEraser() {
 	textureSelected = true
 	eraserEnabled = true
-	currentlySelected = GTexKV{
-		key: "",
-		val: GiuTextureTyped{},
-	}
+	typeSelected = UNDEFINED
+	currentlySelected = ""
+	currentlySelectedTexId = -1
 }
