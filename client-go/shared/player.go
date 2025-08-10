@@ -3,6 +3,7 @@ package shared
 import (
 	"client/network/c2s"
 	"client/util"
+	"fmt"
 )
 
 // TODO: separate this to a local/remote player :S, also, figure out wtf im doing with that move function lol, sob. its only used in one place
@@ -47,6 +48,21 @@ func (lp *LocalPlayer) SendMovePacket(game *Game, x, y int32, facing Direction) 
 		Y:      uint32(y),
 		Facing: byte(facing),
 	})
+}
+
+func (lp *LocalPlayer) GetFacingCoord() util.Vector2I {
+	switch lp.Facing {
+	case DOWN:
+		return util.Vector2I{X: lp.X, Y: lp.Y + 1}
+	case LEFT:
+		return util.Vector2I{X: lp.X - 1, Y: lp.Y}
+	case RIGHT:
+		return util.Vector2I{X: lp.X + 1, Y: lp.Y}
+	case UP:
+		return util.Vector2I{X: lp.X, Y: lp.Y - 1}
+	default:
+		panic(fmt.Sprintf("unexpected shared.Direction: %#v", lp.Facing))
+	}
 }
 
 func (lp *LocalPlayer) Update(game *Game, crossedZone bool) {

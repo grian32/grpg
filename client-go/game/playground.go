@@ -5,8 +5,6 @@ import (
 	"client/util"
 	"fmt"
 	"grpg/data-go/grpgmap"
-	"grpg/data-go/grpgobj"
-	"grpg/data-go/grpgtile"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -16,8 +14,6 @@ type Playground struct {
 	Game             *shared.Game
 	GameframeRight   rl.Texture2D
 	PlayerTextures   map[shared.Direction]rl.Texture2D
-	Objs             map[uint16]grpgobj.Obj
-	Tiles            map[uint16]grpgtile.Tile
 	Textures         map[uint16]rl.Texture2D
 	Zones            map[util.Vector2I]grpgmap.Zone
 	CameraTarget     rl.Vector2
@@ -33,9 +29,9 @@ func (p *Playground) Setup() {
 	p.CurrActionString = "Current Action: None :("
 
 	p.Textures = loadTextures(assetsDirectory + "textures.grpgtex")
+	p.Game.Objs = loadObjs(assetsDirectory + "objs.grpgobj")
+	p.Game.Tiles = loadTiles(assetsDirectory + "tiles.grpgtile")
 	p.Zones = loadMaps(assetsDirectory+"maps/", p.Game)
-	p.Objs = loadObjs(assetsDirectory + "objs.grpgobj")
-	p.Tiles = loadTiles(assetsDirectory + "tiles.grpgtile")
 
 	p.GameframeRight = loadGameframeRightTexture(assetsDirectory + "used/gameframe_right_2.png")
 
@@ -79,6 +75,8 @@ func (p *Playground) Loop() {
 	for _, rp := range p.Game.OtherPlayers {
 		rp.Update(p.Game)
 	}
+
+	updateCurrActionString(p)
 
 	// needs to be done last but crossed zone check must be doing before player is updated as that changes prev x/y
 	updateCamera(p, crossedZone)
@@ -141,6 +139,16 @@ func updateCamera(p *Playground, crossedZone bool) {
 	p.PrevCameraTarget = p.CameraTarget
 }
 
+func updateCurrActionString(p *Playground) {
+	facingCoord := p.Game.Player.GetFacingCoord()
+	trackedObj, exists := p.Game.TrackedObjs[facingCoord]
+	if !exists {
+		p.CurrActionString = "None :("
+	} else {
+		p.CurrActionString = trackedObj.DataObj.InteractText
+	}
+}
+
 func drawWorld(p *Playground) {
 	mapTiles := p.Zones[util.Vector2I{X: p.Game.Player.ChunkX, Y: p.Game.Player.ChunkY}]
 
@@ -148,7 +156,7 @@ func drawWorld(p *Playground) {
 		dx := int32(i%16) * p.Game.TileSize
 		dy := int32(i/16) * p.Game.TileSize
 
-		texId := p.Tiles[uint16(mapTiles.Tiles[i])].TexId
+		texId := p.Game.Tiles[uint16(mapTiles.Tiles[i])].TexId
 
 		tex := p.Textures[texId]
 		rl.DrawTexture(tex, dx, dy, rl.White)
@@ -156,7 +164,7 @@ func drawWorld(p *Playground) {
 		obj := mapTiles.Objs[i]
 		if obj != 0 {
 			// TODO: base on state
-			objTexId := p.Objs[uint16(mapTiles.Objs[i])].Textures[0]
+			objTexId := p.Game.Objs[uint16(mapTiles.Objs[i])].Textures[0]
 
 			objTex := p.Textures[objTexId]
 			rl.DrawTexture(objTex, dx, dy, rl.White)
@@ -193,11 +201,13 @@ func drawOtherPlayers(p *Playground) {
 }
 
 func drawGameFrame(p *Playground) {
-	// rl.DrawRectangle(768, 0, 320, 960, rl.Blue)
-	// rl.DrawTextEx(p.Font, "inventory or something", rl.Vector2{X: 768, Y: 0}, 24, 0, rl.White)
 	rl.DrawTexture(p.GameframeRight, 768, 0, rl.White)
+
 	rl.DrawRectangle(0, 768, 960-192, 192, rl.Blue)
-	rl.DrawTextEx(p.Font, p.CurrActionString, rl.Vector2{X: 0, Y: 768}, 24, 0, rl.White)
+
+	rl.DrawTextEx(p.Font, "Current Action: "+p.CurrActionString, rl.Vector2{X: 0, Y: 768}, 24, 0, rl.White)
+
 	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", p.Game.Player.X, p.Game.Player.Y, p.Game.Player.Facing.String())
+
 	rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 0, Y: 800}, 24, 0, rl.White)
 }

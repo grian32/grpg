@@ -95,11 +95,22 @@ func loadMaps(dirPath string, game *shared.Game) map[util.Vector2I]grpgmap.Zone 
 			zoneMap[chunkPos] = zone
 
 			for idx, obj := range zone.Objs {
+				data := game.Objs[uint16(obj)]
 				if obj != 0 {
 					x := (idx % 16) + (int(header.ChunkX) * 16)
 					y := (idx / 16) + (int(header.ChunkY) * 16)
 
-					game.CollisionMap[util.Vector2I{X: int32(x), Y: int32(y)}] = struct{}{}
+					vec := util.Vector2I{X: int32(x), Y: int32(y)}
+
+					// TODO: this will be transmitted per chunk from server l8r
+					if grpgobj.IsFlagSet(data.Flags, grpgobj.STATE) || grpgobj.IsFlagSet(data.Flags, grpgobj.INTERACT) {
+						game.TrackedObjs[vec] = shared.GameObj{
+							DataObj: data,
+							State:   0,
+						}
+					}
+
+					game.CollisionMap[vec] = struct{}{}
 				}
 			}
 
