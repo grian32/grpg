@@ -1,0 +1,6 @@
+CREATE TABLE players (
+    player_id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    x INTEGER NOT NULL,
+    y INTEGER NOT NULL
+);

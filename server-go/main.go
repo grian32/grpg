@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"cmp"
+	"database/sql"
 	"encoding/binary"
 	"fmt"
 	"grpg/data-go/gbuf"
@@ -15,6 +16,11 @@ import (
 	"server/shared"
 	"server/util"
 	"time"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
@@ -34,6 +40,26 @@ type ChanPacket struct {
 
 func main() {
 	LoadCollisionMaps(assetsDirectory+"maps/", g)
+
+	db, err := sql.Open("sqlite3", "./players.db")
+	if err != nil {
+		log.Fatal("Failed to connect to DB: ", err)
+	}
+	defer db.Close()
+
+	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
+	if err != nil {
+		log.Fatal("Failed to create sqlite3 driver: ", err)
+	}
+
+	m, err := migrate.NewWithDatabaseInstance("file://db/migrations", "sqlite3", driver)
+	if err != nil {
+		log.Fatal("Failed to create new migrate: ", err)
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatal("Failed to migrate: ", err)
+	}
 
 	listener, err := net.Listen("tcp", ":4422")
 	if err != nil {
