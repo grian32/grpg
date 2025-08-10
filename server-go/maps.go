@@ -48,7 +48,7 @@ func LoadCollisionMaps(dir string, game *shared.Game) {
 			}
 
 			for idx, obj := range zone.Objs {
-				if obj.InternalId != 0 && obj.Type == grpgmap.OBJ {
+				if obj != 0 {
 					x := (idx % 16) + (int(header.ChunkX) * 16)
 					y := (idx / 16) + (int(header.ChunkY) * 16)
 

@@ -5,6 +5,8 @@ import (
 	"client/util"
 	"fmt"
 	"grpg/data-go/grpgmap"
+	"grpg/data-go/grpgobj"
+	"grpg/data-go/grpgtile"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -14,6 +16,8 @@ type Playground struct {
 	Game             *shared.Game
 	GameframeRight   rl.Texture2D
 	PlayerTextures   map[shared.Direction]rl.Texture2D
+	Objs             map[uint16]grpgobj.Obj
+	Tiles            map[uint16]grpgtile.Tile
 	Textures         map[uint16]rl.Texture2D
 	Zones            map[util.Vector2I]grpgmap.Zone
 	CameraTarget     rl.Vector2
@@ -28,8 +32,11 @@ func (p *Playground) Setup() {
 	p.Font = rl.LoadFont("./assets/font.ttf")
 	p.CurrActionString = "Current Action: None :("
 
-	p.Textures = loadTextures(assetsDirectory + "textures.pak")
+	p.Textures = loadTextures(assetsDirectory + "textures.grpgtex")
 	p.Zones = loadMaps(assetsDirectory+"maps/", p.Game)
+	p.Objs = loadObjs(assetsDirectory + "objs.grpgobj")
+	p.Tiles = loadTiles(assetsDirectory + "tiles.grpgtile")
+
 	p.GameframeRight = loadGameframeRightTexture(assetsDirectory + "used/gameframe_right_2.png")
 
 	p.PlayerTextures = loadPlayerTextures(assetsDirectory + "used/")
@@ -145,12 +152,17 @@ func drawWorld(p *Playground) {
 		dx := int32(i%16) * p.Game.TileSize
 		dy := int32(i/16) * p.Game.TileSize
 
-		tex := p.Textures[uint16(mapTiles.Tiles[i])]
+		texId := p.Tiles[uint16(mapTiles.Tiles[i])].TexId
+
+		tex := p.Textures[texId]
 		rl.DrawTexture(tex, dx, dy, rl.White)
 
 		obj := mapTiles.Objs[i]
-		if obj.InternalId != 0 && obj.Type == grpgmap.OBJ {
-			objTex := p.Textures[obj.InternalId]
+		if obj != 0 {
+			// TODO: base on state
+			objTexId := p.Objs[uint16(mapTiles.Objs[i])].Textures[0]
+
+			objTex := p.Textures[objTexId]
 			rl.DrawTexture(objTex, dx, dy, rl.White)
 		}
 	}

@@ -6,7 +6,9 @@ import (
 	"cmp"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgmap"
+	"grpg/data-go/grpgobj"
 	"grpg/data-go/grpgtex"
+	"grpg/data-go/grpgtile"
 	"io"
 	"log"
 	"os"
@@ -93,7 +95,7 @@ func loadMaps(dirPath string, game *shared.Game) map[util.Vector2I]grpgmap.Zone 
 			zoneMap[chunkPos] = zone
 
 			for idx, obj := range zone.Objs {
-				if obj.InternalId != 0 && obj.Type == grpgmap.OBJ {
+				if obj != 0 {
 					x := (idx % 16) + (int(header.ChunkX) * 16)
 					y := (idx / 16) + (int(header.ChunkY) * 16)
 
@@ -114,6 +116,73 @@ func loadMaps(dirPath string, game *shared.Game) map[util.Vector2I]grpgmap.Zone 
 	return zoneMap
 }
 
+func loadObjs(path string) map[uint16]grpgobj.Obj {
+	objMap := make(map[uint16]grpgobj.Obj)
+
+	grpgObjFile, err1 := os.Open(path)
+	grpgObjBytes, err2 := io.ReadAll(grpgObjFile)
+
+	if err := cmp.Or(err1, err2); err != nil {
+		log.Fatal("Failed reading GRPGOBJ file")
+	}
+
+	defer grpgObjFile.Close()
+
+	buf := gbuf.NewGBuf(grpgObjBytes)
+
+	header, err := grpgobj.ReadHeader(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if header.Magic != [8]byte{'G', 'R', 'P', 'G', 'O', 'B', 'J', 0x00} {
+		log.Fatal("file does not have GRPGOBJ header")
+	}
+
+	objs, err := grpgobj.ReadObjs(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, obj := range objs {
+		objMap[obj.ObjId] = obj
+	}
+
+	return objMap
+}
+
+func loadTiles(path string) map[uint16]grpgtile.Tile {
+	tileMap := make(map[uint16]grpgtile.Tile)
+
+	grpgTileFile, err1 := os.Open(path)
+	grpgTileBytes, err2 := io.ReadAll(grpgTileFile)
+
+	if err := cmp.Or(err1, err2); err != nil {
+		log.Fatal("Failed reading GRPGTILE file")
+	}
+
+	buf := gbuf.NewGBuf(grpgTileBytes)
+
+	header, err := grpgtile.ReadHeader(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if header.Magic != "GRPGTILE" {
+		log.Fatal("file does not have GRPGTILE header")
+	}
+
+	tiles, err := grpgtile.ReadTiles(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, tile := range tiles {
+		tileMap[tile.TileId] = tile
+	}
+
+	return tileMap
+}
 func loadGameframeRightTexture(texturePath string) rl.Texture2D {
 	file, err1 := os.Open(texturePath)
 	bytes, err2 := io.ReadAll(file)
