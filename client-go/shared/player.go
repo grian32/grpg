@@ -25,8 +25,12 @@ func (lp *LocalPlayer) Move(newX, newY int32, facing Direction) {
 }
 
 func (lp *LocalPlayer) SendMovePacket(game *Game, x, y int32, facing Direction) {
+	if facing > 3 {
+		return
+	}
+
 	_, exists := game.CollisionMap[util.Vector2I{X: x, Y: y}]
-	if x > int32(game.MaxX) || x < 0 || y > int32(game.MaxY) || y < 0 || exists || facing > 3 {
+	if x > int32(game.MaxX) || x < 0 || y > int32(game.MaxY) || y < 0 || exists {
 		if facing != lp.Facing {
 			SendPacket(game.Conn, &c2s.MovePacket{
 				X:      uint32(lp.X),
