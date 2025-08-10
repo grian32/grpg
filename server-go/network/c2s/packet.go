@@ -17,7 +17,7 @@ type PacketData struct {
 
 var (
 	LoginData = PacketData{Opcode: 0x01, Length: -1, Handler: nil}
-	MoveData  = PacketData{Opcode: 0x01, Length: 8, Handler: &Move{}}
+	MoveData  = PacketData{Opcode: 0x01, Length: 9, Handler: &Move{}}
 )
 
 var Packets = map[byte]PacketData{

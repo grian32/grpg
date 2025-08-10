@@ -15,23 +15,33 @@ type LocalPlayer struct {
 	Name           string
 }
 
-func (lp *LocalPlayer) Move(newX, newY int32) {
+func (lp *LocalPlayer) Move(newX, newY int32, facing Direction) {
 	lp.X = newX
 	lp.Y = newY
+	lp.Facing = facing
 
 	lp.ChunkX = lp.X / 16
 	lp.ChunkY = lp.Y / 16
 }
 
-func (lp *LocalPlayer) SendMovePacket(game *Game, x, y int32) {
+func (lp *LocalPlayer) SendMovePacket(game *Game, x, y int32, facing Direction) {
 	_, exists := game.CollisionMap[util.Vector2I{X: x, Y: y}]
-	if x > int32(game.MaxX) || x < 0 || y > int32(game.MaxY) || y < 0 || exists {
+	if x > int32(game.MaxX) || x < 0 || y > int32(game.MaxY) || y < 0 || exists || facing > 3 {
+		if facing != lp.Facing {
+			SendPacket(game.Conn, &c2s.MovePacket{
+				X:      uint32(lp.X),
+				Y:      uint32(lp.Y),
+				Facing: byte(facing),
+			})
+		}
+
 		return
 	}
 
 	SendPacket(game.Conn, &c2s.MovePacket{
-		X: uint32(x),
-		Y: uint32(y),
+		X:      uint32(x),
+		Y:      uint32(y),
+		Facing: byte(facing),
 	})
 }
 
@@ -79,9 +89,10 @@ func NewRemotePlayer(x, y int32, facing Direction, name string) *RemotePlayer {
 	}
 }
 
-func (rp *RemotePlayer) Move(newX, newY int32) {
+func (rp *RemotePlayer) Move(newX, newY int32, facing Direction) {
 	rp.X = newX
 	rp.Y = newY
+	rp.Facing = facing
 }
 
 func (rp *RemotePlayer) Update(game *Game) {

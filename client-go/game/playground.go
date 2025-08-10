@@ -62,17 +62,13 @@ func (p *Playground) Loop() {
 	player := p.Game.Player
 
 	if rl.IsKeyPressed(rl.KeyW) {
-		player.Facing = shared.UP
-		player.SendMovePacket(p.Game, player.X, player.Y-1)
+		player.SendMovePacket(p.Game, player.X, player.Y-1, shared.UP)
 	} else if rl.IsKeyPressed(rl.KeyS) {
-		player.Facing = shared.DOWN
-		player.SendMovePacket(p.Game, player.X, player.Y+1)
+		player.SendMovePacket(p.Game, player.X, player.Y+1, shared.DOWN)
 	} else if rl.IsKeyPressed(rl.KeyA) {
-		player.Facing = shared.LEFT
-		player.SendMovePacket(p.Game, player.X-1, player.Y)
+		player.SendMovePacket(p.Game, player.X-1, player.Y, shared.LEFT)
 	} else if rl.IsKeyPressed(rl.KeyD) {
-		player.Facing = shared.RIGHT
-		player.SendMovePacket(p.Game, player.X+1, player.Y)
+		player.SendMovePacket(p.Game, player.X+1, player.Y, shared.RIGHT)
 	}
 
 	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
@@ -202,6 +198,6 @@ func drawGameFrame(p *Playground) {
 	rl.DrawTexture(p.GameframeRight, 768, 0, rl.White)
 	rl.DrawRectangle(0, 768, 960-192, 192, rl.Blue)
 	rl.DrawTextEx(p.Font, p.CurrActionString, rl.Vector2{X: 0, Y: 768}, 24, 0, rl.White)
-	playerCoords := fmt.Sprintf("X: %d, Y: %d", p.Game.Player.X, p.Game.Player.Y)
+	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", p.Game.Player.X, p.Game.Player.Y, p.Game.Player.Facing.String())
 	rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 0, Y: 800}, 24, 0, rl.White)
 }
