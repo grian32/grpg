@@ -71,6 +71,16 @@ func (lp *LocalPlayer) Update(game *Game, crossedZone bool) {
 
 	const speed = 16.0
 
+	if game.JustLoggedIn {
+		lp.RealX = targetX
+		lp.RealY = targetY
+
+		lp.PrevX = lp.X
+		lp.PrevY = lp.Y
+		game.JustLoggedIn = false
+		return
+	}
+
 	if crossedZone {
 		lp.RealX = targetX
 		lp.RealY = targetY

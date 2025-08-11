@@ -7,6 +7,7 @@ import (
 
 type LoginRejected struct{}
 
-func (l LoginRejected) Handle(buf *gbuf.GBuf, game *shared.Game) {
-	game.ShowFailedLogin = true
+func (l LoginRejected) Handle(buf *gbuf.GBuf, g *shared.Game) {
+	g.ShowFailedLogin = true
+	g.JustLoggedIn = false
 }

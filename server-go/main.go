@@ -48,6 +48,8 @@ func main() {
 	}
 	defer db.Close()
 
+	g.Database = db
+
 	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
 	if err != nil {
 		log.Fatal("Failed to create sqlite3 driver: ", err)
@@ -127,6 +129,7 @@ func handleClient(conn net.Conn, game *shared.Game, packets chan ChanPacket) {
 			if !exists {
 				log.Printf("Couldn't find player to remove after losing connection.")
 			} else {
+				player.SaveToDB(game.Database)
 				delete(game.Players, player)
 				network.UpdatePlayersByChunk(player.ChunkPos, game)
 			}
@@ -182,12 +185,14 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 	player := &shared.Player{
 		Pos:      zeroPos,
 		ChunkPos: zeroPos,
+		Facing:   shared.UP,
 		Name:     string(name),
 		Conn:     conn,
 	}
 
 	game.Players[player] = struct{}{}
 	game.Connections[conn] = player
+	player.LoadFromDB(game.Database)
 
 	network.SendPacket(conn, &s2c.LoginAccepted{}, game)
 	// this will be changed to the chunkpos where u login when i have player saves
