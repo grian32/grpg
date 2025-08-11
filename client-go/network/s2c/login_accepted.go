@@ -13,5 +13,4 @@ func (l *LoginAccepted) Handle(buf *gbuf.GBuf, g *shared.Game) {
 	// this isn't *really* necessary since login screen switches off once login is accepted but doing it for
 	// consistency or if i allow log out later or something else.
 	g.ShowFailedLogin = false
-	g.JustLoggedIn = true
 }

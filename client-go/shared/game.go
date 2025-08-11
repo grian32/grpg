@@ -25,7 +25,6 @@ type Game struct {
 	OtherPlayers    map[string]*RemotePlayer
 	Conn            net.Conn
 	ShowFailedLogin bool
-	JustLoggedIn    bool
 }
 
 // i think this would make sense as a function on game but er.. cyclical lol!
