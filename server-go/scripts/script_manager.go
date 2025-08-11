@@ -3,6 +3,7 @@ package scripts
 import (
 	"errors"
 	"fmt"
+	"grpgscript/ast"
 	"grpgscript/evaluator"
 	"grpgscript/lexer"
 	"grpgscript/object"
@@ -16,12 +17,19 @@ import (
 
 // ScriptManager TODO: dubious name
 type ScriptManager struct {
-	// TODO
+	InteractScripts map[uint16]*ast.BlockStatement
+}
+
+func NewScriptManager() *ScriptManager {
+	return &ScriptManager{
+		InteractScripts: make(map[uint16]*ast.BlockStatement),
+	}
 }
 
 func (s *ScriptManager) LoadScripts(path string) error {
 	// TODO: add my game stuff to env
 	env := object.NewEnvironment()
+	AddListeners(env, s)
 	entries, err := os.ReadDir(path)
 
 	if err != nil {

@@ -70,11 +70,14 @@ func main() {
 		log.Fatal("Failed to start: ", err)
 	}
 
-	scriptManager := scripts.ScriptManager{}
-	err = scriptManager.LoadScripts("../game-scripts")
+	scriptManager := scripts.NewScriptManager()
+	g.ScriptManager = scriptManager
+	err = g.ScriptManager.LoadScripts("../game-scripts")
 	if err != nil {
 		log.Fatal("Failed loading scripts: ", err)
 	}
+
+	fmt.Println(g.ScriptManager.InteractScripts)
 
 	packets := make(chan ChanPacket, 1000)
 
