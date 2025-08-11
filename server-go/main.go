@@ -13,6 +13,7 @@ import (
 	"server/network"
 	"server/network/c2s"
 	"server/network/s2c"
+	"server/scripts"
 	"server/shared"
 	"server/util"
 	"time"
@@ -67,6 +68,12 @@ func main() {
 	listener, err := net.Listen("tcp", ":4422")
 	if err != nil {
 		log.Fatal("Failed to start: ", err)
+	}
+
+	scriptManager := scripts.ScriptManager{}
+	err = scriptManager.LoadScripts("../game-scripts")
+	if err != nil {
+		log.Fatal("Failed loading scripts: ", err)
 	}
 
 	packets := make(chan ChanPacket, 1000)
