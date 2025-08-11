@@ -20,7 +20,7 @@ func (p *PlayersUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	playerLen := 0
 
 	// TODO: might be able to do this without iterating twice but would require a way to modify at pos in gbuf
-	for _, player := range game.Players {
+	for player, _ := range game.Players {
 		if player.ChunkPos == p.ChunkPos {
 			packetLen += 4 + len(player.Name) + 4 + 4 + 1 // len name, name, x, y, facing
 			playerLen++
@@ -36,7 +36,7 @@ func (p *PlayersUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 
 	buf.WriteUint16(uint16(playerLen))
 
-	for _, player := range game.Players {
+	for player, _ := range game.Players {
 		if player.ChunkPos == p.ChunkPos {
 			buf.WriteString(player.Name)
 			buf.WriteUint32(player.Pos.X)

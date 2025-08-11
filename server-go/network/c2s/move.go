@@ -12,7 +12,7 @@ import (
 type Move struct {
 }
 
-func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, playerPos int) {
+func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player) {
 	newX, err1 := buf.ReadUint32()
 	newY, err2 := buf.ReadUint32()
 	facing, err3 := buf.ReadByte()
@@ -29,7 +29,6 @@ func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, playerPos int) {
 
 	chunkPos := util.Vector2I{X: newX / 16, Y: newY / 16}
 
-	player := game.Players[playerPos]
 	player.Pos.X = newX
 	player.Pos.Y = newY
 	player.ChunkPos = chunkPos

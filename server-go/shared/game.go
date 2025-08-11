@@ -2,11 +2,13 @@ package shared
 
 import (
 	"database/sql"
+	"net"
 	"server/util"
 )
 
 type Game struct {
-	Players      []*Player
+	Players      map[*Player]struct{}
+	Connections  map[net.Conn]*Player
 	MaxX         uint32
 	MaxY         uint32
 	Database     *sql.DB

@@ -6,7 +6,7 @@ import (
 )
 
 type Packet interface {
-	Handle(buf *gbuf.GBuf, game *shared.Game, playerPos int)
+	Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player)
 }
 
 type PacketData struct {
@@ -17,7 +17,7 @@ type PacketData struct {
 
 var (
 	LoginData = PacketData{Opcode: 0x01, Length: -1, Handler: nil}
-	MoveData  = PacketData{Opcode: 0x01, Length: 9, Handler: &Move{}}
+	MoveData  = PacketData{Opcode: 0x02, Length: 9, Handler: &Move{}}
 )
 
 var Packets = map[byte]PacketData{

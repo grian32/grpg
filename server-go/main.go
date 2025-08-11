@@ -25,16 +25,17 @@ import (
 
 var (
 	g = &shared.Game{
-		Players: []*shared.Player{},
-		MaxX:    0,
-		MaxY:    0,
+		Players:     map[*shared.Player]struct{}{},
+		Connections: make(map[net.Conn]*shared.Player),
+		MaxX:        0,
+		MaxY:        0,
 	}
 	assetsDirectory = "../../grpg-assets/"
 )
 
 type ChanPacket struct {
 	Bytes      []byte
-	PlayerPos  int
+	Player     *shared.Player
 	PacketData c2s.PacketData
 }
 
@@ -94,7 +95,7 @@ func cycle(packets chan ChanPacket) {
 			select {
 			case packet := <-packets:
 				buf := gbuf.NewGBuf(packet.Bytes)
-				packet.PacketData.Handler.Handle(buf, g, packet.PlayerPos)
+				packet.PacketData.Handler.Handle(buf, g, packet.Player)
 			default:
 				break processPackets
 			}
@@ -120,22 +121,14 @@ func handleClient(conn net.Conn, game *shared.Game, packets chan ChanPacket) {
 		fmt.Println(opcode)
 		if err != nil {
 			log.Printf("Failed to read packet opcode: %v, Conn lost.\n", err)
-			playerPos := -1
-			var playerChunk util.Vector2I
-			for idx, p := range game.Players {
-				if p.Conn == conn {
-					playerPos = idx
-					playerChunk = p.ChunkPos
-					break
-				}
-			}
 
-			if playerPos == -1 {
+			player, exists := game.Connections[conn]
+
+			if !exists {
 				log.Printf("Couldn't find player to remove after losing connection.")
 			} else {
-				game.Players[playerPos] = game.Players[len(game.Players)-1]
-				game.Players = game.Players[:len(game.Players)-1]
-				network.UpdatePlayersByChunk(playerChunk, game)
+				delete(game.Players, player)
+				network.UpdatePlayersByChunk(player.ChunkPos, game)
 			}
 
 			return
@@ -156,23 +149,9 @@ func handleClient(conn net.Conn, game *shared.Game, packets chan ChanPacket) {
 			return
 		}
 
-		var playerPos = -1
-
-		for idx, p := range game.Players {
-			if p.Conn == conn {
-				playerPos = idx
-			}
-		}
-
-		if playerPos == -1 {
-			fmt.Printf("Couldn't find player with conn %v", conn)
-			return
-		}
-
-		//packetData.Handler.Handle(buf, game, playerPos)
 		packets <- ChanPacket{
 			Bytes:      bytes,
-			PlayerPos:  playerPos,
+			Player:     game.Connections[conn],
 			PacketData: packetData,
 		}
 	}
@@ -190,7 +169,8 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 		log.Printf("Error reading login packet, %v\n", err)
 	}
 
-	for _, player := range game.Players {
+	// TODO: not sure if i can optimize this unless i keep a map of pre existing names or something but feels overkill alrdy
+	for player, _ := range game.Players {
 		if player.Name == string(name) {
 			network.SendPacket(conn, &s2c.LoginRejected{}, game)
 			return
@@ -206,7 +186,8 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 		Conn:     conn,
 	}
 
-	game.Players = append(game.Players, player)
+	game.Players[player] = struct{}{}
+	game.Connections[conn] = player
 
 	network.SendPacket(conn, &s2c.LoginAccepted{}, game)
 	// this will be changed to the chunkpos where u login when i have player saves
