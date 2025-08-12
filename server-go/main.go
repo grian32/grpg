@@ -5,7 +5,6 @@ import (
 	"cmp"
 	"database/sql"
 	"encoding/binary"
-	"fmt"
 	"grpg/data-go/gbuf"
 	"io"
 	"log"
@@ -77,8 +76,6 @@ func main() {
 		log.Fatal("Failed loading scripts: ", err)
 	}
 
-	fmt.Println(g.ScriptManager.InteractScripts)
-
 	packets := make(chan ChanPacket, 1000)
 
 	go cycle(packets)
@@ -130,7 +127,6 @@ func handleClient(conn net.Conn, game *shared.Game, packets chan ChanPacket) {
 
 	for {
 		opcode, err := reader.ReadByte()
-		fmt.Println(opcode)
 		if err != nil {
 			log.Printf("Failed to read packet opcode: %v, Conn lost.\n", err)
 

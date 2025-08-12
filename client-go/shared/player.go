@@ -6,7 +6,6 @@ import (
 	"fmt"
 )
 
-// TODO: separate this to a local/remote player :S, also, figure out wtf im doing with that move function lol, sob. its only used in one place
 type LocalPlayer struct {
 	X, Y           int32
 	PrevX, PrevY   int32
@@ -47,6 +46,21 @@ func (lp *LocalPlayer) SendMovePacket(game *Game, x, y int32, facing Direction) 
 		X:      uint32(x),
 		Y:      uint32(y),
 		Facing: byte(facing),
+	})
+}
+
+// SendInteractPacket TODO: maybe bad place for this?
+func (lp *LocalPlayer) SendInteractPacket(game *Game) {
+	facing := lp.GetFacingCoord()
+	trackedObj, exists := game.TrackedObjs[facing]
+	if !exists {
+		return
+	}
+
+	SendPacket(game.Conn, &c2s.InteractPacket{
+		ObjId: trackedObj.DataObj.ObjId,
+		X:     uint32(facing.X),
+		Y:     uint32(facing.Y),
 	})
 }
 

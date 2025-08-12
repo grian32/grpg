@@ -65,6 +65,8 @@ func (p *Playground) Loop() {
 		player.SendMovePacket(p.Game, player.X-1, player.Y, shared.LEFT)
 	} else if rl.IsKeyPressed(rl.KeyD) {
 		player.SendMovePacket(p.Game, player.X+1, player.Y, shared.RIGHT)
+	} else if rl.IsKeyPressed(rl.KeyQ) {
+		player.SendInteractPacket(p.Game)
 	}
 
 	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
