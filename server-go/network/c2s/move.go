@@ -5,6 +5,7 @@ import (
 	"grpg/data-go/gbuf"
 	"log"
 	"server/network"
+	"server/network/s2c"
 	"server/shared"
 	"server/util"
 )
@@ -34,5 +35,5 @@ func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player) 
 	player.ChunkPos = chunkPos
 	player.Facing = shared.Direction(facing)
 
-	network.UpdatePlayersByChunk(chunkPos, game)
+	network.UpdatePlayersByChunk(chunkPos, game, &s2c.PlayersUpdate{ChunkPos: chunkPos})
 }

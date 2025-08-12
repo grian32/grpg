@@ -7,6 +7,8 @@ import (
 	"grpgscript/evaluator"
 	"grpgscript/object"
 	"log"
+	"server/network"
+	"server/network/s2c"
 	"server/shared"
 	"server/util"
 )
@@ -22,17 +24,23 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 		log.Printf("failed to read interact packet: %v\n", err)
 	}
 
+	objPos := util.Vector2I{X: x, Y: y}
 	script := game.ScriptManager.InteractScripts[objId]
 	env := object.NewEnclosedEnvinronment(game.ScriptManager.Env)
-	addInteractBuiltins(env, game, util.Vector2I{X: x, Y: y})
+	addInteractBuiltins(env, game, objPos)
 
 	evaluator.Eval(script, env)
+
+	chunkPos := game.TrackedObjs[objPos].ChunkPos
+
+	network.UpdatePlayersByChunk(chunkPos, game, &s2c.ObjUpdate{ChunkPos: chunkPos})
 
 	for pos, obj := range game.TrackedObjs {
 		if pos.Y == 0 {
 			fmt.Printf("%v: %d\n", pos, obj.State)
 		}
 	}
+
 }
 
 func addInteractBuiltins(env *object.Environment, game *shared.Game, objPos util.Vector2I) {
@@ -49,7 +57,7 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, objPos util
 				return nil
 			}
 
-			game.TrackedObjs[objPos].State = uint16(newState.Value)
+			game.TrackedObjs[objPos].State = byte(newState.Value)
 
 			return nil
 		},

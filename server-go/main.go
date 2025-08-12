@@ -146,7 +146,7 @@ func handleClient(conn net.Conn, game *shared.Game, packets chan ChanPacket) {
 			} else {
 				player.SaveToDB(game.Database)
 				delete(game.Players, player)
-				network.UpdatePlayersByChunk(player.ChunkPos, game)
+				network.UpdatePlayersByChunk(player.ChunkPos, game, &s2c.PlayersUpdate{ChunkPos: player.ChunkPos})
 			}
 
 			return
@@ -210,6 +210,6 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 	player.LoadFromDB(game.Database)
 
 	network.SendPacket(conn, &s2c.LoginAccepted{}, game)
-	// this will be changed to the chunkpos where u login when i have player saves
-	network.UpdatePlayersByChunk(util.Vector2I{X: 0, Y: 0}, game)
+	// TODO: change this to logged in chunkpos
+	network.UpdatePlayersByChunk(zeroPos, game, &s2c.PlayersUpdate{ChunkPos: zeroPos})
 }

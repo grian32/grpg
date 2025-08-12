@@ -104,7 +104,7 @@ func loadMaps(dirPath string, game *shared.Game) map[util.Vector2I]grpgmap.Zone 
 
 					// TODO: this will be transmitted per chunk from server l8r
 					if grpgobj.IsFlagSet(data.Flags, grpgobj.STATE) || grpgobj.IsFlagSet(data.Flags, grpgobj.INTERACT) {
-						game.TrackedObjs[vec] = shared.GameObj{
+						game.TrackedObjs[vec] = &shared.GameObj{
 							DataObj: data,
 							State:   0,
 						}
@@ -127,8 +127,8 @@ func loadMaps(dirPath string, game *shared.Game) map[util.Vector2I]grpgmap.Zone 
 	return zoneMap
 }
 
-func loadObjs(path string) map[uint16]grpgobj.Obj {
-	objMap := make(map[uint16]grpgobj.Obj)
+func loadObjs(path string) map[uint16]*grpgobj.Obj {
+	objMap := make(map[uint16]*grpgobj.Obj)
 
 	grpgObjFile, err1 := os.Open(path)
 	grpgObjBytes, err2 := io.ReadAll(grpgObjFile)
@@ -156,14 +156,14 @@ func loadObjs(path string) map[uint16]grpgobj.Obj {
 	}
 
 	for _, obj := range objs {
-		objMap[obj.ObjId] = obj
+		objMap[obj.ObjId] = &obj
 	}
 
 	return objMap
 }
 
-func loadTiles(path string) map[uint16]grpgtile.Tile {
-	tileMap := make(map[uint16]grpgtile.Tile)
+func loadTiles(path string) map[uint16]*grpgtile.Tile {
+	tileMap := make(map[uint16]*grpgtile.Tile)
 
 	grpgTileFile, err1 := os.Open(path)
 	grpgTileBytes, err2 := io.ReadAll(grpgTileFile)
@@ -189,7 +189,7 @@ func loadTiles(path string) map[uint16]grpgtile.Tile {
 	}
 
 	for _, tile := range tiles {
-		tileMap[tile.TileId] = tile
+		tileMap[tile.TileId] = &tile
 	}
 
 	return tileMap

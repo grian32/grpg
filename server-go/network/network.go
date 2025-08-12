@@ -8,11 +8,7 @@ import (
 	"server/util"
 )
 
-func UpdatePlayersByChunk(chunkPos util.Vector2I, game *shared.Game) {
-	packet := &s2c.PlayersUpdate{
-		ChunkPos: chunkPos,
-	}
-
+func UpdatePlayersByChunk(chunkPos util.Vector2I, game *shared.Game, packet s2c.Packet) {
 	for player, _ := range game.Players {
 		if player.ChunkPos == chunkPos {
 			SendPacket(player.Conn, packet, game)

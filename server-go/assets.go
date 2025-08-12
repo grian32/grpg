@@ -61,8 +61,9 @@ func LoadMaps(dir string, game *shared.Game, objs []grpgobj.Obj) {
 
 					if grpgobj.IsFlagSet(data.Flags, grpgobj.STATE) {
 						game.TrackedObjs[util.Vector2I{X: uint32(x), Y: uint32(y)}] = &shared.GameObj{
-							ObjData: data,
-							State:   0,
+							ObjData:  data,
+							ChunkPos: util.Vector2I{X: uint32(header.ChunkX), Y: uint32(header.ChunkY)},
+							State:    0,
 						}
 					}
 				}
