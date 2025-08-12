@@ -210,6 +210,5 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 	player.LoadFromDB(game.Database)
 
 	network.SendPacket(conn, &s2c.LoginAccepted{}, game)
-	// TODO: change this to logged in chunkpos
-	network.UpdatePlayersByChunk(zeroPos, game, &s2c.PlayersUpdate{ChunkPos: zeroPos})
+	network.UpdatePlayersByChunk(player.ChunkPos, game, &s2c.PlayersUpdate{ChunkPos: player.ChunkPos})
 }
