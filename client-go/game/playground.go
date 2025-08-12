@@ -165,11 +165,18 @@ func drawWorld(p *Playground) {
 
 		obj := mapTiles.Objs[i]
 		if obj != 0 {
-			trackedObj := p.Game.TrackedObjs[util.Vector2I{
+			trackedObj, ok := p.Game.TrackedObjs[util.Vector2I{
 				X: int32(i % 16),
 				Y: int32(i / 16),
 			}]
-			objTexId := p.Game.Objs[uint16(mapTiles.Objs[i])].Textures[trackedObj.State]
+
+			// fallback pretty much, might not be necessary in the future
+			var state uint16 = 0
+			if ok {
+				state = uint16(trackedObj.State)
+			}
+
+			objTexId := p.Game.Objs[uint16(mapTiles.Objs[i])].Textures[state]
 
 			objTex := p.Textures[objTexId]
 			rl.DrawTexture(objTex, dx, dy, rl.White)
