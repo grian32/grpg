@@ -155,8 +155,11 @@ func drawWorld(p *Playground) {
 	mapTiles := p.Zones[util.Vector2I{X: p.Game.Player.ChunkX, Y: p.Game.Player.ChunkY}]
 
 	for i := range 256 {
-		dx := int32(i%16) * p.Game.TileSize
-		dy := int32(i/16) * p.Game.TileSize
+		localX := int32(i % 16)
+		localY := int32(i / 16)
+
+		dx := localX * p.Game.TileSize
+		dy := localY * p.Game.TileSize
 
 		texId := p.Game.Tiles[uint16(mapTiles.Tiles[i])].TexId
 
@@ -166,8 +169,8 @@ func drawWorld(p *Playground) {
 		obj := mapTiles.Objs[i]
 		if obj != 0 {
 			trackedObj, ok := p.Game.TrackedObjs[util.Vector2I{
-				X: int32(i % 16),
-				Y: int32(i / 16),
+				X: localX + (p.Game.Player.ChunkX * 16),
+				Y: localY + (p.Game.Player.ChunkY * 16),
 			}]
 
 			// fallback pretty much, might not be necessary in the future
@@ -186,7 +189,6 @@ func drawWorld(p *Playground) {
 
 // TODO: generalize this code
 func drawPlayer(p *Playground) {
-	// rl.DrawRectangle(p.Game.Player.RealX, p.Game.Player.RealY, 64, 64, rl.SkyBlue)
 	rl.DrawTexture(p.PlayerTextures[p.Game.Player.Facing], p.Game.Player.RealX, p.Game.Player.RealY, rl.White)
 	rl.DrawTextEx(
 		p.Font,
