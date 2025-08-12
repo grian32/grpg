@@ -27,9 +27,12 @@ func NewScriptManager() *ScriptManager {
 }
 
 func (s *ScriptManager) LoadScripts(path string) error {
-	// TODO: add my game stuff to env
 	env := object.NewEnvironment()
 	AddListeners(env, s)
+	err := LoadObjConstants(env, "../../grpg-assets/objs.grpgobj")
+	if err != nil {
+		return err
+	}
 	entries, err := os.ReadDir(path)
 
 	if err != nil {
