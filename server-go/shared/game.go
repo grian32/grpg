@@ -13,6 +13,7 @@ type Game struct {
 	MaxX          uint32
 	MaxY          uint32
 	Database      *sql.DB
+	TrackedObjs   map[util.Vector2I]*GameObj
 	CollisionMap  map[util.Vector2I]struct{}
 	ScriptManager *scripts.ScriptManager
 }

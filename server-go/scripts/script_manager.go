@@ -3,6 +3,7 @@ package scripts
 import (
 	"errors"
 	"fmt"
+	"grpg/data-go/grpgobj"
 	"grpgscript/ast"
 	"grpgscript/evaluator"
 	"grpgscript/lexer"
@@ -17,22 +18,27 @@ import (
 
 // ScriptManager TODO: dubious name
 type ScriptManager struct {
+	Env             *object.Environment
 	InteractScripts map[uint16]*ast.BlockStatement
 }
 
 func NewScriptManager() *ScriptManager {
 	return &ScriptManager{
 		InteractScripts: make(map[uint16]*ast.BlockStatement),
+		Env:             object.NewEnvironment(),
+	}
+}
+
+func (s *ScriptManager) LoadObjConstants(objs []grpgobj.Obj) {
+	for _, obj := range objs {
+		s.Env.Set(uppercaseAll(obj.Name), &object.Integer{Value: int64(obj.ObjId)})
 	}
 }
 
 func (s *ScriptManager) LoadScripts(path string) error {
-	env := object.NewEnvironment()
+	env := object.NewEnclosedEnvinronment(s.Env)
 	AddListeners(env, s)
-	err := LoadObjConstants(env, "../../grpg-assets/objs.grpgobj")
-	if err != nil {
-		return err
-	}
+
 	entries, err := os.ReadDir(path)
 
 	if err != nil {
@@ -71,4 +77,15 @@ func (s *ScriptManager) LoadScripts(path string) error {
 	}
 
 	return nil
+}
+
+func uppercaseAll(str string) string {
+	chars := []int32(str)
+
+	for i, b := range str {
+		if b >= 'a' && b <= 'z' {
+			chars[i] = b - 32
+		}
+	}
+	return string(chars)
 }

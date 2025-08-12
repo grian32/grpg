@@ -2,8 +2,10 @@ package main
 
 import (
 	"cmp"
+	"errors"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgmap"
+	"grpg/data-go/grpgobj"
 	"io"
 	"log"
 	"os"
@@ -12,7 +14,8 @@ import (
 	"server/util"
 )
 
-func LoadCollisionMaps(dir string, game *shared.Game) {
+// LoadMaps loads all collisions from maps & adds tracked objs to the map on game
+func LoadMaps(dir string, game *shared.Game, objs []grpgobj.Obj) {
 	game.CollisionMap = make(map[util.Vector2I]struct{})
 
 	entries, err := os.ReadDir(dir)
@@ -53,6 +56,15 @@ func LoadCollisionMaps(dir string, game *shared.Game) {
 					y := (idx / 16) + (int(header.ChunkY) * 16)
 
 					game.CollisionMap[util.Vector2I{X: uint32(x), Y: uint32(y)}] = struct{}{}
+
+					data := objs[obj-1]
+
+					if grpgobj.IsFlagSet(data.Flags, grpgobj.STATE) {
+						game.TrackedObjs[util.Vector2I{X: uint32(x), Y: uint32(y)}] = &shared.GameObj{
+							ObjData: data,
+							State:   0,
+						}
+					}
 				}
 			}
 
@@ -66,4 +78,32 @@ func LoadCollisionMaps(dir string, game *shared.Game) {
 			}
 		}
 	}
+}
+
+func LoadObjs(path string) ([]grpgobj.Obj, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	bytes, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := gbuf.NewGBuf(bytes)
+	header, err := grpgobj.ReadHeader(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	if header.Magic != [8]byte{'G', 'R', 'P', 'G', 'O', 'B', 'J', 0x00} {
+		return nil, errors.New("file provided does not have GRPGOBJ magic")
+	}
+
+	objs, err := grpgobj.ReadObjs(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	return objs, nil
 }

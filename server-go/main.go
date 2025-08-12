@@ -27,6 +27,7 @@ var (
 	g = &shared.Game{
 		Players:     map[*shared.Player]struct{}{},
 		Connections: make(map[net.Conn]*shared.Player),
+		TrackedObjs: make(map[util.Vector2I]*shared.GameObj),
 		MaxX:        0,
 		MaxY:        0,
 	}
@@ -40,8 +41,6 @@ type ChanPacket struct {
 }
 
 func main() {
-	LoadCollisionMaps(assetsDirectory+"maps/", g)
-
 	db, err := sql.Open("sqlite3", "./players.db")
 	if err != nil {
 		log.Fatal("Failed to connect to DB: ", err)
@@ -69,8 +68,18 @@ func main() {
 		log.Fatal("Failed to start: ", err)
 	}
 
+	objs, err := LoadObjs(assetsDirectory + "objs.grpgobj")
+	if err != nil {
+		log.Fatal("Failed loading objs: ", err)
+	}
+
+	LoadMaps(assetsDirectory+"maps/", g, objs)
+
 	scriptManager := scripts.NewScriptManager()
 	g.ScriptManager = scriptManager
+
+	g.ScriptManager.LoadObjConstants(objs)
+
 	err = g.ScriptManager.LoadScripts("../game-scripts")
 	if err != nil {
 		log.Fatal("Failed loading scripts: ", err)

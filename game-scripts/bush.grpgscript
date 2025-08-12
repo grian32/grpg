@@ -1,3 +1,6 @@
 onInteract(BERRY_BUSH) {
-    println("hello");
+    if (getObjState() == 0) {
+        setObjState(1);
+        playerInvAdd(1);
+    }
 }
