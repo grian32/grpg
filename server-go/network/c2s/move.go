@@ -28,6 +28,8 @@ func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player) 
 		return
 	}
 
+	prevChunkPos := player.ChunkPos
+
 	chunkPos := util.Vector2I{X: newX / 16, Y: newY / 16}
 
 	crossedZone := chunkPos.X != player.ChunkPos.X || chunkPos.Y != player.ChunkPos.Y
@@ -39,6 +41,7 @@ func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player) 
 
 	network.UpdatePlayersByChunk(chunkPos, game, &s2c.PlayersUpdate{ChunkPos: chunkPos})
 	if crossedZone {
+		network.UpdatePlayersByChunk(prevChunkPos, game, &s2c.PlayersUpdate{ChunkPos: prevChunkPos})
 		network.SendPacket(player.Conn, &s2c.ObjUpdate{ChunkPos: chunkPos, Rebuild: true}, game)
 	}
 }
