@@ -8,6 +8,7 @@ import (
 
 type ObjUpdate struct {
 	ChunkPos util.Vector2I
+	Rebuild  bool
 }
 
 func (o *ObjUpdate) Opcode() byte {
@@ -15,24 +16,30 @@ func (o *ObjUpdate) Opcode() byte {
 }
 
 func (o *ObjUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
-	packetLen := 2 // amount of objs
+	packetLen := 1 + 2 // rebuild boolean + amount of objs
 	objLen := 0
 
 	for _, obj := range game.TrackedObjs {
 		if obj.ChunkPos == o.ChunkPos {
-			packetLen += 4 + 4 + 2 + 1 // x, y, objid, state
+			packetLen += 4 + 4 + 1 // x, y, state
+			if o.Rebuild {
+				packetLen += 2 // objid
+			}
 			objLen++
 		}
 	}
 
 	buf.WriteUint16(uint16(packetLen))
+	buf.WriteBool(o.Rebuild)
 	buf.WriteUint16(uint16(objLen))
 
 	for pos, obj := range game.TrackedObjs {
 		if obj.ChunkPos == o.ChunkPos {
 			buf.WriteUint32(pos.X)
 			buf.WriteUint32(pos.Y)
-			buf.WriteUint16(obj.ObjData.ObjId)
+			if o.Rebuild {
+				buf.WriteUint16(obj.ObjData.ObjId)
+			}
 			buf.WriteByte(obj.State)
 		}
 	}

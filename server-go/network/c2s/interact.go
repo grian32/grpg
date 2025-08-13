@@ -33,7 +33,7 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 
 	chunkPos := game.TrackedObjs[objPos].ChunkPos
 
-	network.UpdatePlayersByChunk(chunkPos, game, &s2c.ObjUpdate{ChunkPos: chunkPos})
+	network.UpdatePlayersByChunk(chunkPos, game, &s2c.ObjUpdate{ChunkPos: chunkPos, Rebuild: false})
 	fmt.Println(chunkPos)
 
 	for pos, obj := range game.TrackedObjs {

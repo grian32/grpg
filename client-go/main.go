@@ -6,6 +6,7 @@ import (
 	"client/shared"
 	"client/util"
 	"flag"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -18,7 +19,7 @@ var (
 		MaxY:            0,
 		CollisionMap:    make(map[util.Vector2I]struct{}),
 		ObjIdByLoc:      make(map[util.Vector2I]uint16),
-		TrackedObjs:     make(map[util.Vector2I]shared.GameObj),
+		TrackedObjs:     make(map[util.Vector2I]*shared.GameObj),
 		SceneManager:    &shared.GSceneManager{},
 		Player:          &shared.LocalPlayer{X: 0, Y: 0, RealX: 0, RealY: 0, Facing: shared.UP, Name: ""},
 		OtherPlayers:    map[string]*shared.RemotePlayer{},

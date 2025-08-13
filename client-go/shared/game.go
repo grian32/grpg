@@ -19,7 +19,7 @@ type Game struct {
 	// this is literally only needed to send the right obj id with the interact packet, only stores stateful packets
 	ObjIdByLoc      map[util.Vector2I]uint16
 	Tiles           map[uint16]*grpgtile.Tile
-	TrackedObjs     map[util.Vector2I]GameObj
+	TrackedObjs     map[util.Vector2I]*GameObj
 	TileSize        int32
 	SceneManager    *GSceneManager
 	Player          *LocalPlayer

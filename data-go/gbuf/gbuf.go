@@ -75,7 +75,6 @@ func (buf *GBuf) ReadByte() (byte, error) {
 	return val, nil
 }
 
-// TODO: tests
 func (buf *GBuf) ReadInt32() (int32, error) {
 	if buf.pos+4 > len(buf.slice) {
 		return 0, errors.New("not enough bytes to read int32")
@@ -83,6 +82,20 @@ func (buf *GBuf) ReadInt32() (int32, error) {
 	val := int32(binary.BigEndian.Uint32(buf.slice[buf.pos : buf.pos+4]))
 	buf.pos += 4
 	return val, nil
+}
+
+// ReadBool reads a bool encoded as a byte, with byte value 1 = true, and 0 = false
+func (buf *GBuf) ReadBool() (bool, error) {
+	b, err := buf.ReadByte()
+	if err != nil {
+		return false, err
+	}
+
+	if b == 1 {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (buf *GBuf) WriteUint16(val uint16) {
@@ -110,6 +123,15 @@ func (buf *GBuf) WriteString(val string) {
 
 func (buf *GBuf) WriteByte(val byte) {
 	buf.slice = append(buf.slice, val)
+}
+
+// WriteBool encodes a boolean as either a byte with the value of 1 if true or 0 if false
+func (buf *GBuf) WriteBool(val bool) {
+	if val {
+		buf.WriteByte(1)
+	} else {
+		buf.WriteByte(0)
+	}
 }
 
 // Clear
