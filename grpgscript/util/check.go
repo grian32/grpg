@@ -9,7 +9,3 @@ func IsAlpha(char byte) bool {
 		(char >= 'A' && char <= 'Z') ||
 		char == '_'
 }
-
-func IsAlphaNumeric(char byte) bool {
-	return IsAlpha(char) || IsDigit(char)
-}
