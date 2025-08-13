@@ -30,10 +30,15 @@ func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player) 
 
 	chunkPos := util.Vector2I{X: newX / 16, Y: newY / 16}
 
+	crossedZone := chunkPos.X != player.ChunkPos.X || chunkPos.Y != player.ChunkPos.Y
+
 	player.Pos.X = newX
 	player.Pos.Y = newY
 	player.ChunkPos = chunkPos
 	player.Facing = shared.Direction(facing)
 
 	network.UpdatePlayersByChunk(chunkPos, game, &s2c.PlayersUpdate{ChunkPos: chunkPos})
+	if crossedZone {
+		network.SendPacket(player.Conn, &s2c.ObjUpdate{ChunkPos: chunkPos}, game)
+	}
 }
