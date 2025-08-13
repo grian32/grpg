@@ -52,13 +52,14 @@ func (lp *LocalPlayer) SendMovePacket(game *Game, x, y int32, facing Direction) 
 // SendInteractPacket TODO: maybe bad place for this?
 func (lp *LocalPlayer) SendInteractPacket(game *Game) {
 	facing := lp.GetFacingCoord()
-	trackedObj, exists := game.TrackedObjs[facing]
-	if !exists {
+	objId, ok := game.ObjIdByLoc[util.Vector2I{X: facing.X, Y: facing.Y}]
+	if !ok {
+		fmt.Printf("warn: interact packet tried to find obj id that does not exist @ %d, %d\n", facing.X, facing.Y)
 		return
 	}
 
 	SendPacket(game.Conn, &c2s.InteractPacket{
-		ObjId: trackedObj.DataObj.ObjId,
+		ObjId: objId,
 		X:     uint32(facing.X),
 		Y:     uint32(facing.Y),
 	})

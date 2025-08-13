@@ -16,9 +16,10 @@ type Game struct {
 	MaxY         uint16
 	CollisionMap map[util.Vector2I]struct{}
 	Objs         map[uint16]*grpgobj.Obj
-	Tiles        map[uint16]*grpgtile.Tile
-	// TODO: this will be transmitted per chunk from server l8r
-	TrackedObjs     map[util.Vector2I]*GameObj
+	// this is literally only needed to send the right obj id with the interact packet, only stores stateful packets
+	ObjIdByLoc      map[util.Vector2I]uint16
+	Tiles           map[uint16]*grpgtile.Tile
+	TrackedObjs     map[util.Vector2I]GameObj
 	TileSize        int32
 	SceneManager    *GSceneManager
 	Player          *LocalPlayer

@@ -28,8 +28,6 @@ func (o *ObjUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	buf.WriteUint16(uint16(packetLen))
 	buf.WriteUint16(uint16(objLen))
 
-	// TODO: look into if it's possible to only send objid in the case of a rebuild, seems dodgy tho, ngl :S
-
 	for pos, obj := range game.TrackedObjs {
 		if obj.ChunkPos == o.ChunkPos {
 			buf.WriteUint32(pos.X)
