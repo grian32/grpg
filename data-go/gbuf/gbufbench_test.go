@@ -12,7 +12,11 @@ func BenchmarkAll(b *testing.B) {
 		buf.WriteString("Hello, World!")
 		buf.WriteUint16(42)
 		buf.WriteUint32(52)
+		buf.WriteBool(true)
+		buf.WriteBool(false)
 
+		_, _ = buf.ReadBool()
+		_, _ = buf.ReadBool()
 		_, _ = buf.ReadUint32()
 		_, _ = buf.ReadUint16()
 		_, _ = buf.ReadString()

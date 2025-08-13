@@ -369,3 +369,32 @@ func TestGBuf_ReadInt32(t *testing.T) {
 		t.Errorf("GBuf_ReadByte()=%d, %d, %d & %v want match for %d, %d, %d", firstInt, secondInt, thirdInt, err, 12, -12, 42)
 	}
 }
+
+func TestGBuf_ReadBool(t *testing.T) {
+	buf := NewGBuf([]byte{
+		0x01, 0x00,
+	})
+
+	firstBool, err1 := buf.ReadBool()
+	secondBool, err2 := buf.ReadBool()
+
+	err := cmp.Or(err1, err2)
+	if !firstBool || secondBool || err != nil {
+		t.Errorf("GBuf_ReadBool=%t, %t, %v, want match for %t, %t", firstBool, secondBool, err, true, false)
+	}
+}
+
+func TestGBuf_WriteBool(t *testing.T) {
+	buf := NewEmptyGBuf()
+
+	expectedBytes := []byte{
+		0x01, 0x00,
+	}
+
+	buf.WriteBool(true)
+	buf.WriteBool(false)
+
+	if !bytes.Equal(expectedBytes, buf.Bytes()) {
+		t.Errorf("GBuf_WriteBool=%v, want match for %v", buf.Bytes(), expectedBytes)
+	}
+}
