@@ -9,10 +9,10 @@ import (
 
 func TestReadWriteHeader(t *testing.T) {
 	expectedHeader := Header{
-		Magic: "GRPGTILE",
+		Magic: [8]byte{'G', 'R', 'P', 'G', 'T', 'I', 'L', 'E'},
 	}
 
-	expectedBytes := []byte("GRPGTILE")
+	expectedBytes := []byte{'G', 'R', 'P', 'G', 'T', 'I', 'L', 'E'}
 
 	buf := gbuf.NewEmptyGBuf()
 

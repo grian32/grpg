@@ -165,7 +165,7 @@ func loadTiles(path string) map[uint16]*grpgtile.Tile {
 		log.Fatal(err)
 	}
 
-	if header.Magic != "GRPGTILE" {
+	if header.Magic != [8]byte{'G', 'R', 'P', 'G', 'T', 'I', 'L', 'E'} {
 		log.Fatal("file does not have GRPGTILE header")
 	}
 

@@ -6,7 +6,7 @@ import (
 )
 
 type Header struct {
-	Magic string
+	Magic [8]byte
 }
 
 type Tile struct {
@@ -26,7 +26,7 @@ func ReadHeader(buf *gbuf.GBuf) (Header, error) {
 	}
 
 	return Header{
-		Magic: string(bytes),
+		Magic: [8]byte(bytes),
 	}, nil
 }
 

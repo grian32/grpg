@@ -79,8 +79,7 @@ func LoadTiles() {
 		return
 	}
 
-	correctMagic := "GRPGTILE"
-	if header.Magic != correctMagic {
+	if header.Magic != [8]byte{'G', 'R', 'P', 'G', 'T', 'I', 'L', 'E'} {
 		fmt.Println("magic header for file isn't GRPGTILE")
 		return
 	}
