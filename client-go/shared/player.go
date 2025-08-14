@@ -12,6 +12,7 @@ type LocalPlayer struct {
 	RealX, RealY   int32
 	ChunkX, ChunkY int32
 	Facing         Direction
+	Inventory      [24]InventoryItem
 	Name           string
 }
 

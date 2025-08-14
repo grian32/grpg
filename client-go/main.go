@@ -12,16 +12,121 @@ import (
 
 var (
 	g = &shared.Game{
-		ScreenWidth:     1152,
-		ScreenHeight:    960,
-		TileSize:        64,
-		MaxX:            0,
-		MaxY:            0,
-		CollisionMap:    make(map[util.Vector2I]struct{}),
-		ObjIdByLoc:      make(map[util.Vector2I]uint16),
-		TrackedObjs:     make(map[util.Vector2I]*shared.GameObj),
-		SceneManager:    &shared.GSceneManager{},
-		Player:          &shared.LocalPlayer{X: 0, Y: 0, RealX: 0, RealY: 0, Facing: shared.UP, Name: ""},
+		ScreenWidth:  1152,
+		ScreenHeight: 960,
+		TileSize:     64,
+		MaxX:         0,
+		MaxY:         0,
+		CollisionMap: make(map[util.Vector2I]struct{}),
+		ObjIdByLoc:   make(map[util.Vector2I]uint16),
+		TrackedObjs:  make(map[util.Vector2I]*shared.GameObj),
+		SceneManager: &shared.GSceneManager{},
+		Player: &shared.LocalPlayer{
+			X:      0,
+			Y:      0,
+			RealX:  0,
+			RealY:  0,
+			Facing: shared.UP,
+			Inventory: [24]shared.InventoryItem{
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+				{
+					ItemId: 1,
+					Count:  2,
+				},
+			},
+			Name: "",
+		},
 		OtherPlayers:    map[string]*shared.RemotePlayer{},
 		Conn:            network.StartConn(),
 		ShowFailedLogin: false,

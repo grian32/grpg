@@ -4,6 +4,7 @@ import (
 	"client/network/c2s"
 	"client/util"
 	"grpg/data-go/gbuf"
+	"grpg/data-go/grpgitem"
 	"grpg/data-go/grpgobj"
 	"grpg/data-go/grpgtile"
 	"net"
@@ -19,6 +20,7 @@ type Game struct {
 	// this is literally only needed to send the right obj id with the interact packet, only stores stateful packets
 	ObjIdByLoc      map[util.Vector2I]uint16
 	Tiles           map[uint16]*grpgtile.Tile
+	Items           map[uint16]grpgitem.Item
 	TrackedObjs     map[util.Vector2I]*GameObj
 	TileSize        int32
 	SceneManager    *GSceneManager

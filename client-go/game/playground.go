@@ -31,6 +31,7 @@ func (p *Playground) Setup() {
 	p.Textures = loadTextures(assetsDirectory + "textures.grpgtex")
 	p.Game.Objs = loadObjs(assetsDirectory + "objs.grpgobj")
 	p.Game.Tiles = loadTiles(assetsDirectory + "tiles.grpgtile")
+	p.Game.Items = loadItems(assetsDirectory + "items.grpgitem")
 	p.Zones = loadMaps(assetsDirectory+"maps/", p.Game)
 
 	p.GameframeRight = loadGameframeRightTexture(assetsDirectory + "used/gameframe_right_2.png")
@@ -217,11 +218,24 @@ func drawOtherPlayers(p *Playground) {
 func drawGameFrame(p *Playground) {
 	rl.DrawTexture(p.GameframeRight, 768, 0, rl.White)
 
+	currItemRealPos := rl.Vector2{X: 768 + 64, Y: 64}
+
+	// TODO: surely i can find some better way of doing the positioning?
+	// TODO: kind of unclear which item the count belongs, grid?, maybe put it in the bottom middle?
+	for idx, item := range p.Game.Player.Inventory {
+		data := p.Game.Items[item.ItemId]
+		tex := p.Textures[data.Texture]
+		rl.DrawTexture(tex, int32(currItemRealPos.X), int32(currItemRealPos.Y), rl.White)
+		rl.DrawTextEx(p.Font, fmt.Sprintf("%d", item.Count), currItemRealPos, 18, 0, rl.White)
+		currItemRealPos.X += 64
+		if (idx+1)%4 == 0 {
+			currItemRealPos.Y += 64
+			currItemRealPos.X = 768 + 64
+		}
+	}
+
 	rl.DrawRectangle(0, 768, 960-192, 192, rl.Blue)
-
 	rl.DrawTextEx(p.Font, "Current Action: "+p.CurrActionString, rl.Vector2{X: 0, Y: 768}, 24, 0, rl.White)
-
 	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", p.Game.Player.X, p.Game.Player.Y, p.Game.Player.Facing.String())
-
 	rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 0, Y: 800}, 24, 0, rl.White)
 }

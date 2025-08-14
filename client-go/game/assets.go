@@ -5,6 +5,7 @@ import (
 	"client/util"
 	"cmp"
 	"grpg/data-go/gbuf"
+	"grpg/data-go/grpgitem"
 	"grpg/data-go/grpgmap"
 	"grpg/data-go/grpgobj"
 	"grpg/data-go/grpgtex"
@@ -190,6 +191,40 @@ func loadTiles(path string) map[uint16]*grpgtile.Tile {
 
 	return tileMap
 }
+
+func loadItems(path string) map[uint16]grpgitem.Item {
+	itemMap := make(map[uint16]grpgitem.Item)
+
+	grpgItemFile, err1 := os.Open(path)
+	grpgItemBytes, err2 := io.ReadAll(grpgItemFile)
+
+	if err := cmp.Or(err1, err2); err != nil {
+		log.Fatal("Failed reading GRPGTILE file")
+	}
+
+	buf := gbuf.NewGBuf(grpgItemBytes)
+
+	header, err := grpgitem.ReadHeader(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if header.Magic != [8]byte{'G', 'R', 'P', 'G', 'I', 'T', 'E', 'M'} {
+		log.Fatal("file does not have GRPGITEM header")
+	}
+
+	items, err := grpgitem.ReadItems(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, item := range items {
+		itemMap[item.ItemId] = item
+	}
+
+	return itemMap
+}
+
 func loadGameframeRightTexture(texturePath string) rl.Texture2D {
 	file, err1 := os.Open(texturePath)
 	bytes, err2 := io.ReadAll(file)
