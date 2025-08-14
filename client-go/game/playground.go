@@ -223,6 +223,10 @@ func drawGameFrame(p *Playground) {
 	// TODO: surely i can find some better way of doing the positioning?
 	// TODO: kind of unclear which item the count belongs, grid?, maybe put it in the bottom middle?
 	for idx, item := range p.Game.Player.Inventory {
+		if item.ItemId == 0 {
+			continue
+		}
+
 		data := p.Game.Items[item.ItemId]
 		tex := p.Textures[data.Texture]
 		rl.DrawTexture(tex, int32(currItemRealPos.X), int32(currItemRealPos.Y), rl.White)

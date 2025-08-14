@@ -16,10 +16,11 @@ type PacketData struct {
 }
 
 var (
-	LoginAcceptedData = PacketData{Opcode: 0x01, Length: 0, Handler: &LoginAccepted{}}
-	LoginRejectedData = PacketData{Opcode: 0x02, Length: 0, Handler: &LoginRejected{}}
-	PlayersUpdateData = PacketData{Opcode: 0x03, Length: -1, Handler: &PlayersUpdate{}}
-	ObjUpdateData     = PacketData{Opcode: 0x04, Length: -1, Handler: &ObjUpdate{}}
+	LoginAcceptedData   = PacketData{Opcode: 0x01, Length: 0, Handler: &LoginAccepted{}}
+	LoginRejectedData   = PacketData{Opcode: 0x02, Length: 0, Handler: &LoginRejected{}}
+	PlayersUpdateData   = PacketData{Opcode: 0x03, Length: -1, Handler: &PlayersUpdate{}}
+	ObjUpdateData       = PacketData{Opcode: 0x04, Length: -1, Handler: &ObjUpdate{}}
+	InventoryUpdateData = PacketData{Opcode: 0x05, Length: -1, Handler: &InventoryUpdate{}}
 )
 
 var Packets = map[byte]PacketData{
@@ -27,4 +28,5 @@ var Packets = map[byte]PacketData{
 	0x02: LoginRejectedData,
 	0x03: PlayersUpdateData,
 	0x04: ObjUpdateData,
+	0x05: InventoryUpdateData,
 }

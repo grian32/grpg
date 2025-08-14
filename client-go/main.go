@@ -22,110 +22,13 @@ var (
 		TrackedObjs:  make(map[util.Vector2I]*shared.GameObj),
 		SceneManager: &shared.GSceneManager{},
 		Player: &shared.LocalPlayer{
-			X:      0,
-			Y:      0,
-			RealX:  0,
-			RealY:  0,
-			Facing: shared.UP,
-			Inventory: [24]shared.InventoryItem{
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-				{
-					ItemId: 1,
-					Count:  2,
-				},
-			},
-			Name: "",
+			X:         0,
+			Y:         0,
+			RealX:     0,
+			RealY:     0,
+			Facing:    shared.UP,
+			Inventory: [24]shared.InventoryItem{},
+			Name:      "",
 		},
 		OtherPlayers:    map[string]*shared.RemotePlayer{},
 		Conn:            network.StartConn(),

@@ -2,7 +2,6 @@ package c2s
 
 import (
 	"cmp"
-	"fmt"
 	"grpg/data-go/gbuf"
 	"grpgscript/evaluator"
 	"grpgscript/object"
@@ -34,7 +33,6 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 	chunkPos := game.TrackedObjs[objPos].ChunkPos
 
 	network.UpdatePlayersByChunk(chunkPos, game, &s2c.ObjUpdate{ChunkPos: chunkPos, Rebuild: false})
-	fmt.Println(player.Inventory)
 }
 
 func addInteractBuiltins(env *object.Environment, game *shared.Game, player *shared.Player, objPos util.Vector2I) {
@@ -70,6 +68,7 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 				if player.Inventory[idx].ItemId == uint16(itemId.Value) {
 					player.Inventory[idx].Count++
 					player.Inventory[idx].Dirty = true
+					network.SendPacket(player.Conn, &s2c.InventoryUpdate{Player: player}, game)
 					return nil
 				}
 
@@ -84,6 +83,8 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 				player.Inventory[firstEmptyIdx].Count = 1
 				player.Inventory[firstEmptyIdx].Dirty = true
 			}
+
+			network.SendPacket(player.Conn, &s2c.InventoryUpdate{Player: player}, game)
 
 			return nil
 		},
