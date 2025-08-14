@@ -17,11 +17,12 @@ type Player struct {
 }
 
 func (p *Player) LoadFromDB(db *sql.DB) error {
-	row := db.QueryRow("SELECT x, y FROM players WHERE name = ?", p.Name)
+	row := db.QueryRow("SELECT x, y, inventory FROM players WHERE name = ?", p.Name)
 
 	var loadedX int
 	var loadedY int
-	err := row.Scan(&loadedX, &loadedY)
+	var invBlob []byte
+	err := row.Scan(&loadedX, &loadedY, &invBlob)
 
 	if err == sql.ErrNoRows {
 		return nil
@@ -33,9 +34,14 @@ func (p *Player) LoadFromDB(db *sql.DB) error {
 
 	pos := util.Vector2I{X: uint32(loadedX), Y: uint32(loadedY)}
 	chunkPos := util.Vector2I{X: uint32(loadedX / 16), Y: uint32(loadedY / 16)}
+	inv, err := DecodeInventoryFromBlob(invBlob)
+	if err != nil {
+		return err
+	}
 
 	p.Pos = pos
 	p.ChunkPos = chunkPos
+	p.Inventory = inv
 
 	return nil
 }
@@ -55,24 +61,24 @@ func (p *Player) SaveToDB(db *sql.DB) error {
 	}
 
 	if err == sql.ErrNoRows {
-		stmt, err := tx.Prepare("INSERT INTO players(player_id, name, x, y) VALUES (NULL, ?, ?, ?)")
+		stmt, err := tx.Prepare("INSERT INTO players(player_id, name, x, y, inventory) VALUES (NULL, ?, ?, ?)")
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y)
+		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, EncodeInventoryToBlob(p.Inventory))
 		if err != nil {
 			return err
 		}
 	} else {
-		stmt, err := tx.Prepare("UPDATE players SET x=?, y=? WHERE player_id=?")
+		stmt, err := tx.Prepare("UPDATE players SET x=?, y=?, inventory=? WHERE player_id=?")
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, existingId)
+		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, EncodeInventoryToBlob(p.Inventory), existingId)
 		if err != nil {
 			return err
 		}
