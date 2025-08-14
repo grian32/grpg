@@ -153,6 +153,8 @@ func updateCurrActionString(p *Playground) {
 }
 
 func drawWorld(p *Playground) {
+	player := p.Game.Player
+
 	mapTiles := p.Zones[util.Vector2I{X: p.Game.Player.ChunkX, Y: p.Game.Player.ChunkY}]
 
 	for i := range 256 {
@@ -170,8 +172,8 @@ func drawWorld(p *Playground) {
 		obj := mapTiles.Objs[i]
 		if obj != 0 {
 			trackedObj, ok := p.Game.TrackedObjs[util.Vector2I{
-				X: localX + (p.Game.Player.ChunkX * 16),
-				Y: localY + (p.Game.Player.ChunkY * 16),
+				X: localX + (player.ChunkX * 16),
+				Y: localY + (player.ChunkY * 16),
 			}]
 
 			// fallback pretty much, might not be necessary in the future
@@ -190,11 +192,13 @@ func drawWorld(p *Playground) {
 
 // TODO: generalize this code
 func drawPlayer(p *Playground) {
-	rl.DrawTexture(p.PlayerTextures[p.Game.Player.Facing], p.Game.Player.RealX, p.Game.Player.RealY, rl.White)
+	player := p.Game.Player
+
+	rl.DrawTexture(p.PlayerTextures[player.Facing], player.RealX, player.RealY, rl.White)
 	rl.DrawTextEx(
 		p.Font,
-		p.Game.Player.Name,
-		rl.Vector2{X: float32(p.Game.Player.RealX), Y: float32(p.Game.Player.RealY)},
+		player.Name,
+		rl.Vector2{X: float32(player.RealX), Y: float32(player.RealY)},
 		16,
 		0,
 		rl.White,
@@ -216,12 +220,12 @@ func drawOtherPlayers(p *Playground) {
 }
 
 func drawGameFrame(p *Playground) {
+	player := p.Game.Player
+
 	rl.DrawTexture(p.GameframeRight, 768, 0, rl.White)
 
 	currItemRealPos := rl.Vector2{X: 768 + 64, Y: 64}
 
-	// TODO: surely i can find some better way of doing the positioning?
-	// TODO: kind of unclear which item the count belongs, grid?, maybe put it in the bottom middle?
 	for idx, item := range p.Game.Player.Inventory {
 		if item.ItemId == 0 {
 			continue
@@ -242,7 +246,9 @@ func drawGameFrame(p *Playground) {
 	}
 
 	rl.DrawRectangle(0, 768, 960-192, 192, rl.Blue)
+
 	rl.DrawTextEx(p.Font, "Current Action: "+p.CurrActionString, rl.Vector2{X: 0, Y: 768}, 24, 0, rl.White)
-	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", p.Game.Player.X, p.Game.Player.Y, p.Game.Player.Facing.String())
+
+	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
 	rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 0, Y: 800}, 24, 0, rl.White)
 }
