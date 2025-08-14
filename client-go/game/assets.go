@@ -238,26 +238,24 @@ func loadGameframeRightTexture(texturePath string) rl.Texture2D {
 }
 
 func loadPlayerTextures(dirPath string) map[shared.Direction]rl.Texture2D {
-	// FIXME: kind of a shit way to map textures here but easier than loading each one manually so :shrug:
-	textureFileNames := []string{"player_back.png", "player_down.png", "player_left.png", "player_right.png"}
-	textures := []rl.Texture2D{}
+	textureMap := map[shared.Direction]string{
+		shared.UP:    "player_back.png",
+		shared.DOWN:  "player_down.png",
+		shared.LEFT:  "player_left.png",
+		shared.RIGHT: "player_right.png",
+	}
+	textures := map[shared.Direction]rl.Texture2D{}
 
-	for _, texPath := range textureFileNames {
-		file, err1 := os.Open(dirPath + texPath)
-		bytes, err2 := io.ReadAll(file)
-
-		if err := cmp.Or(err1, err2); err != nil {
-			log.Fatalf("errored while trying to load player texture %s, %s", texPath, err.Error())
+	for direction, texPath := range textureMap {
+		fullPath := filepath.Join(dirPath, texPath)
+		bytes, err := os.ReadFile(fullPath)
+		if err != nil {
+			log.Fatal("errored while trying to load player texture %s", fullPath)
 		}
 
 		image := rl.LoadImageFromMemory(".png", bytes, int32(len(bytes)))
-		textures = append(textures, rl.LoadTextureFromImage(image))
+		textures[direction] = rl.LoadTextureFromImage(image)
 	}
 
-	return map[shared.Direction]rl.Texture2D{
-		shared.UP:    textures[0],
-		shared.DOWN:  textures[1],
-		shared.LEFT:  textures[2],
-		shared.RIGHT: textures[3],
-	}
+	return textures
 }
