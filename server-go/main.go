@@ -5,6 +5,7 @@ import (
 	"cmp"
 	"database/sql"
 	"encoding/binary"
+	"fmt"
 	"grpg/data-go/gbuf"
 	"io"
 	"log"
@@ -212,9 +213,15 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 		Conn:      conn,
 	}
 
+	err := player.LoadFromDB(game.Database)
+	if err != nil {
+		fmt.Printf("failed to load existing player from db, sending login rejected, err: %v\n", err)
+		network.SendPacket(conn, &s2c.LoginRejected{}, game)
+		return
+	}
+
 	game.Players[player] = struct{}{}
 	game.Connections[conn] = player
-	player.LoadFromDB(game.Database)
 
 	network.SendPacket(conn, &s2c.LoginAccepted{}, game)
 	network.UpdatePlayersByChunk(player.ChunkPos, game, &s2c.PlayersUpdate{ChunkPos: player.ChunkPos})
