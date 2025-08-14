@@ -3,14 +3,12 @@ package game
 import (
 	"client/shared"
 	"client/util"
-	"cmp"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgitem"
 	"grpg/data-go/grpgmap"
 	"grpg/data-go/grpgobj"
 	"grpg/data-go/grpgtex"
 	"grpg/data-go/grpgtile"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -21,14 +19,11 @@ import (
 func loadTextures(path string) map[uint16]rl.Texture2D {
 	rlTextures := make(map[uint16]rl.Texture2D)
 
-	grpgTexFile, err1 := os.Open(path)
-	grpgTexBytes, err2 := io.ReadAll(grpgTexFile)
+	grpgTexBytes, err := os.ReadFile(path)
 
-	if err := cmp.Or(err1, err2); err != nil {
+	if err != nil {
 		log.Fatal("Failed reading GRPGTEX file")
 	}
-
-	defer grpgTexFile.Close()
 
 	buf := gbuf.NewGBuf(grpgTexBytes)
 	header, err := grpgtex.ReadHeader(buf)
@@ -68,13 +63,11 @@ func loadMaps(dirPath string, game *shared.Game) map[util.Vector2I]grpgmap.Zone 
 		if !entry.IsDir() {
 			fullPath := filepath.Join(dirPath, entry.Name())
 
-			file, err1 := os.Open(fullPath)
-			bytes, err2 := io.ReadAll(file)
+			bytes, err := os.ReadFile(fullPath)
 
-			if err := cmp.Or(err1, err2); err != nil {
+			if err != nil {
 				log.Fatalf("Error reading map file, %v", err)
 			}
-			defer file.Close()
 
 			buf := gbuf.NewGBuf(bytes)
 			header, err := grpgmap.ReadHeader(buf)
@@ -127,14 +120,11 @@ func loadMaps(dirPath string, game *shared.Game) map[util.Vector2I]grpgmap.Zone 
 func loadObjs(path string) map[uint16]*grpgobj.Obj {
 	objMap := make(map[uint16]*grpgobj.Obj)
 
-	grpgObjFile, err1 := os.Open(path)
-	grpgObjBytes, err2 := io.ReadAll(grpgObjFile)
+	grpgObjBytes, err := os.ReadFile(path)
 
-	if err := cmp.Or(err1, err2); err != nil {
+	if err != nil {
 		log.Fatal("Failed reading GRPGOBJ file")
 	}
-
-	defer grpgObjFile.Close()
 
 	buf := gbuf.NewGBuf(grpgObjBytes)
 
@@ -162,10 +152,9 @@ func loadObjs(path string) map[uint16]*grpgobj.Obj {
 func loadTiles(path string) map[uint16]*grpgtile.Tile {
 	tileMap := make(map[uint16]*grpgtile.Tile)
 
-	grpgTileFile, err1 := os.Open(path)
-	grpgTileBytes, err2 := io.ReadAll(grpgTileFile)
+	grpgTileBytes, err := os.ReadFile(path)
 
-	if err := cmp.Or(err1, err2); err != nil {
+	if err != nil {
 		log.Fatal("Failed reading GRPGTILE file")
 	}
 
@@ -195,10 +184,9 @@ func loadTiles(path string) map[uint16]*grpgtile.Tile {
 func loadItems(path string) map[uint16]grpgitem.Item {
 	itemMap := make(map[uint16]grpgitem.Item)
 
-	grpgItemFile, err1 := os.Open(path)
-	grpgItemBytes, err2 := io.ReadAll(grpgItemFile)
+	grpgItemBytes, err := os.ReadFile(path)
 
-	if err := cmp.Or(err1, err2); err != nil {
+	if err != nil {
 		log.Fatal("Failed reading GRPGTILE file")
 	}
 
@@ -226,11 +214,10 @@ func loadItems(path string) map[uint16]grpgitem.Item {
 }
 
 func loadGameframeRightTexture(texturePath string) rl.Texture2D {
-	file, err1 := os.Open(texturePath)
-	bytes, err2 := io.ReadAll(file)
+	bytes, err := os.ReadFile(texturePath)
 
-	if err := cmp.Or(err1, err2); err != nil {
-		log.Fatalf("errored while trying to load gameframe right texture %s", err.Error())
+	if err != nil {
+		log.Fatalf("errored while trying to load gameframe right texture %v", err)
 	}
 
 	image := rl.LoadImageFromMemory(".png", bytes, int32(len(bytes)))
