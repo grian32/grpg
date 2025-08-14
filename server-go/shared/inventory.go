@@ -33,10 +33,15 @@ func DecodeInventoryFromBlob(blob []byte) ([24]InventoryItem, error) {
 			return [24]InventoryItem{}, err
 		}
 
+		dirty := false
+		if id != 0 {
+			dirty = true
+		}
+
 		inv[idx] = InventoryItem{
 			ItemId: id,
 			Count:  count,
-			Dirty:  false,
+			Dirty:  dirty,
 		}
 	}
 

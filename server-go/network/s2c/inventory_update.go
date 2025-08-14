@@ -34,7 +34,6 @@ func (i *InventoryUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		}
 	}
 
-	// TODO
 	if len(dirtyIndexes) == 0 {
 		return
 	}
