@@ -67,13 +67,7 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 }
 
 func ParseManifestFile(path string) ([]GRPGTexManifestEntry, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	bytes, err := io.ReadAll(file)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

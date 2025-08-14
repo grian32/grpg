@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"grpg/data-go/gbuf"
-	"io"
 	"log"
 	"os"
 	"testing"
@@ -12,8 +11,6 @@ import (
 
 var (
 	buf           = gbuf.NewEmptyGBuf()
-	stone         *os.File
-	grass         *os.File
 	stonePngBytes []byte
 	grassPngBytes []byte
 )
@@ -21,21 +18,11 @@ var (
 func init() {
 	var err error
 
-	stone, err = os.Open("../testdata/stone_texture.png")
-	if err != nil {
-		log.Fatal("Error loading stone texture while initializing format tests")
-	}
-	defer stone.Close()
-	grass, err = os.Open("../testdata/grass_texture.png")
-	if err != nil {
-		log.Fatal("Error loading grass texture while initializing format tests")
-	}
-	defer grass.Close()
-	stonePngBytes, err = io.ReadAll(stone)
+	stonePngBytes, err = os.ReadFile("../testdata/stone_texture.png")
 	if err != nil {
 		log.Fatal("Error loading stone png bytes while initializing format tests")
 	}
-	grassPngBytes, err = io.ReadAll(grass)
+	grassPngBytes, err = os.ReadFile("../testdata/grass_texture.png")
 	if err != nil {
 		log.Fatal("Error loading grass png bytes while initializing format tests")
 	}

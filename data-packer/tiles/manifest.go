@@ -1,7 +1,6 @@
 package tiles
 
 import (
-	"io"
 	"os"
 
 	"grpg/data-go/grpgtile"
@@ -34,13 +33,7 @@ func BuildGRPGTileFromManifest(entries []GRPGTileManifestEntry, texMap map[strin
 }
 
 func ParseManifestFile(path string) ([]GRPGTileManifestEntry, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	bytes, err := io.ReadAll(file)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

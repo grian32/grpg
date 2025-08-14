@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgmap"
-	"io"
 	"os"
 
 	"github.com/sqweek/dialog"
@@ -87,14 +86,7 @@ func LoadMap() {
 		return
 	}
 
-	file, err := os.Open(fileToLoad)
-	if err != nil {
-		dialog.Message("Error loading file").Error()
-		return
-	}
-	defer file.Close()
-
-	fileBytes, err := io.ReadAll(file)
+	fileBytes, err := os.ReadFile(fileToLoad)
 	if err != nil {
 		dialog.Message("Error reading file").Error()
 		return

@@ -11,7 +11,6 @@ import (
 	"grpgscript/object"
 	"grpgscript/parser"
 	"grpgscript/perf"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -56,11 +55,7 @@ func (s *ScriptManager) LoadScripts(path string) error {
 		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".grpgscript") {
 			fullPath := filepath.Join(path, entry.Name())
 
-			file, err := os.Open(fullPath)
-			if err != nil {
-				return err
-			}
-			bytes, err := io.ReadAll(file)
+			bytes, err := os.ReadFile(fullPath)
 			if err != nil {
 				return err
 			}

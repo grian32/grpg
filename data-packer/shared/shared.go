@@ -1,9 +1,7 @@
 package shared
 
 import (
-	"cmp"
 	"errors"
-	"io"
 	"os"
 
 	"grpg/data-go/gbuf"
@@ -11,14 +9,11 @@ import (
 )
 
 func LoadTexturesToMap(path string) (map[string]uint16, error) {
-	texFile, err1 := os.Open(path)
-	texBytes, err2 := io.ReadAll(texFile)
+	texBytes, err := os.ReadFile(path)
 
-	if err := cmp.Or(err1, err2); err != nil {
+	if err != nil {
 		return nil, err
 	}
-
-	defer texFile.Close()
 
 	buf := gbuf.NewGBuf(texBytes)
 

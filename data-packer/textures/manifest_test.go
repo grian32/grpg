@@ -2,7 +2,6 @@ package textures
 
 import (
 	"grpg/data-go/grpgtex"
-	"io"
 	"log"
 	"os"
 	"testing"
@@ -16,25 +15,13 @@ var (
 func init() {
 	var err error
 
-	stone, err := os.Open("../testdata/stone_texture.png")
-	if err != nil {
-		log.Fatal("Error loading stone texture while initializing format tests")
-	}
-	defer stone.Close()
-
-	grass, err := os.Open("../testdata/grass_texture.png")
-	if err != nil {
-		log.Fatal("Error loading grass texture while initializing format tests")
-	}
-	defer grass.Close()
-
-	stonePngBytes, err = io.ReadAll(stone)
+	stonePngBytes, err = os.ReadFile("../testdata/stone_texture.png")
 	if err != nil {
 		log.Fatal("Error loading stone png bytes while initializing format tests")
 	}
-	grassPngBytes, err = io.ReadAll(grass)
+	grassPngBytes, err = os.ReadFile("../testdata/grass_texture.png")
 	if err != nil {
-		log.Fatal("Error loading stone png bytes while initializing format tests")
+		log.Fatal("Error loading grass png bytes while initializing format tests")
 	}
 }
 

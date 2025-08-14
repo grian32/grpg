@@ -2,7 +2,6 @@ package items
 
 import (
 	"grpg/data-go/grpgitem"
-	"io"
 	"os"
 
 	"github.com/pelletier/go-toml/v2"
@@ -33,13 +32,7 @@ func BuildGRPGItemFromManifest(entries []GRPGItemManifestEntry, texMap map[strin
 }
 
 func ParseManifestFile(path string) ([]GRPGItemManifestEntry, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	bytes, err := io.ReadAll(file)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

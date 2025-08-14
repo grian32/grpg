@@ -1,7 +1,6 @@
 package run
 
 import (
-	"cmp"
 	"grpgscript/evaluator"
 	"grpgscript/lexer"
 	"grpgscript/object"
@@ -12,13 +11,11 @@ import (
 )
 
 func RunFile(path string) {
-	f, err1 := os.Open(path)
-	bytes, err2 := io.ReadAll(f)
+	bytes, err := os.ReadFile(path)
 
-	if err := cmp.Or(err1, err2); err != nil {
+	if err != nil {
 		log.Fatalf("Failed to read file with path %s %v", path, err)
 	}
-	defer f.Close()
 
 	Run(string(bytes))
 }
@@ -43,7 +40,6 @@ func Run(str string) {
 	}
 }
 
-// TODO: dupe from repl
 func PrintParserErrors(out io.Writer, errors []string) {
 	for _, msg := range errors {
 		io.WriteString(out, "\t"+msg+"\n")

@@ -2,7 +2,6 @@ package objs
 
 import (
 	"errors"
-	"io"
 	"os"
 	"slices"
 
@@ -72,13 +71,7 @@ func flagsFromStringSlice(flags []string) grpgobj.ObjFlags {
 }
 
 func ParseManifestFile(path string) ([]GRPGObjManifestEntry, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	bytes, err := io.ReadAll(file)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
