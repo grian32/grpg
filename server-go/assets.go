@@ -1,13 +1,11 @@
 package main
 
 import (
-	"cmp"
 	"errors"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgitem"
 	"grpg/data-go/grpgmap"
 	"grpg/data-go/grpgobj"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -29,10 +27,9 @@ func LoadMaps(dir string, game *shared.Game, objs []grpgobj.Obj) {
 		if !entry.IsDir() {
 			fullPath := filepath.Join(dir, entry.Name())
 
-			file, err1 := os.Open(fullPath)
-			bytes, err2 := io.ReadAll(file)
+			bytes, err := os.ReadFile(fullPath)
 
-			if err := cmp.Or(err1, err2); err != nil {
+			if err != nil {
 				log.Fatalf("Error reading map file, %v", err)
 			}
 
@@ -83,11 +80,7 @@ func LoadMaps(dir string, game *shared.Game, objs []grpgobj.Obj) {
 }
 
 func LoadObjs(path string) ([]grpgobj.Obj, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	bytes, err := io.ReadAll(file)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -111,11 +104,7 @@ func LoadObjs(path string) ([]grpgobj.Obj, error) {
 }
 
 func LoadItems(path string) ([]grpgitem.Item, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	bytes, err := io.ReadAll(file)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
