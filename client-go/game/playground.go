@@ -226,7 +226,10 @@ func drawGameFrame(p *Playground) {
 		data := p.Game.Items[item.ItemId]
 		tex := p.Textures[data.Texture]
 		rl.DrawTexture(tex, int32(currItemRealPos.X), int32(currItemRealPos.Y), rl.White)
-		rl.DrawTextEx(p.Font, fmt.Sprintf("%d", item.Count), currItemRealPos, 18, 0, rl.White)
+
+		textPos := rl.Vector2Add(currItemRealPos, rl.Vector2{X: 16, Y: 0})
+		rl.DrawTextEx(p.Font, fmt.Sprintf("%d", item.Count), textPos, 18, 0, rl.White)
+
 		currItemRealPos.X += 64
 		if (idx+1)%4 == 0 {
 			currItemRealPos.Y += 64
