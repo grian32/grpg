@@ -73,12 +73,18 @@ func main() {
 		log.Fatal("Failed loading objs: ", err)
 	}
 
+	items, err := LoadItems(assetsDirectory + "items.grpgitem")
+	if err != nil {
+		log.Fatal("Failed loading items: ", err)
+	}
+
 	LoadMaps(assetsDirectory+"maps/", g, objs)
 
 	scriptManager := scripts.NewScriptManager()
 	g.ScriptManager = scriptManager
 
 	g.ScriptManager.LoadObjConstants(objs)
+	g.ScriptManager.LoadItemConstants(items)
 
 	err = g.ScriptManager.LoadScripts("../game-scripts")
 	if err != nil {
@@ -198,11 +204,12 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 	zeroPos := util.Vector2I{X: 0, Y: 0}
 
 	player := &shared.Player{
-		Pos:      zeroPos,
-		ChunkPos: zeroPos,
-		Facing:   shared.UP,
-		Name:     string(name),
-		Conn:     conn,
+		Pos:       zeroPos,
+		ChunkPos:  zeroPos,
+		Facing:    shared.UP,
+		Name:      string(name),
+		Inventory: [24]shared.InventoryItem{},
+		Conn:      conn,
 	}
 
 	game.Players[player] = struct{}{}

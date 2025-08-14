@@ -1,6 +1,6 @@
 onInteract(BERRY_BUSH) {
     if (getObjState() == 0) {
         setObjState(1);
-        playerInvAdd(1);
+        playerInvAdd(BERRIES);
     }
 }

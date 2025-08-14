@@ -9,10 +9,11 @@ import (
 type Player struct {
 	Pos util.Vector2I
 	// might not need these will see how design pans out
-	ChunkPos util.Vector2I
-	Facing   Direction
-	Name     string
-	Conn     net.Conn
+	ChunkPos  util.Vector2I
+	Facing    Direction
+	Inventory [24]InventoryItem
+	Name      string
+	Conn      net.Conn
 }
 
 func (p *Player) LoadFromDB(db *sql.DB) error {

@@ -3,6 +3,7 @@ package scripts
 import (
 	"errors"
 	"fmt"
+	"grpg/data-go/grpgitem"
 	"grpg/data-go/grpgobj"
 	"grpgscript/ast"
 	"grpgscript/evaluator"
@@ -32,6 +33,12 @@ func NewScriptManager() *ScriptManager {
 func (s *ScriptManager) LoadObjConstants(objs []grpgobj.Obj) {
 	for _, obj := range objs {
 		s.Env.Set(uppercaseAll(obj.Name), &object.Integer{Value: int64(obj.ObjId)})
+	}
+}
+
+func (s *ScriptManager) LoadItemConstants(items []grpgitem.Item) {
+	for _, item := range items {
+		s.Env.Set(uppercaseAll(item.Name), &object.Integer{Value: int64(item.ItemId)})
 	}
 }
 

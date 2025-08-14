@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"errors"
 	"grpg/data-go/gbuf"
+	"grpg/data-go/grpgitem"
 	"grpg/data-go/grpgmap"
 	"grpg/data-go/grpgobj"
 	"io"
@@ -107,4 +108,32 @@ func LoadObjs(path string) ([]grpgobj.Obj, error) {
 	}
 
 	return objs, nil
+}
+
+func LoadItems(path string) ([]grpgitem.Item, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	bytes, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := gbuf.NewGBuf(bytes)
+	header, err := grpgitem.ReadHeader(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	if header.Magic != [8]byte{'G', 'R', 'P', 'G', 'I', 'T', 'E', 'M'} {
+		return nil, errors.New("file provided does not have GRPGITEM magic")
+	}
+
+	items, err := grpgitem.ReadItems(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	return items, nil
 }

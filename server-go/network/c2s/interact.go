@@ -27,24 +27,17 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 	objPos := util.Vector2I{X: x, Y: y}
 	script := game.ScriptManager.InteractScripts[objId]
 	env := object.NewEnclosedEnvinronment(game.ScriptManager.Env)
-	addInteractBuiltins(env, game, objPos)
+	addInteractBuiltins(env, game, player, objPos)
 
 	evaluator.Eval(script, env)
 
 	chunkPos := game.TrackedObjs[objPos].ChunkPos
 
 	network.UpdatePlayersByChunk(chunkPos, game, &s2c.ObjUpdate{ChunkPos: chunkPos, Rebuild: false})
-	fmt.Println(chunkPos)
-
-	for pos, obj := range game.TrackedObjs {
-		if pos.Y == 0 {
-			fmt.Printf("%v: %d\n", pos, obj.State)
-		}
-	}
-
+	fmt.Println(player.Inventory)
 }
 
-func addInteractBuiltins(env *object.Environment, game *shared.Game, objPos util.Vector2I) {
+func addInteractBuiltins(env *object.Environment, game *shared.Game, player *shared.Player, objPos util.Vector2I) {
 	env.Set("getObjState", &object.Builtin{
 		Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return &object.Integer{Value: int64(game.TrackedObjs[objPos].State)}
@@ -65,7 +58,33 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, objPos util
 	})
 	env.Set("playerInvAdd", &object.Builtin{
 		Fn: func(env *object.Environment, args ...object.Object) object.Object {
-			// TODO
+			itemId, ok := args[0].(*object.Integer)
+			if !ok {
+				log.Printf("warn: scriped tries to call playerInvAdd in onInteract ctx without int arg")
+				return nil
+			}
+
+			firstEmptyIdx := -1
+
+			for idx := range 24 {
+				if player.Inventory[idx].ItemId == uint16(itemId.Value) {
+					player.Inventory[idx].Count++
+					player.Inventory[idx].Dirty = true
+					return nil
+				}
+
+				if player.Inventory[idx].ItemId == 0 && firstEmptyIdx == -1 {
+					firstEmptyIdx = idx
+				}
+			}
+
+			// if it finds a pre existing stack then it returns early anyway so np
+			if firstEmptyIdx != -1 {
+				player.Inventory[firstEmptyIdx].ItemId = uint16(itemId.Value)
+				player.Inventory[firstEmptyIdx].Count = 1
+				player.Inventory[firstEmptyIdx].Dirty = true
+			}
+
 			return nil
 		},
 	})
