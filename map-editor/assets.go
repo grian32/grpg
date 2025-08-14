@@ -8,7 +8,6 @@ import (
 	"grpg/data-go/grpgtile"
 	"image"
 	"image/png"
-	"io"
 	"log"
 	"os"
 
@@ -142,13 +141,7 @@ func loadFileToGBuf(dialogTitle string) *gbuf.GBuf {
 		log.Fatal(err)
 	}
 
-	file, err := os.Open(out)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	fileBytes, err := io.ReadAll(file)
+	fileBytes, err := os.ReadFile(out)
 	if err != nil {
 		log.Fatal(err)
 	}
