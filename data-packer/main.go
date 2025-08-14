@@ -63,7 +63,7 @@ func main() {
 	}
 
 	objCmd.Flags().StringVarP(&objOpts.Manifest, "manifest", "m", "", "The path to the tile manifest.")
-	objCmd.Flags().StringVarP(&objOpts.Output, "output", "o", "tiles.grpgtile", "The output path.")
+	objCmd.Flags().StringVarP(&objOpts.Output, "output", "o", "objs.grpgobj", "The output path.")
 	objCmd.Flags().StringVarP(&objOpts.Textures, "textures", "t", "", "The path to the used grpgtex file.")
 
 	cmd.AddCommand(objCmd)
@@ -79,7 +79,7 @@ func main() {
 	}
 
 	itemCmd.Flags().StringVarP(&itemOpts.Manifest, "manifest", "m", "", "The path to the tile manifest.")
-	itemCmd.Flags().StringVarP(&itemOpts.Output, "output", "o", "tiles.grpgtile", "The output path.")
+	itemCmd.Flags().StringVarP(&itemOpts.Output, "output", "o", "items.grpgitem", "The output path.")
 	itemCmd.Flags().StringVarP(&itemOpts.Textures, "textures", "t", "", "The path to the used grpgtex file.")
 
 	cmd.AddCommand(itemCmd)
