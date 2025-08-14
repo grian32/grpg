@@ -1,4 +1,4 @@
 item = [
-    { name = "berries", id = 1, texture = "berries_item" },
-    { name = "berriess", id = 2, texture = "berries_item" }
+    { name = "berries", id = 1, texture = "grass_tex" },
+    { name = "berriess", id = 2, texture = "grass_tex" }
 ]

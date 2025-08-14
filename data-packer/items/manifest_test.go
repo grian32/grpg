@@ -11,16 +11,16 @@ var (
 		{
 			Name:    "berries",
 			ItemId:  1,
-			Texture: "berries_item",
+			Texture: "grass_tex",
 		},
 		{
 			Name:    "berriess",
 			ItemId:  2,
-			Texture: "berries_item",
+			Texture: "grass_tex",
 		},
 	}
 	texMap = map[string]uint16{
-		"berries_item": 3,
+		"grass_tex": 1,
 	}
 )
 
@@ -38,12 +38,12 @@ func TestBuildGRPGItemFromManifest(t *testing.T) {
 	expectedItems := []grpgitem.Item{
 		{
 			ItemId:  1,
-			Texture: 3,
+			Texture: 1,
 			Name:    "berries",
 		},
 		{
 			ItemId:  2,
-			Texture: 3,
+			Texture: 1,
 			Name:    "berriess",
 		},
 	}
