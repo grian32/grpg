@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"texture-packer/items"
 	"texture-packer/objs"
 	"texture-packer/shared"
 	"texture-packer/textures"
@@ -66,6 +67,22 @@ func main() {
 	objCmd.Flags().StringVarP(&objOpts.Textures, "textures", "t", "", "The path to the used grpgtex file.")
 
 	cmd.AddCommand(objCmd)
+
+	itemOpts := &shared.SharedOptions{}
+
+	itemCmd := &cobra.Command{
+		Use:   "item",
+		Short: "Packs items.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return items.RunItemCommand(cmd, args, itemOpts)
+		},
+	}
+
+	itemCmd.Flags().StringVarP(&itemOpts.Manifest, "manifest", "m", "", "The path to the tile manifest.")
+	itemCmd.Flags().StringVarP(&itemOpts.Output, "output", "o", "tiles.grpgtile", "The output path.")
+	itemCmd.Flags().StringVarP(&itemOpts.Textures, "textures", "t", "", "The path to the used grpgtex file.")
+
+	cmd.AddCommand(itemCmd)
 
 	if err := fang.Execute(context.Background(), cmd); err != nil {
 		os.Exit(1)
