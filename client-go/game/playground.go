@@ -21,11 +21,11 @@ type Playground struct {
 	CurrActionString string
 }
 
+// this is reused in loginscreen.go can't rly avoid however
 var assetsDirectory = "../../grpg-assets/"
 
 func (p *Playground) Setup() {
-	// TODO: move font out
-	p.Font = rl.LoadFont("./assets/font.ttf")
+	p.Font = rl.LoadFont(assetsDirectory + "font.ttf")
 	p.CurrActionString = "Current Action: None :("
 
 	p.Textures = loadTextures(assetsDirectory + "textures.grpgtex")
@@ -190,7 +190,6 @@ func drawWorld(p *Playground) {
 	}
 }
 
-// TODO: generalize this code
 func drawPlayer(p *Playground) {
 	player := p.Game.Player
 

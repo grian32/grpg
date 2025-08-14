@@ -23,7 +23,7 @@ func (l *LoginScreen) Cleanup() {
 }
 
 func (l *LoginScreen) Setup() {
-	l.Font = rl.LoadFont("./assets/font.ttf")
+	l.Font = rl.LoadFont(assetsDirectory + "font.ttf")
 
 	rg.SetFont(l.Font)
 	rg.SetStyle(rg.DEFAULT, rg.TEXT_SIZE, 20)
