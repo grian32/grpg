@@ -5,17 +5,17 @@ import (
 
 	"grpg/data-go/grpgtile"
 
-	"github.com/pelletier/go-toml/v2"
+	"github.com/grian32/gcfg"
 )
 
 type ManifestConfig struct {
-	Tiles []GRPGTileManifestEntry `toml:"tiles"`
+	Tiles []GRPGTileManifestEntry `gcfg:"Tile"`
 }
 
 type GRPGTileManifestEntry struct {
-	Name    string `toml:"name"`
-	Id      uint16 `toml:"id"`
-	TexName string `toml:"tex_name"`
+	Name    string `gcfg:"name"`
+	Id      uint16 `gcfg:"id"`
+	TexName string `gcfg:"tex_name"`
 }
 
 func BuildGRPGTileFromManifest(entries []GRPGTileManifestEntry, texMap map[string]uint16) []grpgtile.Tile {
@@ -39,7 +39,7 @@ func ParseManifestFile(path string) ([]GRPGTileManifestEntry, error) {
 	}
 
 	var cfg ManifestConfig
-	err = toml.Unmarshal(bytes, &cfg)
+	err = gcfg.Unmarshal(bytes, &cfg)
 	if err != nil {
 		return nil, err
 	}

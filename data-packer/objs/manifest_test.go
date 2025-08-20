@@ -26,7 +26,7 @@ var texMap = map[string]uint16{
 }
 
 func TestParseManifestFile(t *testing.T) {
-	filepath := "../testdata/test_obj_manifest.toml"
+	filepath := "../testdata/test_obj_manifest.gcfg"
 
 	output, err := ParseManifestFile(filepath)
 

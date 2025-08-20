@@ -8,17 +8,17 @@ import (
 	"log"
 	"os"
 
-	"github.com/pelletier/go-toml/v2"
+	"github.com/grian32/gcfg"
 )
 
 type ManifestConfig struct {
-	Textures []GRPGTexManifestEntry `toml:"texture"`
+	Textures []GRPGTexManifestEntry `gcfg:"Texture"`
 }
 
 type GRPGTexManifestEntry struct {
-	InternalName string `toml:"name"`
-	InternalId   int    `toml:"id"`
-	FilePath     string `toml:"path"`
+	InternalName string `gcfg:"name"`
+	InternalId   int    `gcfg:"id"`
+	FilePath     string `gcfg:"path"`
 }
 
 func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, error) {
@@ -73,7 +73,7 @@ func ParseManifestFile(path string) ([]GRPGTexManifestEntry, error) {
 	}
 
 	var cfg ManifestConfig
-	err = toml.Unmarshal(bytes, &cfg)
+	err = gcfg.Unmarshal(bytes, &cfg)
 	if err != nil {
 		return nil, err
 	}

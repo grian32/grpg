@@ -1,0 +1,11 @@
+[Tile] {
+    name = "grass"
+    id = 1
+    tex_name = "grass_tex"
+}
+
+[Tile] {
+    name = "water"
+    id = 2
+    tex_name = "still_water"
+}

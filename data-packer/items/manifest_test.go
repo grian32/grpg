@@ -25,7 +25,7 @@ var (
 )
 
 func TestParseManifestFile(t *testing.T) {
-	filepath := "../testdata/test_item_manifest.toml"
+	filepath := "../testdata/test_item_manifest.gcfg"
 
 	output, err := ParseManifestFile(filepath)
 

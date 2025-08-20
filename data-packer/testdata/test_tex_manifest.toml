@@ -1,4 +1,0 @@
-texture = [
-    { name = "grass_tex", id = 1, path = "testdata/grass_texture.png" },
-    { name = "still_water", id = 2, path = "testdata/stone_texture.png" },
-]

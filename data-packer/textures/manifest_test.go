@@ -39,7 +39,7 @@ func TestParseManifestFile(t *testing.T) {
 		},
 	}
 
-	filePath := "../testdata/test_tex_manifest.toml"
+	filePath := "../testdata/test_tex_manifest.gcfg"
 
 	output, err := ParseManifestFile(filePath)
 

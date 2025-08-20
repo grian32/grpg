@@ -7,19 +7,19 @@ import (
 
 	"grpg/data-go/grpgobj"
 
-	"github.com/pelletier/go-toml/v2"
+	"github.com/grian32/gcfg"
 )
 
 type ManifestConfig struct {
-	Objs []GRPGObjManifestEntry `toml:"obj"`
+	Objs []GRPGObjManifestEntry `gcfg:"Obj"`
 }
 
 type GRPGObjManifestEntry struct {
-	Name         string   `toml:"name"`
-	ObjId        uint16   `toml:"id"`
-	Flags        []string `toml:"flags"`
-	Textures     []string `toml:"textures"`
-	InteractText string   `toml:"interact_text"`
+	Name         string   `gcfg:"name"`
+	ObjId        uint16   `gcfg:"id"`
+	Flags        []string `gcfg:"flags"`
+	Textures     []string `gcfg:"textures"`
+	InteractText string   `gcfg:"interact_text"`
 }
 
 // Equal only meant to be used for testing, you probably shouldn't be == this type
@@ -77,7 +77,7 @@ func ParseManifestFile(path string) ([]GRPGObjManifestEntry, error) {
 	}
 
 	var cfg ManifestConfig
-	err = toml.Unmarshal(bytes, &cfg)
+	err = gcfg.Unmarshal(bytes, &cfg)
 	if err != nil {
 		return nil, err
 	}

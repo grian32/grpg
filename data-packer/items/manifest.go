@@ -4,17 +4,17 @@ import (
 	"grpg/data-go/grpgitem"
 	"os"
 
-	"github.com/pelletier/go-toml/v2"
+	"github.com/grian32/gcfg"
 )
 
 type ManifestConfig struct {
-	Items []GRPGItemManifestEntry `toml:"item"`
+	Items []GRPGItemManifestEntry `gcfg:"Item"`
 }
 
 type GRPGItemManifestEntry struct {
-	Name    string `toml:"name"`
-	ItemId  uint16 `toml:"id"`
-	Texture string `toml:"texture"`
+	Name    string `gcfg:"name"`
+	ItemId  uint16 `gcfg:"id"`
+	Texture string `gcfg:"texture"`
 }
 
 func BuildGRPGItemFromManifest(entries []GRPGItemManifestEntry, texMap map[string]uint16) []grpgitem.Item {
@@ -38,7 +38,7 @@ func ParseManifestFile(path string) ([]GRPGItemManifestEntry, error) {
 	}
 
 	var cfg ManifestConfig
-	err = toml.Unmarshal(bytes, &cfg)
+	err = gcfg.Unmarshal(bytes, &cfg)
 	if err != nil {
 		return nil, err
 	}

@@ -1,0 +1,11 @@
+[Texture] {
+    name = "grass_tex"
+    id = 1
+    path = "testdata/grass_texture.png"
+}
+
+[Texture] {
+    name = "still_water"
+    id = 2
+    path = "testdata/stone_texture.png"
+}
