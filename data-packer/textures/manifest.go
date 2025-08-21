@@ -32,15 +32,6 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 		}
 		defer f.Close()
 
-		pngConfig, err := png.DecodeConfig(f)
-		if err != nil {
-			return nil, err
-		}
-
-		if pngConfig.Width != 64 || pngConfig.Height != 64 {
-			return nil, errors.New("png images must be exactly 64x64")
-		}
-
 		_, err = f.Seek(0, 0)
 		if err != nil {
 			return nil, err
