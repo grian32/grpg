@@ -1,6 +1,7 @@
 package game
 
 import (
+	"bytes"
 	"client/shared"
 	"client/util"
 	"grpg/data-go/gbuf"
@@ -9,10 +10,13 @@ import (
 	"grpg/data-go/grpgobj"
 	"grpg/data-go/grpgtex"
 	"grpg/data-go/grpgtile"
+	"image"
+	"image/draw"
 	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/gen2brain/jpegxl"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -41,7 +45,23 @@ func loadTextures(path string) map[uint16]rl.Texture2D {
 	}
 
 	for _, tex := range textures {
-		rlImage := rl.LoadImageFromMemory(".png", tex.PNGBytes, int32(len(tex.PNGBytes)))
+		img, err := jpegxl.Decode(bytes.NewReader(tex.ImageBytes))
+		if err != nil {
+			log.Fatalf("failed reading jpegxl tex: %v", err)
+		}
+
+		bounds := img.Bounds()
+		rgba := image.NewRGBA(bounds)
+		draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
+
+		rlImage := rl.NewImage(
+			rgba.Pix,
+			int32(bounds.Dx()),
+			int32(bounds.Dy()),
+			1,
+			rl.UncompressedR8g8b8a8,
+		)
+
 		rlTex := rl.LoadTextureFromImage(rlImage)
 
 		rlTextures[tex.InternalIdInt] = rlTex

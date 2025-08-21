@@ -13,11 +13,11 @@ type Header struct {
 type Texture struct {
 	InternalIdString []byte
 	InternalIdInt    uint16
-	PNGBytes         []byte
+	ImageBytes       []byte
 }
 
 func (t Texture) Equals(other Texture) bool {
-	return bytes.Equal(t.InternalIdString, other.InternalIdString) && bytes.Equal(t.PNGBytes, other.PNGBytes)
+	return bytes.Equal(t.InternalIdString, other.InternalIdString) && bytes.Equal(t.ImageBytes, other.ImageBytes)
 }
 
 func WriteHeader(buf *gbuf.GBuf) {
@@ -38,8 +38,8 @@ func WriteTextures(buf *gbuf.GBuf, textures []Texture) {
 
 		buf.WriteUint16(tex.InternalIdInt)
 
-		buf.WriteUint32(uint32(len(tex.PNGBytes)))
-		buf.WriteBytes(tex.PNGBytes)
+		buf.WriteUint32(uint32(len(tex.ImageBytes)))
+		buf.WriteBytes(tex.ImageBytes)
 	}
 }
 
@@ -67,8 +67,8 @@ func ReadTextures(buf *gbuf.GBuf) ([]Texture, error) {
 		internalIdLen, err1 := buf.ReadUint32()
 		internalIdString, err2 := buf.ReadBytes(int(internalIdLen))
 		internalIdInt, err3 := buf.ReadUint16()
-		pngBytesLen, err4 := buf.ReadUint32()
-		pngBytes, err5 := buf.ReadBytes(int(pngBytesLen))
+		imageBytesLen, err4 := buf.ReadUint32()
+		imageBytes, err5 := buf.ReadBytes(int(imageBytesLen))
 
 		if err := cmp.Or(err1, err2, err3, err4, err5); err != nil {
 			return nil, err
@@ -77,7 +77,7 @@ func ReadTextures(buf *gbuf.GBuf) ([]Texture, error) {
 		textures = append(textures, Texture{
 			InternalIdString: internalIdString,
 			InternalIdInt:    internalIdInt,
-			PNGBytes:         pngBytes,
+			ImageBytes:       imageBytes,
 		})
 	}
 

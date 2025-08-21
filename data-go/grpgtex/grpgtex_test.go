@@ -11,18 +11,18 @@ import (
 
 var (
 	buf           = gbuf.NewEmptyGBuf()
-	stonePngBytes []byte
-	grassPngBytes []byte
+	grassJxlBytes []byte
+	stoneJxlBytes []byte
 )
 
 func init() {
 	var err error
 
-	stonePngBytes, err = os.ReadFile("../testdata/stone_texture.png")
+	stoneJxlBytes, err = os.ReadFile("../testdata/stone.jxl")
 	if err != nil {
 		log.Fatal("Error loading stone png bytes while initializing format tests")
 	}
-	grassPngBytes, err = os.ReadFile("../testdata/grass_texture.png")
+	grassJxlBytes, err = os.ReadFile("../testdata/grass.jxl")
 	if err != nil {
 		log.Fatal("Error loading grass png bytes while initializing format tests")
 	}
@@ -46,12 +46,12 @@ func TestWriteTextures(t *testing.T) {
 		{
 			InternalIdString: []byte("grass"),
 			InternalIdInt:    0,
-			PNGBytes:         grassPngBytes,
+			ImageBytes:       grassJxlBytes,
 		},
 		{
 			InternalIdString: []byte("stone"),
 			InternalIdInt:    1,
-			PNGBytes:         stonePngBytes,
+			ImageBytes:       stoneJxlBytes,
 		},
 	}
 
@@ -61,8 +61,8 @@ func TestWriteTextures(t *testing.T) {
 		expectedBytes = append(expectedBytes, uint32ToBytes(len(tex.InternalIdString))...)
 		expectedBytes = append(expectedBytes, tex.InternalIdString...)
 		expectedBytes = append(expectedBytes, uint16ToBytes(int(tex.InternalIdInt))...)
-		expectedBytes = append(expectedBytes, uint32ToBytes(len(tex.PNGBytes))...)
-		expectedBytes = append(expectedBytes, tex.PNGBytes...)
+		expectedBytes = append(expectedBytes, uint32ToBytes(len(tex.ImageBytes))...)
+		expectedBytes = append(expectedBytes, tex.ImageBytes...)
 	}
 
 	WriteTextures(buf, input)
@@ -96,12 +96,12 @@ func TestReadTextures(t *testing.T) {
 		{
 			InternalIdString: []byte("grass"),
 			InternalIdInt:    0,
-			PNGBytes:         grassPngBytes,
+			ImageBytes:       grassJxlBytes,
 		},
 		{
 			InternalIdString: []byte("stone"),
 			InternalIdInt:    1,
-			PNGBytes:         stonePngBytes,
+			ImageBytes:       stoneJxlBytes,
 		},
 	}
 
@@ -112,14 +112,14 @@ func TestReadTextures(t *testing.T) {
 	buf.WriteUint32(5)
 	buf.WriteBytes([]byte("grass"))
 	buf.WriteUint16(0)
-	buf.WriteUint32(uint32(len(grassPngBytes)))
-	buf.WriteBytes(grassPngBytes)
+	buf.WriteUint32(uint32(len(grassJxlBytes)))
+	buf.WriteBytes(grassJxlBytes)
 
 	buf.WriteUint32(5)
 	buf.WriteBytes([]byte("stone"))
 	buf.WriteUint16(1)
-	buf.WriteUint32(uint32(len(stonePngBytes)))
-	buf.WriteBytes(stonePngBytes)
+	buf.WriteUint32(uint32(len(stoneJxlBytes)))
+	buf.WriteBytes(stoneJxlBytes)
 
 	output, err := ReadTextures(buf)
 	if err != nil {

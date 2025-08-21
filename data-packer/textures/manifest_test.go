@@ -1,28 +1,59 @@
 package textures
 
 import (
+	"bytes"
 	"grpg/data-go/grpgtex"
+	"image/png"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/gen2brain/jpegxl"
 )
 
 var (
-	stonePngBytes []byte
-	grassPngBytes []byte
+	stoneJxlBytes []byte
+	grassJxlBytes []byte
 )
 
 func init() {
 	var err error
 
-	stonePngBytes, err = os.ReadFile("../testdata/stone_texture.png")
+	stonePng, err := os.Open("../testdata/stone_texture.png")
 	if err != nil {
-		log.Fatal("Error loading stone png bytes while initializing format tests")
+		log.Fatal(err)
 	}
-	grassPngBytes, err = os.ReadFile("../testdata/grass_texture.png")
+	grassPng, err := os.Open("../testdata/grass_texture.png")
 	if err != nil {
-		log.Fatal("Error loading grass png bytes while initializing format tests")
+		log.Fatal(err)
 	}
+
+	stoneImg, err := png.Decode(stonePng)
+	if err != nil {
+		log.Fatal(err)
+	}
+	grassImg, err := png.Decode(grassPng)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	jxlOptions := jpegxl.Options{
+		Quality: 100,
+		Effort:  10,
+	}
+
+	var stoneJxlBuf bytes.Buffer
+	err = jpegxl.Encode(&stoneJxlBuf, stoneImg, jxlOptions)
+	stoneJxlBytes = stoneJxlBuf.Bytes()
+
+	var grassJxlBuf bytes.Buffer
+	err = jpegxl.Encode(&grassJxlBuf, grassImg, jxlOptions)
+	grassJxlBytes = grassJxlBuf.Bytes()
+
+	file, err := os.Create("grass.jxl")
+	file.Write(grassJxlBytes)
+	file, err = os.Create("stone.jxl")
+	file.Write(stoneJxlBytes)
 }
 
 func TestParseManifestFile(t *testing.T) {
@@ -67,12 +98,12 @@ func TestBuildGRPGTexFromManifest(t *testing.T) {
 		{
 			InternalIdString: []byte("grass"),
 			InternalIdInt:    1,
-			PNGBytes:         grassPngBytes,
+			ImageBytes:       grassJxlBytes,
 		},
 		{
 			InternalIdString: []byte("stone"),
 			InternalIdInt:    2,
-			PNGBytes:         stonePngBytes,
+			ImageBytes:       stoneJxlBytes,
 		},
 	}
 

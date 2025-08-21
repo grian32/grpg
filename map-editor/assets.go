@@ -7,13 +7,13 @@ import (
 	"grpg/data-go/grpgtex"
 	"grpg/data-go/grpgtile"
 	"image"
-	"image/png"
 	"log"
 	"os"
 
 	"grpg/data-go/grpgobj"
 
 	g "github.com/AllenDang/giu"
+	"github.com/gen2brain/jpegxl"
 	"github.com/sqweek/dialog"
 )
 
@@ -54,12 +54,12 @@ func LoadTextures() {
 	}
 
 	for _, tex := range grpgTextures {
-		pngImage, err := png.Decode(bytes.NewReader(tex.PNGBytes))
+		jxlImage, err := jpegxl.Decode(bytes.NewReader(tex.ImageBytes))
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		g.NewTextureFromRgba(pngImage.(*image.NRGBA), func(texture *g.Texture) {
+		g.NewTextureFromRgba(jxlImage.(*image.NRGBA), func(texture *g.Texture) {
 			typed := GiuTextureTyped{
 				Texture:    texture,
 				InternalId: tex.InternalIdInt,

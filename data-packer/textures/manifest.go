@@ -1,13 +1,14 @@
 package textures
 
 import (
+	"bytes"
 	"errors"
 	"grpg/data-go/grpgtex"
 	"image/png"
-	"io"
 	"log"
 	"os"
 
+	"github.com/gen2brain/jpegxl"
 	"github.com/grian32/gcfg"
 )
 
@@ -37,7 +38,7 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 		}
 
 		if pngConfig.Width != 64 || pngConfig.Height != 64 {
-			return nil, errors.New("PNG Images must be exactly 64x64")
+			return nil, errors.New("png images must be exactly 64x64")
 		}
 
 		_, err = f.Seek(0, 0)
@@ -45,7 +46,19 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 			return nil, err
 		}
 
-		pngBytes, err := io.ReadAll(f)
+		image, err := png.Decode(f)
+		if err != nil {
+			return nil, errors.New("failed to decode png image")
+		}
+
+		var jpegXlBuf bytes.Buffer
+
+		jpegXlOptions := jpegxl.Options{
+			Quality: 100,
+			Effort:  10,
+		}
+
+		err = jpegxl.Encode(&jpegXlBuf, image, jpegXlOptions)
 		if err != nil {
 			return nil, err
 		}
@@ -57,7 +70,7 @@ func BuildGRPGTexFromManifest(files []GRPGTexManifestEntry) ([]grpgtex.Texture, 
 		tex[idx] = grpgtex.Texture{
 			InternalIdString: []byte(file.InternalName),
 			InternalIdInt:    uint16(file.InternalId),
-			PNGBytes:         pngBytes,
+			ImageBytes:       jpegXlBuf.Bytes(),
 		}
 
 		f.Close()

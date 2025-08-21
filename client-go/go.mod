@@ -10,6 +10,8 @@ require (
 
 require (
 	github.com/ebitengine/purego v0.8.4 // indirect
+	github.com/gen2brain/jpegxl v0.4.5 // indirect
+	github.com/tetratelabs/wazero v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
 	golang.org/x/sys v0.33.0 // indirect
 )
