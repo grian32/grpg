@@ -99,7 +99,7 @@ func (lp *LocalPlayer) Update(game *Game, crossedZone bool) {
 	if crossedZone {
 		lp.RealX = targetX
 		lp.RealY = targetY
-	} else {
+	} else if lp.RealX != targetX || lp.RealY != targetY {
 		if lp.RealX < targetX {
 			lp.RealX += speed
 		} else if lp.RealX > targetX {
@@ -156,16 +156,18 @@ func (rp *RemotePlayer) Update(game *Game) {
 
 	const speed = 16.0
 
-	if rp.RealX < targetX {
-		rp.RealX += speed
-	} else if rp.RealX > targetX {
-		rp.RealX -= speed
-	}
+	if rp.RealX != targetX || rp.RealY != targetY {
+		if rp.RealX < targetX {
+			rp.RealX += speed
+		} else if rp.RealX > targetX {
+			rp.RealX -= speed
+		}
 
-	if rp.RealY < targetY {
-		rp.RealY += speed
-	} else if rp.RealY > targetY {
-		rp.RealY -= speed
+		if rp.RealY < targetY {
+			rp.RealY += speed
+		} else if rp.RealY > targetY {
+			rp.RealY -= speed
+		}
 	}
 
 	rp.PrevX = rp.X
