@@ -49,11 +49,6 @@ func init() {
 	var grassJxlBuf bytes.Buffer
 	err = jpegxl.Encode(&grassJxlBuf, grassImg, jxlOptions)
 	grassJxlBytes = grassJxlBuf.Bytes()
-
-	file, err := os.Create("grass.jxl")
-	file.Write(grassJxlBytes)
-	file, err = os.Create("stone.jxl")
-	file.Write(stoneJxlBytes)
 }
 
 func TestParseManifestFile(t *testing.T) {
