@@ -45,26 +45,7 @@ func loadTextures(path string) map[uint16]rl.Texture2D {
 	}
 
 	for _, tex := range textures {
-		img, err := jpegxl.Decode(bytes.NewReader(tex.ImageBytes))
-		if err != nil {
-			log.Fatalf("failed reading jpegxl tex: %v", err)
-		}
-
-		bounds := img.Bounds()
-		rgba := image.NewRGBA(bounds)
-		draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
-
-		rlImage := rl.NewImage(
-			rgba.Pix,
-			int32(bounds.Dx()),
-			int32(bounds.Dy()),
-			1,
-			rl.UncompressedR8g8b8a8,
-		)
-
-		rlTex := rl.LoadTextureFromImage(rlImage)
-
-		rlTextures[tex.InternalIdInt] = rlTex
+		rlTextures[tex.InternalIdInt] = jpegXlImgBytesToRlTexture(tex.ImageBytes)
 	}
 
 	return rlTextures
@@ -233,36 +214,54 @@ func loadItems(path string) map[uint16]grpgitem.Item {
 	return itemMap
 }
 
-func loadGameframeRightTexture(texturePath string) rl.Texture2D {
-	bytes, err := os.ReadFile(texturePath)
-
+func jpegXlImgBytesToRlTexture(imgBytes []byte) rl.Texture2D {
+	img, err := jpegxl.Decode(bytes.NewReader(imgBytes))
 	if err != nil {
-		log.Fatalf("errored while trying to load gameframe right texture %v", err)
+		log.Fatalf("failed reading jpegxl tex: %v", err)
 	}
 
-	image := rl.LoadImageFromMemory(".png", bytes, int32(len(bytes)))
-	return rl.LoadTextureFromImage(image)
+	bounds := img.Bounds()
+	rgba := image.NewRGBA(bounds)
+	draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
+
+	rlImage := rl.NewImage(
+		rgba.Pix,
+		int32(bounds.Dx()),
+		int32(bounds.Dy()),
+		1,
+		rl.UncompressedR8g8b8a8,
+	)
+
+	rlTex := rl.LoadTextureFromImage(rlImage)
+	return rlTex
 }
 
-func loadPlayerTextures(dirPath string) map[shared.Direction]rl.Texture2D {
-	textureMap := map[shared.Direction]string{
-		shared.UP:    "player_back.png",
-		shared.DOWN:  "player_down.png",
-		shared.LEFT:  "player_left.png",
-		shared.RIGHT: "player_right.png",
-	}
-	textures := map[shared.Direction]rl.Texture2D{}
+func loadOtherTex(path string) map[string]rl.Texture2D {
+	rlTextures := make(map[string]rl.Texture2D)
 
-	for direction, texPath := range textureMap {
-		fullPath := filepath.Join(dirPath, texPath)
-		bytes, err := os.ReadFile(fullPath)
-		if err != nil {
-			log.Fatal("errored while trying to load player texture %s", fullPath)
-		}
+	grpgTexBytes, err := os.ReadFile(path)
 
-		image := rl.LoadImageFromMemory(".png", bytes, int32(len(bytes)))
-		textures[direction] = rl.LoadTextureFromImage(image)
+	if err != nil {
+		log.Fatal("failed reading GRPGTEX file")
 	}
 
-	return textures
+	buf := gbuf.NewGBuf(grpgTexBytes)
+	header, err := grpgtex.ReadHeader(buf)
+	if err != nil {
+		log.Fatalf("failed reading grpgtex header: %v", err)
+	}
+
+	if string(header.Magic[:]) != "GRPGTEX\x00" {
+		log.Fatal("file is not GRPGTEX file")
+	}
+
+	textures, err := grpgtex.ReadTextures(buf)
+	if err != nil {
+		log.Fatalf("failed reading grpgtex textures: %v", err)
+	}
+	for _, tex := range textures {
+		rlTextures[string(tex.InternalIdString)] = jpegXlImgBytesToRlTexture(tex.ImageBytes)
+	}
+
+	return rlTextures
 }

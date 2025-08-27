@@ -34,9 +34,15 @@ func (p *Playground) Setup() {
 	p.Game.Items = loadItems(assetsDirectory + "items.grpgitem")
 	p.Zones = loadMaps(assetsDirectory+"maps/", p.Game)
 
-	p.GameframeRight = loadGameframeRightTexture(assetsDirectory + "used/gameframe_right_2.png")
+	otherTex := loadOtherTex(assetsDirectory + "other.grpgtex")
 
-	p.PlayerTextures = loadPlayerTextures(assetsDirectory + "used/")
+	p.GameframeRight = otherTex["gameframe_right"]
+
+	p.PlayerTextures = make(map[shared.Direction]rl.Texture2D)
+	p.PlayerTextures[shared.UP] = otherTex["player_up"]
+	p.PlayerTextures[shared.DOWN] = otherTex["player_down"]
+	p.PlayerTextures[shared.LEFT] = otherTex["player_left"]
+	p.PlayerTextures[shared.RIGHT] = otherTex["player_right"]
 }
 
 func (p *Playground) Cleanup() {
