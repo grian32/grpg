@@ -134,10 +134,6 @@ func cycle(packets chan ChanPacket) {
 			fmt.Printf("running timed scripts for %d\n", g.CurrentTick)
 			for _, script := range timed {
 				evaluator.Eval(script.Script, script.Env)
-				switch script.Update {
-				case scripts.OBJECT:
-					network.UpdatePlayersByChunk(script.ChunkPos, g, &s2c.ObjUpdate{ChunkPos: script.ChunkPos})
-				}
 			}
 		}
 

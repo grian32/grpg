@@ -30,10 +30,6 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 	addInteractBuiltins(env, game, player, objPos)
 
 	evaluator.Eval(script, env)
-
-	chunkPos := game.TrackedObjs[objPos].ChunkPos
-
-	network.UpdatePlayersByChunk(chunkPos, game, &s2c.ObjUpdate{ChunkPos: chunkPos, Rebuild: false})
 }
 
 func addInteractBuiltins(env *object.Environment, game *shared.Game, player *shared.Player, objPos util.Vector2I) {
@@ -50,7 +46,10 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 				return nil
 			}
 
-			game.TrackedObjs[objPos].State = byte(newState.Value)
+			trackedObj := game.TrackedObjs[objPos]
+			trackedObj.State = byte(newState.Value)
+
+			network.UpdatePlayersByChunk(trackedObj.ChunkPos, game, &s2c.ObjUpdate{ChunkPos: trackedObj.ChunkPos, Rebuild: false})
 
 			return nil
 		},
@@ -103,14 +102,10 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 				return nil
 			}
 
-			chunkPos := util.Vector2I{X: 0, Y: 0}
-
 			game.AddTimedScript(game.CurrentTick+uint32(tickCount.Value),
 				scripts.TimedScript{
-					Script:   fn.Body,
-					Env:      env,
-					Update:   scripts.OBJECT,
-					ChunkPos: chunkPos,
+					Script: fn.Body,
+					Env:    env,
 				})
 
 			return nil
