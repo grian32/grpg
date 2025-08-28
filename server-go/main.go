@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"grpg/data-go/gbuf"
+	"grpgscript/evaluator"
 	"io"
 	"log"
 	"net"
@@ -26,11 +27,13 @@ import (
 
 var (
 	g = &shared.Game{
-		Players:     map[*shared.Player]struct{}{},
-		Connections: make(map[net.Conn]*shared.Player),
-		TrackedObjs: make(map[util.Vector2I]*shared.GameObj),
-		MaxX:        0,
-		MaxY:        0,
+		Players:      map[*shared.Player]struct{}{},
+		Connections:  make(map[net.Conn]*shared.Player),
+		TrackedObjs:  make(map[util.Vector2I]*shared.GameObj),
+		MaxX:         0,
+		MaxY:         0,
+		CurrentTick:  0,
+		TimedScripts: make(map[uint32][]scripts.TimedScript),
 	}
 	assetsDirectory = "../../grpg-assets/"
 )
@@ -126,6 +129,19 @@ func cycle(packets chan ChanPacket) {
 			}
 		}
 
+		timed, ok := g.TimedScripts[g.CurrentTick]
+		if ok {
+			fmt.Printf("running timed scripts for %d\n", g.CurrentTick)
+			for _, script := range timed {
+				evaluator.Eval(script.Script, script.Env)
+				switch script.Update {
+				case scripts.OBJECT:
+					network.UpdatePlayersByChunk(script.ChunkPos, g, &s2c.ObjUpdate{ChunkPos: script.ChunkPos})
+				}
+			}
+		}
+
+		g.CurrentTick++
 		diff := time.Until(expectedTime)
 		if diff > 0 {
 			time.Sleep(diff)

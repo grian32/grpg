@@ -16,4 +16,15 @@ type Game struct {
 	TrackedObjs   map[util.Vector2I]*GameObj
 	CollisionMap  map[util.Vector2I]struct{}
 	ScriptManager *scripts.ScriptManager
+	CurrentTick   uint32
+	TimedScripts  map[uint32][]scripts.TimedScript
+}
+
+func (g *Game) AddTimedScript(tick uint32, script scripts.TimedScript) {
+	_, ok := g.TimedScripts[tick]
+	if !ok {
+		g.TimedScripts[tick] = []scripts.TimedScript{script}
+	} else {
+		g.TimedScripts[tick] = append(g.TimedScripts[tick], script)
+	}
 }

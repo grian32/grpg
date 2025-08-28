@@ -8,6 +8,7 @@ import (
 	"log"
 	"server/network"
 	"server/network/s2c"
+	"server/scripts"
 	"server/shared"
 	"server/util"
 )
@@ -85,6 +86,32 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 			}
 
 			network.SendPacket(player.Conn, &s2c.InventoryUpdate{Player: player}, game)
+
+			return nil
+		},
+	})
+	env.Set("timer", &object.Builtin{
+		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+			tickCount, ok := args[0].(*object.Integer)
+			if !ok {
+				log.Printf("warn: script tries to call timer in onInteract ctx without int arg")
+				return nil
+			}
+			fn, ok := args[1].(*object.Function)
+			if !ok {
+				log.Printf("warn: script tries to call timer in onInteract ctx without function arg")
+				return nil
+			}
+
+			chunkPos := util.Vector2I{X: 0, Y: 0}
+
+			game.AddTimedScript(game.CurrentTick+uint32(tickCount.Value),
+				scripts.TimedScript{
+					Script:   fn.Body,
+					Env:      env,
+					Update:   scripts.OBJECT,
+					ChunkPos: chunkPos,
+				})
 
 			return nil
 		},
