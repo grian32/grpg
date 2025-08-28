@@ -30,6 +30,7 @@ var (
 			Inventory: [24]shared.InventoryItem{},
 			Name:      "",
 		},
+		Talkbox:         shared.Talkbox{},
 		OtherPlayers:    map[string]*shared.RemotePlayer{},
 		Conn:            network.StartConn(),
 		ShowFailedLogin: false,

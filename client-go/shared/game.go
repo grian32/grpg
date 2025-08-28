@@ -25,6 +25,7 @@ type Game struct {
 	TileSize        int32
 	SceneManager    *GSceneManager
 	Player          *LocalPlayer
+	Talkbox         Talkbox
 	OtherPlayers    map[string]*RemotePlayer
 	Conn            net.Conn
 	ShowFailedLogin bool

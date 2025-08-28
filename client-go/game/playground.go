@@ -26,6 +26,7 @@ type Playground struct {
 var assetsDirectory = "../../grpg-assets/"
 
 func (p *Playground) Setup() {
+	p.Game.Talkbox.CurrentName = "hi!"
 	p.Font = rl.LoadFont(assetsDirectory + "font.ttf")
 	p.CurrActionString = "Current Action: None :("
 
@@ -254,8 +255,15 @@ func drawGameFrame(p *Playground) {
 
 	rl.DrawTexture(p.GameframeBottom, 0, 768, rl.White)
 
+	talkbox := p.Game.Talkbox
 	// x is offset from 0, y has offset added, to be placed in the right spot
 	rl.DrawTextEx(p.Font, "Current Action: "+p.CurrActionString, rl.Vector2{X: 110, Y: 768 + 28 + 3}, 20, 0, rl.White)
+	if talkbox.CurrentName != "" {
+		rl.DrawTextEx(p.Font, talkbox.CurrentName, rl.Vector2{X: 110 + 332, Y: 768 + 28 + 3}, 24, 0, rl.White)
+	}
+	if talkbox.CurrentMessage != "" {
+		// TODO
+	}
 
 	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
 	rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 768, Y: 800}, 24, 0, rl.White)
