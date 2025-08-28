@@ -4,7 +4,7 @@ onInteract(BERRY_BUSH) {
         playerInvAdd(BERRIES);
     }
 
-    timer(250) {
+    timer(100) {
         setObjState(0);
     }
 }
