@@ -228,8 +228,7 @@ func drawOtherPlayers(p *Playground) {
 }
 
 func drawGameFrame(p *Playground) {
-	//player := p.Game.Player
-
+	player := p.Game.Player
 	rl.DrawTexture(p.GameframeRight, 768, 0, rl.White)
 
 	currItemRealPos := rl.Vector2{X: 768 + 64, Y: 64}
@@ -255,10 +254,9 @@ func drawGameFrame(p *Playground) {
 
 	rl.DrawTexture(p.GameframeBottom, 0, 768, rl.White)
 
-	//rl.DrawRectangle(0, 768, 960-192, 192, rl.Blue)
+	// x is offset from 0, y has offset added, to be placed in the right spot
+	rl.DrawTextEx(p.Font, "Current Action: "+p.CurrActionString, rl.Vector2{X: 110, Y: 768 + 28 + 3}, 20, 0, rl.White)
 
-	rl.DrawTextEx(p.Font, "Current Action: "+p.CurrActionString, rl.Vector2{X: 0, Y: 768}, 24, 0, rl.White)
-
-	//playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
-	//rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 0, Y: 800}, 24, 0, rl.White)
+	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
+	rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 768, Y: 800}, 24, 0, rl.White)
 }
