@@ -38,7 +38,8 @@ func (i *InventoryUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	buf.WriteUint16(packetLen)
 
 	if len(dirtyIndexes) == 0 {
-		buf.WriteBytes([]byte{0, 0, 0})
+		// should only happen on login, when inventory update is sent blindly
+		buf.WriteBytesV(0x00, 0x00, 0x00)
 		return
 	}
 
