@@ -13,6 +13,7 @@ type Playground struct {
 	Font             rl.Font
 	Game             *shared.Game
 	GameframeRight   rl.Texture2D
+	GameframeBottom  rl.Texture2D
 	PlayerTextures   map[shared.Direction]rl.Texture2D
 	Textures         map[uint16]rl.Texture2D
 	Zones            map[util.Vector2I]grpgmap.Zone
@@ -37,6 +38,7 @@ func (p *Playground) Setup() {
 	otherTex := loadOtherTex(assetsDirectory + "other.grpgtex")
 
 	p.GameframeRight = otherTex["gameframe_right"]
+	p.GameframeBottom = otherTex["gameframe_bottom"]
 
 	p.PlayerTextures = make(map[shared.Direction]rl.Texture2D)
 	p.PlayerTextures[shared.UP] = otherTex["player_up"]
@@ -55,6 +57,7 @@ func (p *Playground) Cleanup() {
 	}
 
 	rl.UnloadTexture(p.GameframeRight)
+	rl.UnloadTexture(p.GameframeBottom)
 
 	for _, tex := range p.PlayerTextures {
 		rl.UnloadTexture(tex)
@@ -225,7 +228,7 @@ func drawOtherPlayers(p *Playground) {
 }
 
 func drawGameFrame(p *Playground) {
-	player := p.Game.Player
+	//player := p.Game.Player
 
 	rl.DrawTexture(p.GameframeRight, 768, 0, rl.White)
 
@@ -250,10 +253,12 @@ func drawGameFrame(p *Playground) {
 		}
 	}
 
-	rl.DrawRectangle(0, 768, 960-192, 192, rl.Blue)
+	rl.DrawTexture(p.GameframeBottom, 0, 768, rl.White)
+
+	//rl.DrawRectangle(0, 768, 960-192, 192, rl.Blue)
 
 	rl.DrawTextEx(p.Font, "Current Action: "+p.CurrActionString, rl.Vector2{X: 0, Y: 768}, 24, 0, rl.White)
 
-	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
-	rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 0, Y: 800}, 24, 0, rl.White)
+	//playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
+	//rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 0, Y: 800}, 24, 0, rl.White)
 }
