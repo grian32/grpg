@@ -36,7 +36,10 @@ func ReadServerPackets(conn net.Conn, packetChan chan<- ChanPacket) {
 			return
 		}
 
-		packetData := s2c.Packets[opcode]
+		packetData, ok := s2c.Packets[opcode]
+		if !ok {
+			log.Printf("unknown opcode: %d\n", opcode)
+		}
 
 		var bytes []byte
 
