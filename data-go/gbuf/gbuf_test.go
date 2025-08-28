@@ -398,3 +398,15 @@ func TestGBuf_WriteBool(t *testing.T) {
 		t.Errorf("GBuf_WriteBool=%v, want match for %v", buf.Bytes(), expectedBytes)
 	}
 }
+
+func TestGBuf_WriteBytesV(t *testing.T) {
+	buf := NewEmptyGBuf()
+
+	buf.WriteBytesV(0x01, 0x02)
+	buf.WriteBytesV(0x03, 0x04, 0x05)
+
+	expected := []byte{0x01, 0x02, 0x03, 0x04, 0x05}
+	if !bytes.Equal(expected, buf.slice) {
+		t.Errorf("GBuf_WriteBytes() got %v, want %v", buf.slice, expected)
+	}
+}

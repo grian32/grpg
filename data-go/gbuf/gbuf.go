@@ -114,6 +114,10 @@ func (buf *GBuf) WriteBytes(bytes []byte) {
 	buf.slice = append(buf.slice, bytes...)
 }
 
+func (buf *GBuf) WriteBytesV(bytes ...byte) {
+	buf.slice = append(buf.slice, bytes...)
+}
+
 // WriteString
 // Writes a uint32 length encoded string to the buffer
 func (buf *GBuf) WriteString(val string) {
