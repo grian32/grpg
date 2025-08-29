@@ -15,7 +15,7 @@ import (
 
 type Interact struct{}
 
-func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player) {
+func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, scriptManager *scripts.ScriptManager) {
 	objId, err1 := buf.ReadUint16()
 	x, err2 := buf.ReadUint32()
 	y, err3 := buf.ReadUint32()
@@ -25,14 +25,14 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 	}
 
 	objPos := util.Vector2I{X: x, Y: y}
-	script := game.ScriptManager.InteractScripts[objId]
-	env := object.NewEnclosedEnvinronment(game.ScriptManager.Env)
-	addInteractBuiltins(env, game, player, objPos)
+	script := scriptManager.InteractScripts[objId]
+	env := object.NewEnclosedEnvinronment(scriptManager.Env)
+	addInteractBuiltins(env, game, player, objPos, scriptManager)
 
 	evaluator.Eval(script, env)
 }
 
-func addInteractBuiltins(env *object.Environment, game *shared.Game, player *shared.Player, objPos util.Vector2I) {
+func addInteractBuiltins(env *object.Environment, game *shared.Game, player *shared.Player, objPos util.Vector2I, scriptManager *scripts.ScriptManager) {
 	env.Set("getObjState", &object.Builtin{
 		Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return &object.Integer{Value: int64(game.TrackedObjs[objPos].State)}
@@ -102,7 +102,7 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 				return nil
 			}
 
-			game.AddTimedScript(game.CurrentTick+uint32(tickCount.Value),
+			scriptManager.AddTimedScript(game.CurrentTick+uint32(tickCount.Value),
 				scripts.TimedScript{
 					Script: fn.Body,
 					Env:    env,

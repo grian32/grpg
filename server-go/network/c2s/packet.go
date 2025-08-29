@@ -2,11 +2,12 @@ package c2s
 
 import (
 	"grpg/data-go/gbuf"
+	"server/scripts"
 	"server/shared"
 )
 
 type Packet interface {
-	Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player)
+	Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, scriptManager *scripts.ScriptManager)
 }
 
 type PacketData struct {

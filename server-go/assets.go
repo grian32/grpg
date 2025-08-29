@@ -5,6 +5,7 @@ import (
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgitem"
 	"grpg/data-go/grpgmap"
+	"grpg/data-go/grpgnpc"
 	"grpg/data-go/grpgobj"
 	"log"
 	"os"
@@ -101,6 +102,35 @@ func LoadObjs(path string) ([]grpgobj.Obj, error) {
 	}
 
 	return objs, nil
+}
+
+func LoadNpcs(path string) (map[uint16]*grpgnpc.Npc, error) {
+	bytes, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := gbuf.NewGBuf(bytes)
+	header, err := grpgnpc.ReadHeader(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	if header.Magic != [8]byte{'G', 'R', 'P', 'G', 'N', 'P', 'C', 0x00} {
+		return nil, errors.New("file provided does not have GRPGNPC magic")
+	}
+
+	npcs, err := grpgnpc.ReadNpcs(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	npcMap := make(map[uint16]*grpgnpc.Npc)
+	for _, npc := range npcs {
+		npcMap[npc.NpcId] = &npc
+	}
+
+	return npcMap, nil
 }
 
 func LoadItems(path string) ([]grpgitem.Item, error) {

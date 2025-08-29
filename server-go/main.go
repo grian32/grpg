@@ -27,15 +27,16 @@ import (
 
 var (
 	g = &shared.Game{
-		Players:      map[*shared.Player]struct{}{},
-		Connections:  make(map[net.Conn]*shared.Player),
-		TrackedObjs:  make(map[util.Vector2I]*shared.GameObj),
-		MaxX:         0,
-		MaxY:         0,
-		CurrentTick:  0,
-		TimedScripts: make(map[uint32][]scripts.TimedScript),
+		Players:     map[*shared.Player]struct{}{},
+		Connections: make(map[net.Conn]*shared.Player),
+		TrackedObjs: make(map[util.Vector2I]*shared.GameObj),
+		TrackedNpcs: make(map[util.Vector2I]*shared.GameNpc),
+		MaxX:        0,
+		MaxY:        0,
+		CurrentTick: 0,
 	}
 	assetsDirectory = "../../grpg-assets/"
+	scriptManager   *scripts.ScriptManager
 )
 
 type ChanPacket struct {
@@ -82,18 +83,25 @@ func main() {
 		log.Fatal("Failed loading items: ", err)
 	}
 
+	npcs, err := LoadNpcs(assetsDirectory + "npcs.grpgnpc")
+	if err != nil {
+		log.Fatal("Failed loading npcs: ", err)
+	}
+
 	LoadMaps(assetsDirectory+"maps/", g, objs)
 
-	scriptManager := scripts.NewScriptManager()
-	g.ScriptManager = scriptManager
+	scriptManager = scripts.NewScriptManager()
 
-	g.ScriptManager.LoadObjConstants(objs)
-	g.ScriptManager.LoadItemConstants(items)
+	scriptManager.LoadObjConstants(objs)
+	scriptManager.LoadItemConstants(items)
+	scriptManager.LoadNpcConstants(npcs)
 
-	err = g.ScriptManager.LoadScripts("../game-scripts")
+	err = scriptManager.LoadScripts("../game-scripts", g, npcs)
 	if err != nil {
 		log.Fatal("Failed loading scripts: ", err)
 	}
+
+	fmt.Println(g.TrackedNpcs)
 
 	packets := make(chan ChanPacket, 1000)
 
@@ -123,13 +131,13 @@ func cycle(packets chan ChanPacket) {
 			select {
 			case packet := <-packets:
 				buf := gbuf.NewGBuf(packet.Bytes)
-				packet.PacketData.Handler.Handle(buf, g, packet.Player)
+				packet.PacketData.Handler.Handle(buf, g, packet.Player, scriptManager)
 			default:
 				break processPackets
 			}
 		}
 
-		timed, ok := g.TimedScripts[g.CurrentTick]
+		timed, ok := scriptManager.TimedScripts[g.CurrentTick]
 		if ok {
 			fmt.Printf("running timed scripts for %d\n", g.CurrentTick)
 			for _, script := range timed {

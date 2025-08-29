@@ -6,6 +6,7 @@ import (
 	"log"
 	"server/network"
 	"server/network/s2c"
+	"server/scripts"
 	"server/shared"
 	"server/util"
 )
@@ -13,7 +14,7 @@ import (
 type Move struct {
 }
 
-func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player) {
+func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, scriptManagers *scripts.ScriptManager) {
 	newX, err1 := buf.ReadUint32()
 	newY, err2 := buf.ReadUint32()
 	facing, err3 := buf.ReadByte()

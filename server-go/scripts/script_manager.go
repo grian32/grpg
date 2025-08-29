@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"grpg/data-go/grpgitem"
+	"grpg/data-go/grpgnpc"
 	"grpg/data-go/grpgobj"
 	"grpgscript/ast"
 	"grpgscript/evaluator"
@@ -11,8 +12,10 @@ import (
 	"grpgscript/object"
 	"grpgscript/parser"
 	"grpgscript/perf"
+	"log"
 	"os"
 	"path/filepath"
+	"server/shared"
 	"strings"
 )
 
@@ -20,6 +23,16 @@ import (
 type ScriptManager struct {
 	Env             *object.Environment
 	InteractScripts map[uint16]*ast.BlockStatement
+	TimedScripts    map[uint32][]TimedScript
+}
+
+func (s *ScriptManager) AddTimedScript(tick uint32, script TimedScript) {
+	_, ok := s.TimedScripts[tick]
+	if !ok {
+		s.TimedScripts[tick] = []TimedScript{script}
+	} else {
+		s.TimedScripts[tick] = append(s.TimedScripts[tick], script)
+	}
 }
 
 func NewScriptManager() *ScriptManager {
@@ -41,9 +54,16 @@ func (s *ScriptManager) LoadItemConstants(items []grpgitem.Item) {
 	}
 }
 
-func (s *ScriptManager) LoadScripts(path string) error {
+func (s *ScriptManager) LoadNpcConstants(npcs map[uint16]*grpgnpc.Npc) {
+	for _, npc := range npcs {
+		s.Env.Set(uppercaseAll(npc.Name), &object.Integer{Value: int64(npc.NpcId)})
+	}
+}
+
+func (s *ScriptManager) LoadScripts(path string, game *shared.Game, npcs map[uint16]*grpgnpc.Npc) error {
 	env := object.NewEnclosedEnvinronment(s.Env)
 	AddListeners(env, s)
+	AddGlobals(env, game, npcs)
 
 	entries, err := os.ReadDir(path)
 
@@ -74,7 +94,10 @@ func (s *ScriptManager) LoadScripts(path string) error {
 
 			perf.ConstFold(program)
 
-			evaluator.Eval(program, env)
+			obj := evaluator.Eval(program, env)
+			if obj != nil && obj.Type() == object.ERROR_OBJ {
+				log.Printf("script %s errored %s", fullPath, obj.Inspect())
+			}
 		}
 	}
 
