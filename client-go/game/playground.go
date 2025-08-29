@@ -204,6 +204,7 @@ func drawWorld(p *Playground) {
 			objTex := p.Textures[objTexId]
 			rl.DrawTexture(objTex, dx, dy, rl.White)
 		} else {
+			// TODO: maybe don't render if player is standing over?
 			trackedNpc, ok := p.Game.TrackedNpcs[worldPos]
 			if ok {
 				npcTexId := trackedNpc.NpcData.TextureId

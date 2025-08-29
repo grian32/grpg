@@ -22,6 +22,7 @@ import (
 type ScriptManager struct {
 	Env             *object.Environment
 	InteractScripts map[uint16]*ast.BlockStatement
+	NpcTalkScripts  map[uint16]*ast.BlockStatement
 	TimedScripts    map[uint32][]TimedScript
 }
 

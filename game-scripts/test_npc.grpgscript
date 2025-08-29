@@ -1,1 +1,7 @@
 spawnNpc(TEST, 1, 1);
+
+onTalkNpc(TEST) {
+    talkPlayer("hello, test")
+    talkNpc("...")
+    talkPlayer("C U")
+}
