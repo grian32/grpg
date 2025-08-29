@@ -246,5 +246,6 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 	network.SendPacket(conn, &s2c.LoginAccepted{}, game)
 	network.UpdatePlayersByChunk(player.ChunkPos, game, &s2c.PlayersUpdate{ChunkPos: player.ChunkPos})
 	network.SendPacket(player.Conn, &s2c.ObjUpdate{ChunkPos: player.ChunkPos, Rebuild: true}, game)
+	network.SendPacket(player.Conn, &s2c.NpcUpdate{ChunkPos: player.ChunkPos}, game)
 	network.SendPacket(player.Conn, &s2c.InventoryUpdate{Player: player}, game)
 }

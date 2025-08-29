@@ -4,6 +4,8 @@ import (
 	"grpg/data-go/grpgnpc"
 	"grpgscript/object"
 	"log"
+	"server/network"
+	"server/network/s2c"
 	"server/shared"
 	"server/util"
 )
@@ -36,11 +38,16 @@ func AddGlobals(env *object.Environment, game *shared.Game, npcs map[uint16]*grp
 			}
 
 			pos := util.Vector2I{X: uint32(x.Value), Y: uint32(y.Value)}
+			chunkPos := util.Vector2I{X: pos.X / 16, Y: pos.Y / 16}
 
 			game.TrackedNpcs[pos] = &shared.GameNpc{
-				Pos:     pos,
-				NpcData: npcData,
+				Pos:      pos,
+				NpcData:  npcData,
+				ChunkPos: chunkPos,
 			}
+
+			// maybe not needed? but will probably keep, will be useful if player x spawns y mob so its visible for player z
+			network.UpdatePlayersByChunk(chunkPos, game, &s2c.NpcUpdate{ChunkPos: chunkPos})
 
 			return nil
 		},

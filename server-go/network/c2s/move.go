@@ -44,5 +44,6 @@ func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, 
 	if crossedZone {
 		network.UpdatePlayersByChunk(prevChunkPos, game, &s2c.PlayersUpdate{ChunkPos: prevChunkPos})
 		network.SendPacket(player.Conn, &s2c.ObjUpdate{ChunkPos: chunkPos, Rebuild: true}, game)
+		network.SendPacket(player.Conn, &s2c.NpcUpdate{ChunkPos: chunkPos}, game)
 	}
 }
