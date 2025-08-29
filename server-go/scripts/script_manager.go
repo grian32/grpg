@@ -2,7 +2,6 @@ package scripts
 
 import (
 	"errors"
-	"fmt"
 	"grpg/data-go/grpgitem"
 	"grpg/data-go/grpgnpc"
 	"grpg/data-go/grpgobj"
@@ -85,9 +84,9 @@ func (s *ScriptManager) LoadScripts(path string, game *shared.Game, npcs map[uin
 			program := p.ParseProgram()
 
 			if len(p.Errors()) != 0 {
-				fmt.Printf("Found errors parsing script: %s\n", fullPath)
+				log.Printf("Found errors parsing script: %s\n", fullPath)
 				for _, msg := range p.Errors() {
-					fmt.Println(msg)
+					log.Println(msg)
 				}
 				return errors.New("errors parsing scripts")
 			}
