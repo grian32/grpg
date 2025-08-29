@@ -1,0 +1,11 @@
+[Npc] {
+    name = "corey"
+    id = 1
+    texture = "still_water"
+}
+
+[Npc] {
+    name = "grian"
+    id = 2
+    texture = "grass_tex"
+}

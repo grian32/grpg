@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"texture-packer/items"
+	"texture-packer/npcs"
 	"texture-packer/objs"
 	"texture-packer/shared"
 	"texture-packer/textures"
@@ -62,7 +63,7 @@ func main() {
 		},
 	}
 
-	objCmd.Flags().StringVarP(&objOpts.Manifest, "manifest", "m", "", "The path to the tile manifest.")
+	objCmd.Flags().StringVarP(&objOpts.Manifest, "manifest", "m", "", "The path to the obj manifest.")
 	objCmd.Flags().StringVarP(&objOpts.Output, "output", "o", "objs.grpgobj", "The output path.")
 	objCmd.Flags().StringVarP(&objOpts.Textures, "textures", "t", "", "The path to the used grpgtex file.")
 
@@ -78,11 +79,27 @@ func main() {
 		},
 	}
 
-	itemCmd.Flags().StringVarP(&itemOpts.Manifest, "manifest", "m", "", "The path to the tile manifest.")
+	itemCmd.Flags().StringVarP(&itemOpts.Manifest, "manifest", "m", "", "The path to the item manifest.")
 	itemCmd.Flags().StringVarP(&itemOpts.Output, "output", "o", "items.grpgitem", "The output path.")
 	itemCmd.Flags().StringVarP(&itemOpts.Textures, "textures", "t", "", "The path to the used grpgtex file.")
 
 	cmd.AddCommand(itemCmd)
+
+	npcOpts := &shared.SharedOptions{}
+
+	npcCmd := &cobra.Command{
+		Use:   "npc",
+		Short: "Packs npcs.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return npcs.RunNpcCommand(cmd, args, npcOpts)
+		},
+	}
+
+	npcCmd.Flags().StringVarP(&npcOpts.Manifest, "manifest", "m", "", "The path to the npc manifest.")
+	npcCmd.Flags().StringVarP(&npcOpts.Output, "output", "o", "items.grpgitem", "The output path.")
+	npcCmd.Flags().StringVarP(&npcOpts.Textures, "textures", "t", "", "The path to the used grpgtex file.")
+
+	cmd.AddCommand(npcCmd)
 
 	if err := fang.Execute(context.Background(), cmd); err != nil {
 		os.Exit(1)
