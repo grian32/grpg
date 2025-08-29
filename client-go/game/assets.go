@@ -7,6 +7,7 @@ import (
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgitem"
 	"grpg/data-go/grpgmap"
+	"grpg/data-go/grpgnpc"
 	"grpg/data-go/grpgobj"
 	"grpg/data-go/grpgtex"
 	"grpg/data-go/grpgtile"
@@ -148,6 +149,37 @@ func loadObjs(path string) map[uint16]*grpgobj.Obj {
 	}
 
 	return objMap
+}
+
+func loadNpcs(path string) map[uint16]*grpgnpc.Npc {
+	npcMap := make(map[uint16]*grpgnpc.Npc)
+
+	grpgNpcBytes, err := os.ReadFile(path)
+
+	if err != nil {
+		log.Fatal("failed reading GRPGNPC file")
+	}
+
+	buf := gbuf.NewGBuf(grpgNpcBytes)
+	header, err := grpgnpc.ReadHeader(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if header.Magic != [8]byte{'G', 'R', 'P', 'G', 'N', 'P', 'C', 0x00} {
+		log.Fatal("file does not have GRPGNPC header")
+	}
+
+	npcs, err := grpgnpc.ReadNpcs(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, npc := range npcs {
+		npcMap[npc.NpcId] = &npc
+	}
+
+	return npcMap
 }
 
 func loadTiles(path string) map[uint16]*grpgtile.Tile {

@@ -6,6 +6,7 @@ import (
 	"client/shared"
 	"client/util"
 	"flag"
+	"grpg/data-go/grpgnpc"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -20,6 +21,16 @@ var (
 		CollisionMap: make(map[util.Vector2I]struct{}),
 		ObjIdByLoc:   make(map[util.Vector2I]uint16),
 		TrackedObjs:  make(map[util.Vector2I]*shared.GameObj),
+		TrackedNpcs: map[util.Vector2I]*shared.GameNpc{
+			{1, 1}: {
+				Position: util.Vector2I{X: 1, Y: 1},
+				NpcData: &grpgnpc.Npc{
+					NpcId:     1,
+					Name:      "test",
+					TextureId: 5,
+				},
+			},
+		},
 		SceneManager: &shared.GSceneManager{},
 		Player: &shared.LocalPlayer{
 			X:         0,

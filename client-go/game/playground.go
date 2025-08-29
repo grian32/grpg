@@ -34,6 +34,7 @@ func (p *Playground) Setup() {
 	p.Game.Objs = loadObjs(assetsDirectory + "objs.grpgobj")
 	p.Game.Tiles = loadTiles(assetsDirectory + "tiles.grpgtile")
 	p.Game.Items = loadItems(assetsDirectory + "items.grpgitem")
+	p.Game.Npcs = loadNpcs(assetsDirectory + "npcs.grpgnpc")
 	p.Zones = loadMaps(assetsDirectory+"maps/", p.Game)
 
 	otherTex := loadOtherTex(assetsDirectory + "other.grpgtex")
@@ -154,11 +155,14 @@ func updateCamera(p *Playground, crossedZone bool) {
 
 func updateCurrActionString(p *Playground) {
 	facingCoord := p.Game.Player.GetFacingCoord()
-	trackedObj, exists := p.Game.TrackedObjs[facingCoord]
-	if !exists {
-		p.CurrActionString = "None :("
-	} else {
+	trackedObj, objExists := p.Game.TrackedObjs[facingCoord]
+	trackedNpc, npcExists := p.Game.TrackedNpcs[facingCoord]
+	if objExists {
 		p.CurrActionString = trackedObj.DataObj.InteractText
+	} else if npcExists {
+		p.CurrActionString = "Talk to " + trackedNpc.NpcData.Name
+	} else {
+		p.CurrActionString = "None :("
 	}
 }
 
@@ -179,12 +183,14 @@ func drawWorld(p *Playground) {
 		tex := p.Textures[texId]
 		rl.DrawTexture(tex, dx, dy, rl.White)
 
+		worldPos := util.Vector2I{
+			X: localX + (player.ChunkX * 16),
+			Y: localY + (player.ChunkY * 16),
+		}
+
 		obj := mapTiles.Objs[i]
 		if obj != 0 {
-			trackedObj, ok := p.Game.TrackedObjs[util.Vector2I{
-				X: localX + (player.ChunkX * 16),
-				Y: localY + (player.ChunkY * 16),
-			}]
+			trackedObj, ok := p.Game.TrackedObjs[worldPos]
 
 			// fallback pretty much, might not be necessary in the future
 			var state uint16 = 0
@@ -196,6 +202,12 @@ func drawWorld(p *Playground) {
 
 			objTex := p.Textures[objTexId]
 			rl.DrawTexture(objTex, dx, dy, rl.White)
+		} else {
+			trackedNpc, ok := p.Game.TrackedNpcs[worldPos]
+			if ok {
+				npcTexId := trackedNpc.NpcData.TextureId
+				rl.DrawTexture(p.Textures[npcTexId], dx, dy, rl.White)
+			}
 		}
 	}
 }
