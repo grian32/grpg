@@ -20,7 +20,7 @@ func (i *InventoryUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 
 	var firstByte, secondByte, thirdByte byte // = 0
 
-	for idx, item := range i.Player.Inventory {
+	for idx, item := range i.Player.Inventory.Items {
 		if item.Dirty {
 			packetLen += 2 + 2 // id, count
 			dirtyIndexes = append(dirtyIndexes, idx)
@@ -48,9 +48,9 @@ func (i *InventoryUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	buf.WriteByte(thirdByte)
 
 	for _, idx := range dirtyIndexes {
-		buf.WriteUint16(i.Player.Inventory[idx].ItemId)
-		buf.WriteUint16(i.Player.Inventory[idx].Count)
-		i.Player.Inventory[idx].Dirty = false
+		buf.WriteUint16(i.Player.Inventory.Items[idx].ItemId)
+		buf.WriteUint16(i.Player.Inventory.Items[idx].Count)
+		i.Player.Inventory.Items[idx].Dirty = false
 	}
 	fmt.Println(buf.Bytes())
 }

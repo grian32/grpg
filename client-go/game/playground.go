@@ -67,7 +67,6 @@ func (p *Playground) Cleanup() {
 }
 
 func (p *Playground) Loop() {
-	fmt.Println(p.Game.TrackedNpcs)
 	player := p.Game.Player
 
 	if rl.IsKeyPressed(rl.KeyW) {

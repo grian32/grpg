@@ -11,7 +11,7 @@ type Player struct {
 	// might not need these will see how design pans out
 	ChunkPos  util.Vector2I
 	Facing    Direction
-	Inventory [24]InventoryItem
+	Inventory Inventory
 	Name      string
 	Conn      net.Conn
 }
@@ -67,7 +67,7 @@ func (p *Player) SaveToDB(db *sql.DB) error {
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, EncodeInventoryToBlob(p.Inventory))
+		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, EncodeInventoryToBlob(p.Inventory.Items))
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ func (p *Player) SaveToDB(db *sql.DB) error {
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, EncodeInventoryToBlob(p.Inventory), existingId)
+		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, EncodeInventoryToBlob(p.Inventory.Items), existingId)
 		if err != nil {
 			return err
 		}

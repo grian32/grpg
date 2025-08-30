@@ -38,6 +38,8 @@ func (s *ScriptManager) AddTimedScript(tick uint32, script TimedScript) {
 func NewScriptManager() *ScriptManager {
 	return &ScriptManager{
 		InteractScripts: make(map[uint16]*ast.BlockStatement),
+		TimedScripts:    make(map[uint32][]TimedScript),
+		NpcTalkScripts:  make(map[uint16]*ast.BlockStatement),
 		Env:             object.NewEnvironment(),
 	}
 }

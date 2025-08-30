@@ -62,27 +62,7 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 				return nil
 			}
 
-			firstEmptyIdx := -1
-
-			for idx := range 24 {
-				if player.Inventory[idx].ItemId == uint16(itemId.Value) {
-					player.Inventory[idx].Count++
-					player.Inventory[idx].Dirty = true
-					network.SendPacket(player.Conn, &s2c.InventoryUpdate{Player: player}, game)
-					return nil
-				}
-
-				if player.Inventory[idx].ItemId == 0 && firstEmptyIdx == -1 {
-					firstEmptyIdx = idx
-				}
-			}
-
-			// if it finds a pre existing stack then it returns early anyway so np
-			if firstEmptyIdx != -1 {
-				player.Inventory[firstEmptyIdx].ItemId = uint16(itemId.Value)
-				player.Inventory[firstEmptyIdx].Count = 1
-				player.Inventory[firstEmptyIdx].Dirty = true
-			}
+			player.Inventory.AddItem(uint16(itemId.Value))
 
 			network.SendPacket(player.Conn, &s2c.InventoryUpdate{Player: player}, game)
 

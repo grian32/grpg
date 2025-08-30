@@ -101,8 +101,6 @@ func main() {
 		log.Fatal("Failed loading scripts: ", err)
 	}
 
-	fmt.Println(g.TrackedNpcs)
-
 	packets := make(chan ChanPacket, 1000)
 
 	go cycle(packets)
@@ -229,7 +227,7 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 		ChunkPos:  zeroPos,
 		Facing:    shared.UP,
 		Name:      string(name),
-		Inventory: [24]shared.InventoryItem{},
+		Inventory: shared.Inventory{Items: [24]shared.InventoryItem{}},
 		Conn:      conn,
 	}
 

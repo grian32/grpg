@@ -5,12 +5,41 @@ import (
 	"grpg/data-go/gbuf"
 )
 
+type Inventory struct {
+	Items [24]InventoryItem
+}
+
+func (i *Inventory) AddItem(itemId uint16) {
+	firstEmptyIdx := -1
+
+	for idx := range 24 {
+		if i.Items[idx].ItemId == uint16(itemId) {
+			i.Items[idx].Count++
+			i.Items[idx].Dirty = true
+			return
+		}
+
+		if i.Items[idx].ItemId == 0 && firstEmptyIdx == -1 {
+			firstEmptyIdx = idx
+		}
+	}
+
+	// if it finds a pre existing stack then it returns early anyway so np
+	if firstEmptyIdx != -1 {
+		i.Items[firstEmptyIdx].ItemId = uint16(itemId)
+		i.Items[firstEmptyIdx].Count = 1
+		i.Items[firstEmptyIdx].Dirty = true
+	}
+
+}
+
 type InventoryItem struct {
 	ItemId uint16
 	Count  uint16
 	Dirty  bool
 }
 
+// EncodeInventoryToBlob TODO: move this to inventory struct
 func EncodeInventoryToBlob(items [24]InventoryItem) []byte {
 	buf := gbuf.NewEmptyGBuf()
 
@@ -22,7 +51,7 @@ func EncodeInventoryToBlob(items [24]InventoryItem) []byte {
 	return buf.Bytes()
 }
 
-func DecodeInventoryFromBlob(blob []byte) ([24]InventoryItem, error) {
+func DecodeInventoryFromBlob(blob []byte) (Inventory, error) {
 	buf := gbuf.NewGBuf(blob)
 	inv := [24]InventoryItem{}
 
@@ -30,7 +59,7 @@ func DecodeInventoryFromBlob(blob []byte) ([24]InventoryItem, error) {
 		id, err1 := buf.ReadUint16()
 		count, err2 := buf.ReadUint16()
 		if err := cmp.Or(err1, err2); err != nil {
-			return [24]InventoryItem{}, err
+			return Inventory{}, err
 		}
 
 		dirty := false
@@ -45,5 +74,5 @@ func DecodeInventoryFromBlob(blob []byte) ([24]InventoryItem, error) {
 		}
 	}
 
-	return inv, nil
+	return Inventory{Items: inv}, nil
 }
