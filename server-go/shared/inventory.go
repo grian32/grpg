@@ -9,6 +9,12 @@ type Inventory struct {
 	Items [24]InventoryItem
 }
 
+type InventoryItem struct {
+	ItemId uint16
+	Count  uint16
+	Dirty  bool
+}
+
 func (i *Inventory) AddItem(itemId uint16) {
 	firstEmptyIdx := -1
 
@@ -33,19 +39,12 @@ func (i *Inventory) AddItem(itemId uint16) {
 
 }
 
-type InventoryItem struct {
-	ItemId uint16
-	Count  uint16
-	Dirty  bool
-}
-
-// EncodeInventoryToBlob TODO: move this to inventory struct
-func EncodeInventoryToBlob(items [24]InventoryItem) []byte {
+func (i *Inventory) EncodeToBlob() []byte {
 	buf := gbuf.NewEmptyGBuf()
 
 	for idx := range 24 {
-		buf.WriteUint16(items[idx].ItemId)
-		buf.WriteUint16(items[idx].Count)
+		buf.WriteUint16(i.Items[idx].ItemId)
+		buf.WriteUint16(i.Items[idx].Count)
 	}
 
 	return buf.Bytes()

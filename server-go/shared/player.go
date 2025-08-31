@@ -67,7 +67,7 @@ func (p *Player) SaveToDB(db *sql.DB) error {
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, EncodeInventoryToBlob(p.Inventory.Items))
+		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob())
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ func (p *Player) SaveToDB(db *sql.DB) error {
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, EncodeInventoryToBlob(p.Inventory.Items), existingId)
+		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), existingId)
 		if err != nil {
 			return err
 		}
