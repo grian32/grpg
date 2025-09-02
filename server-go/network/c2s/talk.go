@@ -2,7 +2,9 @@ package c2s
 
 import (
 	"cmp"
+	"fmt"
 	"grpg/data-go/gbuf"
+	"grpgscript/evaluator"
 	"grpgscript/object"
 	"log"
 	"server/scripts"
@@ -23,13 +25,54 @@ func (t *Talk) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, 
 	}
 
 	_ = util.Vector2I{X: x, Y: y}
-	_ = scriptManager.NpcTalkScripts[npcId]
+	script := scriptManager.NpcTalkScripts[npcId]
 	env := object.NewEnclosedEnvinronment(scriptManager.Env)
-	addTalkBuiltins(env)
+	addTalkBuiltins(env, player)
 
-	//evaluator.Eval(script, env)
+	evaluator.Eval(script, env)
+	fmt.Println(player.DialogueQueue)
 }
 
-func addTalkBuiltins(env *object.Environment) {
+func addTalkBuiltins(env *object.Environment, player *shared.Player) {
+	// i could probably make this cleaner by making it generic but it's only 2 functions
+	env.Set("talkPlayer", &object.Builtin{
+		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+			if len(args) != 1 {
+				log.Printf("warn: script tried to call talkPlayer with less or more than 1 arg\n")
+				return nil
+			}
+			talk, ok := args[0].(*object.String)
+			if !ok {
+				log.Printf("warn: script tried to call talkPlayer with non string argument\n")
+				return nil
+			}
 
+			player.DialogueQueue.Dialogues = append(player.DialogueQueue.Dialogues, shared.Dialogue{
+				Type:    shared.PLAYER,
+				Content: talk.Value,
+			})
+
+			return nil
+		},
+	})
+	env.Set("talkNpc", &object.Builtin{
+		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+			if len(args) != 1 {
+				log.Printf("warn: script tried to call talkNpc with less or more than 1 arg\n")
+				return nil
+			}
+			talk, ok := args[0].(*object.String)
+			if !ok {
+				log.Printf("warn: script tried to call talkNpc with non string argument\n")
+				return nil
+			}
+
+			player.DialogueQueue.Dialogues = append(player.DialogueQueue.Dialogues, shared.Dialogue{
+				Type:    shared.NPC,
+				Content: talk.Value,
+			})
+
+			return nil
+		},
+	})
 }

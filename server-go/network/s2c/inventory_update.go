@@ -1,7 +1,6 @@
 package s2c
 
 import (
-	"fmt"
 	"grpg/data-go/gbuf"
 	"server/shared"
 )
@@ -52,5 +51,4 @@ func (i *InventoryUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		buf.WriteUint16(i.Player.Inventory.Items[idx].Count)
 		i.Player.Inventory.Items[idx].Dirty = false
 	}
-	fmt.Println(buf.Bytes())
 }

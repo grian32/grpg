@@ -20,10 +20,12 @@ var (
 	LoginData    = PacketData{Opcode: 0x01, Length: -1, Handler: nil}
 	MoveData     = PacketData{Opcode: 0x02, Length: 9, Handler: &Move{}}
 	InteractData = PacketData{Opcode: 0x03, Length: 10, Handler: &Interact{}}
+	TalkData     = PacketData{Opcode: 0x04, Length: 10, Handler: &Talk{}}
 )
 
 var Packets = map[byte]PacketData{
 	0x01: LoginData,
 	0x02: MoveData,
 	0x03: InteractData,
+	0x04: TalkData,
 }

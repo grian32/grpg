@@ -53,17 +53,27 @@ func (lp *LocalPlayer) SendMovePacket(game *Game, x, y int32, facing Direction) 
 // SendInteractPacket TODO: maybe bad place for this?
 func (lp *LocalPlayer) SendInteractPacket(game *Game) {
 	facing := lp.GetFacingCoord()
-	objId, ok := game.ObjIdByLoc[util.Vector2I{X: facing.X, Y: facing.Y}]
-	if !ok {
-		fmt.Printf("warn: interact packet tried to find obj id that does not exist @ %d, %d\n", facing.X, facing.Y)
+	pos := util.Vector2I{X: facing.X, Y: facing.Y}
+
+	if objId, ok := game.ObjIdByLoc[pos]; ok {
+		SendPacket(game.Conn, &c2s.InteractPacket{
+			ObjId: objId,
+			X:     uint32(facing.X),
+			Y:     uint32(facing.Y),
+		})
 		return
 	}
 
-	SendPacket(game.Conn, &c2s.InteractPacket{
-		ObjId: objId,
-		X:     uint32(facing.X),
-		Y:     uint32(facing.Y),
-	})
+	if npc, ok := game.TrackedNpcs[pos]; ok {
+		SendPacket(game.Conn, &c2s.TalkPacket{
+			NpcId: npc.NpcData.NpcId,
+			X:     uint32(npc.Position.X),
+			Y:     uint32(npc.Position.Y),
+		})
+		return
+	}
+
+	fmt.Printf("warn: interact/talk packet tried to find obj/npc that does not exist @ %d, %d\n", facing.X, facing.Y)
 }
 
 func (lp *LocalPlayer) GetFacingCoord() util.Vector2I {
