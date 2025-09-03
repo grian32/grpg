@@ -5,7 +5,6 @@ import (
 	"cmp"
 	"database/sql"
 	"encoding/binary"
-	"fmt"
 	"grpg/data-go/gbuf"
 	"grpgscript/evaluator"
 	"io"
@@ -137,7 +136,6 @@ func cycle(packets chan ChanPacket) {
 
 		timed, ok := scriptManager.TimedScripts[g.CurrentTick]
 		if ok {
-			fmt.Printf("running timed scripts for %d\n", g.CurrentTick)
 			for _, script := range timed {
 				evaluator.Eval(script.Script, script.Env)
 			}
@@ -236,7 +234,7 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 
 	err := player.LoadFromDB(game.Database)
 	if err != nil {
-		fmt.Printf("failed to load existing player from db, sending login rejected, err: %v\n", err)
+		log.Printf("failed to load existing player from db, sending login rejected, err: %v\n", err)
 		network.SendPacket(conn, &s2c.LoginRejected{}, game)
 		return
 	}

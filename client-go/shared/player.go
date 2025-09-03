@@ -4,6 +4,7 @@ import (
 	"client/network/c2s"
 	"client/util"
 	"fmt"
+	"log"
 )
 
 type LocalPlayer struct {
@@ -73,7 +74,7 @@ func (lp *LocalPlayer) SendInteractPacket(game *Game) {
 		return
 	}
 
-	fmt.Printf("warn: interact/talk packet tried to find obj/npc that does not exist @ %d, %d\n", facing.X, facing.Y)
+	log.Printf("warn: interact/talk packet tried to find obj/npc that does not exist @ %d, %d\n", facing.X, facing.Y)
 }
 
 func (lp *LocalPlayer) GetFacingCoord() util.Vector2I {

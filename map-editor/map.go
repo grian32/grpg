@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgmap"
+	"log"
 	"os"
 
 	"github.com/sqweek/dialog"
@@ -95,7 +95,7 @@ func LoadMap() {
 	buf := gbuf.NewGBuf(fileBytes)
 	header, err := grpgmap.ReadHeader(buf)
 	if err != nil {
-		fmt.Println("reading grpgmap header errored: %w. file: %s", err, fileToLoad)
+		log.Printf("reading grpgmap header errored: %w. file: %s\n", err, fileToLoad)
 		return
 	}
 
@@ -109,7 +109,7 @@ func LoadMap() {
 
 	zone, err := grpgmap.ReadZone(buf)
 	if err != nil {
-		fmt.Println("reading grpgmap tiles errored: %w. file: %s", err, fileToLoad)
+		log.Printf("reading grpgmap tiles errored: %w. file: %s", err, fileToLoad)
 		return
 	}
 

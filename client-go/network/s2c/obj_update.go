@@ -4,8 +4,8 @@ import (
 	"client/shared"
 	"client/util"
 	"cmp"
-	"fmt"
 	"grpg/data-go/gbuf"
+	"log"
 )
 
 type ObjUpdate struct {
@@ -14,11 +14,11 @@ type ObjUpdate struct {
 func (o *ObjUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	rebuild, err := buf.ReadBool()
 	if err != nil {
-		fmt.Printf("failed to read rebuild bool in obj update: %v\n", err)
+		log.Printf("failed to read rebuild bool in obj update: %v\n", err)
 	}
 	objLen, err := buf.ReadUint16()
 	if err != nil {
-		fmt.Printf("failed to read uint16 len in obj update: %v\n", err)
+		log.Printf("failed to read uint16 len in obj update: %v\n", err)
 		return
 	}
 
@@ -31,7 +31,7 @@ func (o *ObjUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 			objId, err3 := buf.ReadUint16()
 			state, err4 := buf.ReadByte()
 			if err := cmp.Or(err1, err2, err3, err4); err != nil {
-				fmt.Printf("failed to read obj in obj update: %v", err)
+				log.Printf("failed to read obj in obj update: %v", err)
 				return
 			}
 
@@ -51,7 +51,7 @@ func (o *ObjUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 			state, err3 := buf.ReadByte()
 
 			if err := cmp.Or(err1, err2, err3); err != nil {
-				fmt.Printf("failed to read obj in obj update: %v", err)
+				log.Printf("failed to read obj in obj update: %v", err)
 				return
 			}
 
@@ -62,7 +62,7 @@ func (o *ObjUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 
 			obj, ok := game.TrackedObjs[pos]
 			if !ok {
-				fmt.Printf("tried to modify obj on rebuild that did not exist in tracked objs")
+				log.Printf("tried to modify obj on rebuild that did not exist in tracked objs")
 				return
 			}
 			obj.State = state

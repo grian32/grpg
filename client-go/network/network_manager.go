@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"client/network/s2c"
 	"encoding/binary"
-	"fmt"
 	"grpg/data-go/gbuf"
 	"io"
 	"log"
@@ -32,7 +31,7 @@ func ReadServerPackets(conn net.Conn, packetChan chan<- ChanPacket) {
 	for {
 		opcode, err := reader.ReadByte()
 		if err != nil {
-			fmt.Println("Error reading packet opcode, conn lost.")
+			log.Println("error reading packet opcode, conn lost")
 			return
 		}
 

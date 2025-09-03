@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgtex"
 	"grpg/data-go/grpgtile"
@@ -36,20 +35,20 @@ func LoadTextures() {
 
 	header, err := grpgtex.ReadHeader(buf)
 	if err != nil {
-		fmt.Printf("reading grpgtex header errored: %w.\n", err)
+		log.Printf("reading grpgtex header errored: %v.\n", err)
 		return
 	}
 	correctMagic := "GRPGTEX\x00"
 
 	// move this to some notification system or something
 	if string(header.Magic[:]) != correctMagic {
-		fmt.Println("File entered for texture loading has the wrong magic header.")
+		log.Println("file entered for texture loading has the wrong magic header")
 		return
 	}
 
 	grpgTextures, err := grpgtex.ReadTextures(buf)
 	if err != nil {
-		fmt.Printf("reading grpgtex textures errored: %w. file: %s\n", err)
+		log.Printf("reading grpgtex textures errored: %v", err)
 		return
 	}
 
@@ -74,18 +73,18 @@ func LoadTiles() {
 
 	header, err := grpgtile.ReadHeader(buf)
 	if err != nil {
-		fmt.Println("error reading grpgtile header\n")
+		log.Println("error reading grpgtile header")
 		return
 	}
 
 	if header.Magic != [8]byte{'G', 'R', 'P', 'G', 'T', 'I', 'L', 'E'} {
-		fmt.Println("magic header for file isn't GRPGTILE")
+		log.Println("magic header for file isn't GRPGTILE")
 		return
 	}
 
 	grpgTiles, err := grpgtile.ReadTiles(buf)
 	if err != nil {
-		fmt.Printf("error reading tiles %w\n", err)
+		log.Printf("error reading tiles %v\n", err)
 	}
 
 	for _, tile := range grpgTiles {
@@ -104,19 +103,19 @@ func LoadObjs() {
 
 	header, err := grpgobj.ReadHeader(buf)
 	if err != nil {
-		fmt.Println("error reading grpgobj header\n")
+		log.Printf("error reading grpgobj header\n")
 		return
 	}
 
 	correctMagic := "GRPGOBJ\x00"
 	if string(header.Magic[:]) != correctMagic {
-		fmt.Println("magic header for file isn't GRPGOBJ")
+		log.Println("magic header for file isn't GRPGOBJ")
 		return
 	}
 
 	grpgObjs, err := grpgobj.ReadObjs(buf)
 	if err != nil {
-		fmt.Printf("error reading objs %w\n", err)
+		log.Printf("error reading objs %v\n", err)
 	}
 
 	for _, obj := range grpgObjs {

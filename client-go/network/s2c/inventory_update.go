@@ -3,8 +3,8 @@ package s2c
 import (
 	"client/shared"
 	"cmp"
-	"fmt"
 	"grpg/data-go/gbuf"
+	"log"
 )
 
 type InventoryUpdate struct{}
@@ -20,7 +20,7 @@ func (i *InventoryUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	}
 
 	if err := cmp.Or(err1, err2, err3); err != nil {
-		fmt.Printf("failed to read mask bytes in inv update: %v", err)
+		log.Printf("failed to read mask bytes in inv update: %v", err)
 		return
 	}
 
@@ -42,7 +42,7 @@ func (i *InventoryUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 			item, err1 := buf.ReadUint16()
 			count, err2 := buf.ReadUint16()
 			if err := cmp.Or(err1, err2); err != nil {
-				fmt.Printf("failed to read item & count in inv update: %v", err)
+				log.Printf("failed to read item & count in inv update: %v", err)
 				return
 			}
 

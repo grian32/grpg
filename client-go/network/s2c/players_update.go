@@ -3,8 +3,8 @@ package s2c
 import (
 	"client/shared"
 	"cmp"
-	"fmt"
 	"grpg/data-go/gbuf"
+	"log"
 )
 
 type PlayersUpdate struct{}
@@ -13,7 +13,7 @@ func (p PlayersUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	playersLen, err := buf.ReadUint16()
 
 	if err != nil {
-		fmt.Printf("Failed to read players update\n")
+		log.Printf("Failed to read players update\n")
 		return
 	}
 
@@ -26,7 +26,7 @@ func (p PlayersUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		facing, err4 := buf.ReadByte()
 
 		if err := cmp.Or(err1, err2, err3, err4); err != nil {
-			fmt.Printf("Failed to read player struct %v\n", err)
+			log.Printf("Failed to read player struct %v\n", err)
 			return
 		}
 

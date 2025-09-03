@@ -44,6 +44,4 @@ func EnableEraser() {
 	typeSelected = UNDEFINED
 	currentlySelected = ""
 	currentlySelectedTexId = -1
-	fmt.Printf("%v", objs)
-	fmt.Printf("%v", tiles)
 }
