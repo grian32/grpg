@@ -75,4 +75,25 @@ func addTalkBuiltins(env *object.Environment, player *shared.Player) {
 			return nil
 		},
 	})
+	env.Set("clearDialogueQueue", &object.Builtin{
+		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+			if len(args) != 0 {
+				log.Printf("warn: script tried to call clearDialogueQueue with non zero args\n")
+			}
+
+			player.DialogueQueue.Clear()
+			return nil
+		},
+	})
+	env.Set("startDialogue", &object.Builtin{
+		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+			if len(args) != 0 {
+				log.Printf("warn: script tried to call startDialogue with non zero args\n")
+			}
+
+			// TODO: send first talk packet
+
+			return nil
+		},
+	})
 }
