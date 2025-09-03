@@ -1,6 +1,7 @@
 package game
 
 import (
+	"client/network/c2s"
 	"client/shared"
 	"client/util"
 	"fmt"
@@ -79,6 +80,8 @@ func (p *Playground) Loop() {
 		player.SendMovePacket(p.Game, player.X+1, player.Y, shared.RIGHT)
 	} else if rl.IsKeyPressed(rl.KeyQ) {
 		player.SendInteractPacket(p.Game)
+	} else if p.Game.Talkbox.Active && rl.IsKeyPressed(rl.KeySpace) {
+		shared.SendPacket(p.Game.Conn, &c2s.Continue{})
 	}
 
 	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
@@ -271,11 +274,11 @@ func drawGameFrame(p *Playground) {
 	talkbox := p.Game.Talkbox
 	// x is offset from 0, y has offset added, to be placed in the right spot
 	rl.DrawTextEx(p.Font, "Current Action: "+p.CurrActionString, rl.Vector2{X: 110, Y: 768 + 28 + 3}, 20, 0, rl.White)
-	if talkbox.CurrentName != "" {
+	if talkbox.Active {
 		rl.DrawTextEx(p.Font, talkbox.CurrentName, rl.Vector2{X: 110 + 332, Y: 768 + 28 + 3}, 24, 0, rl.White)
-	}
-	if talkbox.CurrentMessage != "" {
-		// TODO
+		rl.DrawTextEx(p.Font, talkbox.CurrentMessage, rl.Vector2{X: 90, Y: 840}, 20, 0, rl.White)
+		// TODO: draw PRESS [SPACE] TO CONTINUE
+		// TODO: wrap msg text
 	}
 
 	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())

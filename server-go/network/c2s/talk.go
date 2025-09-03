@@ -7,6 +7,8 @@ import (
 	"grpgscript/evaluator"
 	"grpgscript/object"
 	"log"
+	"server/network"
+	"server/network/s2c"
 	"server/scripts"
 	"server/shared"
 	"server/util"
@@ -27,13 +29,13 @@ func (t *Talk) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, 
 	_ = util.Vector2I{X: x, Y: y}
 	script := scriptManager.NpcTalkScripts[npcId]
 	env := object.NewEnclosedEnvinronment(scriptManager.Env)
-	addTalkBuiltins(env, player)
+	addTalkBuiltins(env, player, game)
 
 	evaluator.Eval(script, env)
 	fmt.Println(player.DialogueQueue)
 }
 
-func addTalkBuiltins(env *object.Environment, player *shared.Player) {
+func addTalkBuiltins(env *object.Environment, player *shared.Player, game *shared.Game) {
 	// i could probably make this cleaner by making it generic but it's only 2 functions
 	env.Set("talkPlayer", &object.Builtin{
 		Fn: func(env *object.Environment, args ...object.Object) object.Object {
@@ -51,6 +53,7 @@ func addTalkBuiltins(env *object.Environment, player *shared.Player) {
 				Type:    shared.PLAYER,
 				Content: talk.Value,
 			})
+			player.DialogueQueue.MaxIndex++
 
 			return nil
 		},
@@ -71,6 +74,7 @@ func addTalkBuiltins(env *object.Environment, player *shared.Player) {
 				Type:    shared.NPC,
 				Content: talk.Value,
 			})
+			player.DialogueQueue.MaxIndex++
 
 			return nil
 		},
@@ -82,6 +86,7 @@ func addTalkBuiltins(env *object.Environment, player *shared.Player) {
 			}
 
 			player.DialogueQueue.Clear()
+			SendDialoguePacket(player, game)
 			return nil
 		},
 	})
@@ -91,9 +96,35 @@ func addTalkBuiltins(env *object.Environment, player *shared.Player) {
 				log.Printf("warn: script tried to call startDialogue with non zero args\n")
 			}
 
-			// TODO: send first talk packet
+			SendDialoguePacket(player, game)
 
 			return nil
 		},
 	})
+}
+
+func SendDialoguePacket(player *shared.Player, game *shared.Game) {
+	if player.DialogueQueue.Index >= player.DialogueQueue.MaxIndex {
+		network.SendPacket(player.Conn, &s2c.Talkbox{
+			Type: s2c.CLEAR,
+			Msg:  "",
+		}, game)
+		return
+	}
+
+	pktType := dqTypeToPacketType(player.DialogueQueue.Dialogues[player.DialogueQueue.Index].Type)
+
+	network.SendPacket(player.Conn, &s2c.Talkbox{
+		Type: pktType,
+		Msg:  player.DialogueQueue.Dialogues[player.DialogueQueue.Index].Content,
+	}, game)
+	player.DialogueQueue.Index++
+}
+
+func dqTypeToPacketType(t shared.DialogueType) s2c.TalkboxType {
+	if t == shared.NPC {
+		return s2c.NPC
+	}
+
+	return s2c.PLAYER
 }
