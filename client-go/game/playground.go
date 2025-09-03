@@ -276,9 +276,7 @@ func drawGameFrame(p *Playground) {
 	rl.DrawTextEx(p.Font, "Current Action: "+p.CurrActionString, rl.Vector2{X: 110, Y: 768 + 28 + 3}, 20, 0, rl.White)
 	if talkbox.Active {
 		rl.DrawTextEx(p.Font, talkbox.CurrentName, rl.Vector2{X: 110 + 332, Y: 768 + 28 + 3}, 24, 0, rl.White)
-		rl.DrawTextEx(p.Font, talkbox.CurrentMessage, rl.Vector2{X: 90, Y: 840}, 20, 0, rl.White)
-		// TODO: draw PRESS [SPACE] TO CONTINUE
-		// TODO: wrap msg text
+		rl.DrawTextEx(p.Font, talkbox.CurrentMessage, rl.Vector2{X: 90, Y: 840}, 24, 0, rl.White)
 	}
 
 	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
