@@ -2,7 +2,6 @@ package c2s
 
 import (
 	"cmp"
-	"fmt"
 	"grpg/data-go/gbuf"
 	"grpgscript/evaluator"
 	"grpgscript/object"
@@ -11,31 +10,28 @@ import (
 	"server/network/s2c"
 	"server/scripts"
 	"server/shared"
-	"server/util"
 )
 
 type Talk struct{}
 
 func (t *Talk) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, scriptManager *scripts.ScriptManager) {
 	npcId, err1 := buf.ReadUint16()
-	x, err2 := buf.ReadUint32()
-	y, err3 := buf.ReadUint32()
+	_, err2 := buf.ReadUint32()
+	_, err3 := buf.ReadUint32()
 
 	if err := cmp.Or(err1, err2, err3); err != nil {
 		log.Printf("failed reading npc in talk packet")
 		return
 	}
 
-	_ = util.Vector2I{X: x, Y: y}
 	script := scriptManager.NpcTalkScripts[npcId]
 	env := object.NewEnclosedEnvinronment(scriptManager.Env)
-	addTalkBuiltins(env, player, game)
+	addTalkBuiltins(env, player, game, npcId)
 
 	evaluator.Eval(script, env)
-	fmt.Println(player.DialogueQueue)
 }
 
-func addTalkBuiltins(env *object.Environment, player *shared.Player, game *shared.Game) {
+func addTalkBuiltins(env *object.Environment, player *shared.Player, game *shared.Game, npcId uint16) {
 	// i could probably make this cleaner by making it generic but it's only 2 functions
 	env.Set("talkPlayer", &object.Builtin{
 		Fn: func(env *object.Environment, args ...object.Object) object.Object {
@@ -75,6 +71,9 @@ func addTalkBuiltins(env *object.Environment, player *shared.Player, game *share
 				Content: talk.Value,
 			})
 			player.DialogueQueue.MaxIndex++
+			// not sure this is the best way to do it, but i don't wanna do it as part of the packet handling
+			// maybe a function to set active npc? not sure.
+			player.DialogueQueue.ActiveNpcId = npcId
 
 			return nil
 		},
@@ -86,7 +85,7 @@ func addTalkBuiltins(env *object.Environment, player *shared.Player, game *share
 			}
 
 			player.DialogueQueue.Clear()
-			SendDialoguePacket(player, game)
+			SendDialoguePacket(player, game, npcId)
 			return nil
 		},
 	})
@@ -96,14 +95,14 @@ func addTalkBuiltins(env *object.Environment, player *shared.Player, game *share
 				log.Printf("warn: script tried to call startDialogue with non zero args\n")
 			}
 
-			SendDialoguePacket(player, game)
+			SendDialoguePacket(player, game, npcId)
 
 			return nil
 		},
 	})
 }
 
-func SendDialoguePacket(player *shared.Player, game *shared.Game) {
+func SendDialoguePacket(player *shared.Player, game *shared.Game, npcId uint16) {
 	if player.DialogueQueue.Index >= player.DialogueQueue.MaxIndex {
 		network.SendPacket(player.Conn, &s2c.Talkbox{
 			Type: s2c.CLEAR,
@@ -115,8 +114,9 @@ func SendDialoguePacket(player *shared.Player, game *shared.Game) {
 	pktType := dqTypeToPacketType(player.DialogueQueue.Dialogues[player.DialogueQueue.Index].Type)
 
 	network.SendPacket(player.Conn, &s2c.Talkbox{
-		Type: pktType,
-		Msg:  player.DialogueQueue.Dialogues[player.DialogueQueue.Index].Content,
+		Type:  pktType,
+		NpcId: npcId,
+		Msg:   player.DialogueQueue.Dialogues[player.DialogueQueue.Index].Content,
 	}, game)
 	player.DialogueQueue.Index++
 }

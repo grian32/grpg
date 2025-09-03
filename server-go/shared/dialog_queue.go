@@ -12,13 +12,15 @@ type Dialogue struct {
 	Content string
 }
 type DialogueQueue struct {
-	Index     uint16
-	MaxIndex  uint16
-	Dialogues []Dialogue
+	Index       uint16
+	MaxIndex    uint16
+	ActiveNpcId uint16
+	Dialogues   []Dialogue
 }
 
 func (dq *DialogueQueue) Clear() {
 	dq.Index = 0
 	dq.MaxIndex = 0
+	dq.ActiveNpcId = 0
 	dq.Dialogues = []Dialogue{}
 }

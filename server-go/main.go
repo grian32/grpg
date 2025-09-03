@@ -229,7 +229,6 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 		Name:      string(name),
 		Inventory: shared.Inventory{Items: [24]shared.InventoryItem{}},
 		DialogueQueue: shared.DialogueQueue{
-			Index:     0,
 			Dialogues: []shared.Dialogue{},
 		},
 		Conn: conn,
