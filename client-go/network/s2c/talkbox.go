@@ -25,28 +25,33 @@ func (t *Talkbox) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	}
 	tbType := TalkboxType(tType)
 
-	if tbType == PLAYER {
+	var msg, name string
+
+	switch tbType {
+	case PLAYER:
 		content, err := buf.ReadString()
 		if err != nil {
 			log.Printf("couldn't read talkbox packet: %v\n", err)
 		}
-		game.Talkbox.CurrentMessage = content
-		game.Talkbox.CurrentName = game.Player.Name
-		game.Talkbox.Active = true
-	} else if tbType == NPC {
+		msg = content
+		name = game.Player.Name
+	case NPC:
 		npcId, err1 := buf.ReadUint16()
 		content, err2 := buf.ReadString()
 
 		if err := cmp.Or(err1, err2); err != nil {
 			log.Printf("couldn't read talkbox packet: %v\n", err)
 		}
-
-		game.Talkbox.CurrentName = game.Npcs[npcId].Name
-		game.Talkbox.CurrentMessage = content
-		game.Talkbox.Active = true
-	} else {
+		msg = content
+		name = game.Npcs[npcId].Name
+	case CLEAR:
 		game.Talkbox.CurrentName = ""
 		game.Talkbox.CurrentMessage = ""
 		game.Talkbox.Active = false
+		return
 	}
+
+	game.Talkbox.CurrentName = name
+	game.Talkbox.CurrentMessage = msg
+	game.Talkbox.Active = true
 }
