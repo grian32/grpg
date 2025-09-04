@@ -40,6 +40,11 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 	})
 	env.Set("setObjState", &object.Builtin{
 		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+			if len(args) != 1 {
+				log.Printf("warn: script tries to call setObjState in onInteract ctx with non-1 arguments")
+				return nil
+			}
+
 			newState, ok := args[0].(*object.Integer)
 			if !ok {
 				log.Printf("warn: script tries to call setObjState in onInteract ctx without int arg")
@@ -56,6 +61,11 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 	})
 	env.Set("playerInvAdd", &object.Builtin{
 		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+			if len(args) != 1 {
+				log.Printf("warn: script tries to call playerInvAdd in onInteract ctx with non-1 arguments")
+				return nil
+			}
+
 			itemId, ok := args[0].(*object.Integer)
 			if !ok {
 				log.Printf("warn: scriped tries to call playerInvAdd in onInteract ctx without int arg")
@@ -71,6 +81,11 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 	})
 	env.Set("timer", &object.Builtin{
 		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+			if len(args) != 2 {
+				log.Printf("warn: script tries to call timer in onInteract ctx with non-2 arguments")
+				return nil
+			}
+
 			tickCount, ok := args[0].(*object.Integer)
 			if !ok {
 				log.Printf("warn: script tries to call timer in onInteract ctx without int arg")
