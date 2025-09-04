@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net"
 	"server/util"
+	"sync"
 )
 
 type Game struct {
@@ -14,6 +15,7 @@ type Game struct {
 	Database     *sql.DB
 	TrackedObjs  map[util.Vector2I]*GameObj
 	TrackedNpcs  map[util.Vector2I]*GameNpc
+	Mu           sync.RWMutex
 	CollisionMap map[util.Vector2I]struct{}
 	CurrentTick  uint32
 }

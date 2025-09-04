@@ -16,6 +16,7 @@ import (
 	"server/scripts"
 	"server/shared"
 	"server/util"
+	"sync"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -30,6 +31,7 @@ var (
 		Connections: make(map[net.Conn]*shared.Player),
 		TrackedObjs: make(map[util.Vector2I]*shared.GameObj),
 		TrackedNpcs: make(map[util.Vector2I]*shared.GameNpc),
+		Mu:          sync.RWMutex{},
 		MaxX:        0,
 		MaxY:        0,
 		CurrentTick: 0,
@@ -162,13 +164,17 @@ func handleClient(conn net.Conn, game *shared.Game, packets chan ChanPacket) {
 		if err != nil {
 			log.Printf("Failed to read packet opcode: %v, Conn lost.\n", err)
 
+			game.Mu.RLock()
 			player, exists := game.Connections[conn]
+			game.Mu.RUnlock()
 
 			if !exists {
 				log.Printf("Couldn't find player to remove after losing connection.")
 			} else {
 				player.SaveToDB(game.Database)
+				game.Mu.Lock()
 				delete(game.Players, player)
+				game.Mu.Unlock()
 				network.UpdatePlayersByChunk(player.ChunkPos, game, &s2c.PlayersUpdate{ChunkPos: player.ChunkPos})
 			}
 
@@ -190,9 +196,13 @@ func handleClient(conn net.Conn, game *shared.Game, packets chan ChanPacket) {
 			return
 		}
 
+		game.Mu.RLock()
+		player := game.Connections[conn]
+		game.Mu.RUnlock()
+
 		packets <- ChanPacket{
 			Bytes:      bytes,
-			Player:     game.Connections[conn],
+			Player:     player,
 			PacketData: packetData,
 		}
 	}
@@ -239,8 +249,10 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 		return
 	}
 
+	game.Mu.Lock()
 	game.Players[player] = struct{}{}
 	game.Connections[conn] = player
+	game.Mu.Unlock()
 
 	network.SendPacket(conn, &s2c.LoginAccepted{}, game)
 	network.UpdatePlayersByChunk(player.ChunkPos, game, &s2c.PlayersUpdate{ChunkPos: player.ChunkPos})
