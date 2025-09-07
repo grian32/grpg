@@ -13,6 +13,8 @@ type LocalPlayer struct {
 	RealX, RealY   int32
 	ChunkX, ChunkY int32
 	Facing         Direction
+	CurrFrame      uint8
+	FrameCounter   float64
 	Inventory      [24]InventoryItem
 	Name           string
 }
@@ -104,13 +106,22 @@ func (lp *LocalPlayer) Update(game *Game, crossedZone bool) {
 
 		lp.PrevX = lp.X
 		lp.PrevY = lp.Y
+
+		lp.CurrFrame = 0
+		lp.FrameCounter = 0
 		return
 	}
 
 	if crossedZone {
 		lp.RealX = targetX
 		lp.RealY = targetY
+
+		lp.CurrFrame = 0
+		lp.FrameCounter = 0
 	} else if lp.RealX != targetX || lp.RealY != targetY {
+		lp.FrameCounter++
+		lp.CurrFrame = uint8(lp.FrameCounter/4) % 4
+
 		if lp.RealX < targetX {
 			lp.RealX += speed
 		} else if lp.RealX > targetX {
@@ -133,6 +144,8 @@ type RemotePlayer struct {
 	PrevX, PrevY int32
 	RealX, RealY int32
 	Facing       Direction
+	CurrFrame    uint8
+	FrameCounter uint64
 	Name         string
 }
 
@@ -162,12 +175,18 @@ func (rp *RemotePlayer) Update(game *Game) {
 
 		rp.PrevX = rp.X
 		rp.PrevY = rp.Y
+
+		rp.CurrFrame = 0
+		rp.FrameCounter = 0
 		return
 	}
 
 	const speed = 16.0
 
 	if rp.RealX != targetX || rp.RealY != targetY {
+		rp.FrameCounter++
+		rp.CurrFrame = uint8(rp.FrameCounter/4) % 4
+
 		if rp.RealX < targetX {
 			rp.RealX += speed
 		} else if rp.RealX > targetX {
@@ -179,6 +198,7 @@ func (rp *RemotePlayer) Update(game *Game) {
 		} else if rp.RealY > targetY {
 			rp.RealY -= speed
 		}
+		rp.CurrFrame++
 	}
 
 	rp.PrevX = rp.X
