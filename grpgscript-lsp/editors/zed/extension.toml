@@ -1,0 +1,11 @@
+id = "grpgscriptlsp-zed"
+name = "grpgscriptlsp"
+version = "0.0.1"
+schema_version = 1
+authors = ["Grian Grian <grianguy32@gmail.com>"]
+description = "Provides the GRPGScript LSP in Zed."
+repository = "https://github.com/grian32/grpg/"
+
+[language_servers.grpgscriptlsp]
+name = "grpgscriptlsp"
+languages = ["grpgscript"]

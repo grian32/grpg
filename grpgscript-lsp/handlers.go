@@ -25,6 +25,10 @@ func (h Handler) Initialize(ctx context.Context, params *protocol.InitializePara
 		Type:    protocol.MessageTypeInfo,
 		Message: "GRPGScript LSP Initialized",
 	})
+	_ = h.Client.ShowMessage(ctx, &protocol.ShowMessageParams{
+		Type:    protocol.MessageTypeInfo,
+		Message: "GRPGScript LSP Initialized",
+	})
 
 	return &protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{},
