@@ -88,8 +88,8 @@ func (s *ScriptManager) LoadScripts(path string, game *shared.Game, npcs map[uin
 
 			if len(p.Errors()) != 0 {
 				log.Printf("Found errors parsing script: %s\n", fullPath)
-				for _, msg := range p.Errors() {
-					log.Println(msg)
+				for _, err := range p.Errors() {
+					log.Println(err.String())
 				}
 				return errors.New("errors parsing scripts")
 			}

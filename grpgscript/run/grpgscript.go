@@ -40,8 +40,8 @@ func Run(str string) {
 	}
 }
 
-func PrintParserErrors(out io.Writer, errors []string) {
-	for _, msg := range errors {
-		io.WriteString(out, "\t"+msg+"\n")
+func PrintParserErrors(out io.Writer, errors []parser.ParserError) {
+	for _, err := range errors {
+		io.WriteString(out, "\t"+err.String()+"\n")
 	}
 }

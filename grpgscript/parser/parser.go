@@ -38,10 +38,21 @@ type (
 	infixParseFn  func(ast.Expression) ast.Expression
 )
 
+type ParserError struct {
+	Msg  string
+	Line uint64
+	Col  uint64
+	End  uint64
+}
+
+func (pe *ParserError) String() string {
+	return fmt.Sprintf("line %d, col %d, end %d: %s", pe.Line, pe.Col, pe.End, pe.Msg)
+}
+
 type Parser struct {
 	l *lexer.Lexer
 
-	errors []string
+	errors []ParserError
 
 	curToken  token.Token
 	peekToken token.Token
@@ -51,7 +62,7 @@ type Parser struct {
 }
 
 func New(l *lexer.Lexer) *Parser {
-	p := &Parser{l: l, errors: []string{}}
+	p := &Parser{l: l, errors: []ParserError{}}
 
 	p.NextToken()
 	p.NextToken()
@@ -85,13 +96,18 @@ func New(l *lexer.Lexer) *Parser {
 	return p
 }
 
-func (p *Parser) Errors() []string {
+func (p *Parser) Errors() []ParserError {
 	return p.errors
 }
 
-func (p *Parser) noPrefixParseFnError(t token.TokenType) {
-	msg := fmt.Sprintf("no prefix parse function for %s found", t)
-	p.errors = append(p.errors, msg)
+func (p *Parser) noPrefixParseFnError(t token.Token) {
+	msg := fmt.Sprintf("no prefix parse function for %s found", t.Type)
+	p.errors = append(p.errors, ParserError{
+		Msg:  msg,
+		Line: t.Line,
+		Col:  t.Col,
+		End:  t.End,
+	})
 }
 
 func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
@@ -194,7 +210,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 func (p *Parser) parseExpression(precendence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
-		p.noPrefixParseFnError(p.curToken.Type)
+		p.noPrefixParseFnError(p.curToken)
 		return nil
 	}
 	leftExp := prefix()
@@ -219,7 +235,12 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
-		p.errors = append(p.errors, msg)
+		p.errors = append(p.errors, ParserError{
+			Msg:  msg,
+			Line: p.curToken.Line,
+			Col:  p.curToken.Col,
+			End:  p.curToken.End,
+		})
 		return nil
 	}
 
@@ -472,7 +493,12 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 
 func (p *Parser) peekError(t token.TokenType) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type)
-	p.errors = append(p.errors, msg)
+	p.errors = append(p.errors, ParserError{
+		Msg:  msg,
+		Line: p.peekToken.Line,
+		Col:  p.peekToken.Col,
+		End:  p.peekToken.End,
+	})
 }
 
 func (p *Parser) curTokenIs(t token.TokenType) bool {
