@@ -5,6 +5,9 @@ type TokenType string
 type Token struct {
 	Type    TokenType
 	Literal string
+	Line    uint64
+	Col     uint64
+	End     uint64
 }
 
 // TODO: convert to byte, but i'm just following along with the book now

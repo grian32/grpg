@@ -9,7 +9,11 @@ type Lexer struct {
 	input        string
 	position     int
 	readPosition int
-	ch           byte
+	currLine     int
+	// this is literally just == position/readPosition but resets on newline
+	currCol int
+	readCol int
+	ch      byte
 }
 
 var singleCharTokens = map[byte]token.TokenType{
@@ -36,7 +40,9 @@ func (l *Lexer) readChar() {
 	}
 
 	l.position = l.readPosition
+	l.currCol = l.readCol
 	l.readPosition += 1
+	l.readCol += 1
 }
 
 func (l *Lexer) peekChar() byte {
@@ -54,7 +60,7 @@ func (l *Lexer) NextToken() token.Token {
 
 	singleCharToken, exists := singleCharTokens[l.ch]
 	if exists {
-		tok = newToken(singleCharToken, l.ch)
+		tok = newToken(singleCharToken, l.ch, l.currLine, l.currCol, l.readCol)
 		// need to advance to the next char over, this behaviour is replicated below before returning.
 		// not necessary for ints/literals as those advance before returning on readint/literal
 		l.readChar()
@@ -65,40 +71,52 @@ func (l *Lexer) NextToken() token.Token {
 	case '=':
 		tok = l.ifNextIsDoubleLen('=', token.EQ, token.ASSIGN)
 	case '+':
-		tok = newToken(token.PLUS, l.ch)
+		tok = newToken(token.PLUS, l.ch, l.currLine, l.currCol, l.readCol)
 	case '-':
-		tok = newToken(token.MINUS, l.ch)
+		tok = newToken(token.MINUS, l.ch, l.currLine, l.currCol, l.readCol)
 	case '!':
 		tok = l.ifNextIsDoubleLen('=', token.NOT_EQ, token.BANG)
 	case '/':
-		tok = newToken(token.SLASH, l.ch)
+		tok = newToken(token.SLASH, l.ch, l.currLine, l.currCol, l.readCol)
 	case '<':
-		tok = newToken(token.LT, l.ch)
+		tok = newToken(token.LT, l.ch, l.currLine, l.currCol, l.readCol)
 	case '>':
-		tok = newToken(token.GT, l.ch)
+		tok = newToken(token.GT, l.ch, l.currLine, l.currCol, l.readCol)
 	case '[':
-		tok = newToken(token.LBRACKET, l.ch)
+		tok = newToken(token.LBRACKET, l.ch, l.currLine, l.currCol, l.readCol)
 	case ']':
-		tok = newToken(token.RBRACKET, l.ch)
+		tok = newToken(token.RBRACKET, l.ch, l.currLine, l.currCol, l.readCol)
 	case ':':
-		tok = newToken(token.COLON, l.ch)
+		tok = newToken(token.COLON, l.ch, l.currLine, l.currCol, l.readCol)
 	case '"':
 		tok.Type = token.STRING
 		tok.Literal = l.readString()
+		tok.Line = uint64(l.currLine)
+		tok.Col = uint64(l.currCol - len(tok.Literal) - 1) // -1 for "
+		tok.End = uint64(l.readCol)
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
+		tok.Line = uint64(l.currLine)
+		tok.Col = uint64(0)
+		tok.End = uint64(0)
 	default:
 		if util.IsAlpha(l.ch) {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
+			tok.Line = uint64(l.currLine)
+			tok.Col = uint64(l.currCol - len(tok.Literal))
+			tok.End = uint64(l.currCol)
 			return tok
 		} else if util.IsDigit(l.ch) {
 			tok.Literal = l.readInt()
 			tok.Type = token.INT
+			tok.Line = uint64(l.currLine)
+			tok.Col = uint64(l.currCol - len(tok.Literal))
+			tok.End = uint64(l.currCol)
 			return tok
 		} else {
-			tok = newToken(token.ILLEGAL, l.ch)
+			tok = newToken(token.ILLEGAL, l.ch, l.currLine, l.currCol, l.readCol)
 		}
 	}
 
@@ -144,18 +162,22 @@ func (l *Lexer) ifNextIsDoubleLen(char byte, t, f token.TokenType) token.Token {
 	if l.peekChar() == char {
 		ch := l.ch
 		l.readChar()
-		return token.Token{Type: t, Literal: string(ch) + string(l.ch)}
+		return token.Token{Type: t, Literal: string(ch) + string(l.ch), Line: uint64(l.currLine), Col: uint64(l.currCol - 1), End: uint64(l.readCol)}
 	} else {
-		return newToken(f, l.ch)
+		return newToken(f, l.ch, l.currLine, l.currCol, l.readCol)
 	}
 }
 
 func (l *Lexer) skipWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		if l.ch == '\n' {
+			l.currLine++
+			l.readCol = 0
+		}
 		l.readChar()
 	}
 }
 
-func newToken(tokenType token.TokenType, ch byte) token.Token {
-	return token.Token{Type: tokenType, Literal: string(ch)}
+func newToken(tokenType token.TokenType, ch byte, line, col, end int) token.Token {
+	return token.Token{Type: tokenType, Literal: string(ch), Line: uint64(line), Col: uint64(col), End: uint64(end)}
 }
