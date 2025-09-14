@@ -184,14 +184,7 @@ func applyFunction(fn object.Object, args []object.Object, env *object.Environme
 		evaluated := Eval(fn.Body, extendedEnv)
 		return unwrapReturnValue(evaluated)
 	case *object.Builtin:
-		builtinResult := fn.Fn(env, args...)
-		switch result := builtinResult.(type) {
-		case *BuiltinDSLResult:
-			Eval(result.Body, result.Env)
-			return NULL
-		default:
-			return result
-		}
+		return fn.Fn(env, args...)
 	default:
 		return newError("not a function, %s", fn.Type())
 	}
