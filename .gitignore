@@ -4,6 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+grpgscript-lsp/editors/zed/target
 
 ### STS ###
 .apt_generated

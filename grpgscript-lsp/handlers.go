@@ -11,15 +11,21 @@ var log *zap.Logger
 
 type Handler struct {
 	protocol.Server
+	Client protocol.Client
 }
 
-func NewHandler(ctx context.Context, server protocol.Server, logger *zap.Logger) (Handler, context.Context, error) {
+func NewHandler(ctx context.Context, server protocol.Server, client protocol.Client, logger *zap.Logger) (Handler, context.Context, error) {
 	log = logger
-
-	return Handler{Server: server}, ctx, nil
+	return Handler{Server: server, Client: client}, ctx, nil
 }
 
 func (h Handler) Initialize(ctx context.Context, params *protocol.InitializeParams) (*protocol.InitializeResult, error) {
+	log.Info("GRPGScript LSP Initialized")
+	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
+		Type:    protocol.MessageTypeInfo,
+		Message: "GRPGScript LSP Initialized",
+	})
+
 	return &protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{},
 		ServerInfo: &protocol.ServerInfo{
