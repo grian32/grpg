@@ -5,7 +5,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 grpgscript-lsp/editors/zed/target
-grpgscript-lsp/editors/zed/*.wasm
+grpgscript-lsp/editors/zed/**/*.wasm
 grpgscript-lsp/editors/zed/grpgscriptlsp
 
 ### STS ###
