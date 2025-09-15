@@ -10,6 +10,6 @@ repository = "https://github.com/grian32/grpg/"
 name = "grpgscriptlsp"
 language = "GRPGScript"
 
-[grammars.javascript]
-repository = "https://github.com/tree-sitter/tree-sitter-javascript"
-rev = "22da14e17db59c35aae2b9da2728337c301ce741"
+[grammars.grpgscript]
+repository = "https://github.com/grian32/tree-sitter-grpgscript"
+rev = "2dffcda0af68b8ec9da775a49355074d35e51114"
