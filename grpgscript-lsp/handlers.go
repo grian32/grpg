@@ -27,10 +27,13 @@ func NewHandler(ctx context.Context, server protocol.Server, client protocol.Cli
 
 func (h Handler) Initialize(ctx context.Context, params *protocol.InitializeParams) (*protocol.InitializeResult, error) {
 	log.Info("GRPGScript LSP Initialized")
-	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
+	err := h.Client.LogMessage(ctx, &protocol.LogMessageParams{
 		Type:    protocol.MessageTypeInfo,
 		Message: "GRPGScript LSP Initialized",
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{
@@ -49,7 +52,7 @@ func (h Handler) Initialize(ctx context.Context, params *protocol.InitializePara
 
 func (h Handler) DidOpen(ctx context.Context, params *protocol.DidOpenTextDocumentParams) (err error) {
 	h.Documents.Set(params.TextDocument.URI, openParamsToDocuments(params))
-	diagnostics := h.validateDocuments(params.TextDocument.URI, params.TextDocument.Text)
+	diagnostics := h.validateDocuments(params.TextDocument.URI, params.TextDocument.Text, ctx)
 
 	return h.Client.PublishDiagnostics(ctx, &protocol.PublishDiagnosticsParams{
 		URI:         params.TextDocument.URI,
@@ -63,12 +66,12 @@ func (h Handler) DidChange(ctx context.Context, params *protocol.DidChangeTextDo
 		return fmt.Errorf("document not found: %s", params.TextDocument.URI)
 	}
 
-	updatedText := h.applyChanges(doc.Text, params.ContentChanges, ctx)
+	updatedText := h.applyChanges(doc.Text, params.ContentChanges)
 
 	doc.Text = updatedText
 	doc.Version = params.TextDocument.Version
 
-	diagnostics := h.validateDocuments(params.TextDocument.URI, updatedText)
+	diagnostics := h.validateDocuments(params.TextDocument.URI, updatedText, ctx)
 
 	return h.Client.PublishDiagnostics(ctx, &protocol.PublishDiagnosticsParams{
 		URI:         params.TextDocument.URI,
@@ -76,31 +79,35 @@ func (h Handler) DidChange(ctx context.Context, params *protocol.DidChangeTextDo
 	})
 }
 
-func (h Handler) validateDocuments(uri protocol.DocumentURI, text string) []protocol.Diagnostic {
+func (h Handler) validateDocuments(uri protocol.DocumentURI, text string, ctx context.Context) []protocol.Diagnostic {
+	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
+		Type:    protocol.MessageTypeInfo,
+		Message: text,
+	})
 	return []protocol.Diagnostic{}
 }
 
-func (h Handler) applyChanges(currText string, changes []protocol.TextDocumentContentChangeEvent, ctx context.Context) string {
+func (h Handler) applyChanges(currText string, changes []protocol.TextDocumentContentChangeEvent) string {
 	text := currText
 
 	for _, change := range changes {
-		// if not included = 0
+		// per documentation: If range and rangeLength are omitted the new text is considered to be the full content of the document.
 		if change.RangeLength == 0 && isZeroRange(change.Range) {
 			text = change.Text
+			return text
 		} else {
-			h.applyRangeChanges(text, change.Range, change.Text, ctx)
+			text = h.applyRangeChanges(text, change.Range, change.Text)
 		}
 	}
 
 	return text
 }
 
-func (h Handler) applyRangeChanges(text string, rang protocol.Range, changed string, ctx context.Context) string {
-	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
-		Type:    protocol.MessageTypeInfo,
-		Message: fmt.Sprintf("file: %s; range: %v, changed: %s", text, rang, changed),
-	})
-	return ""
+func (h Handler) applyRangeChanges(text string, rang protocol.Range, changed string) string {
+	start := posToOffset(text, rang.Start)
+	end := posToOffset(text, rang.End)
+
+	return text[:start] + changed + text[end:]
 }
 
 func openParamsToDocuments(params *protocol.DidOpenTextDocumentParams) *Document {
@@ -113,4 +120,25 @@ func openParamsToDocuments(params *protocol.DidOpenTextDocumentParams) *Document
 
 func isZeroRange(rang protocol.Range) bool {
 	return rang.Start.Line == 0 && rang.Start.Character == 0 && rang.End.Line == 0 && rang.End.Character == 0
+}
+
+func posToOffset(text string, pos protocol.Position) int {
+	var line uint32 = 0
+	var col uint32 = 0
+
+	for i, r := range text {
+		if line == pos.Line && col == pos.Character {
+			return i
+		}
+
+		if r == '\n' {
+			line++
+			col = 0
+		} else {
+			col++
+		}
+	}
+
+	// means pos is eof
+	return len(text)
 }
