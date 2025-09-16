@@ -300,8 +300,9 @@ func testEval(input string) object.Object {
 	perf.ConstFold(program)
 
 	env := object.NewEnvironment()
+	eval := NewEvaluator()
 
-	return Eval(program, env)
+	return eval.Eval(program, env)
 }
 
 func TestStringLiteral(t *testing.T) {

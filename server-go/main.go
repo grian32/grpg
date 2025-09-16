@@ -139,7 +139,8 @@ func cycle(packets chan ChanPacket) {
 		timed, ok := scriptManager.TimedScripts[g.CurrentTick]
 		if ok {
 			for _, script := range timed {
-				evaluator.Eval(script.Script, script.Env)
+				eval := evaluator.NewEvaluator()
+				eval.Eval(script.Script, script.Env)
 			}
 		}
 

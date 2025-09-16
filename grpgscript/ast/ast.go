@@ -422,19 +422,30 @@ type HashLiteral struct {
 func (hl *HashLiteral) Pos() Position {
 	var last Expression
 
+	tokenPos := Position{
+		Start:     hl.Token.Col,
+		End:       hl.Token.End,
+		StartLine: hl.Token.Line,
+		EndLine:   hl.Token.Line,
+	}
+
+	if hl.Pairs == nil {
+		return tokenPos
+	}
+
 	for _, expr := range hl.Pairs {
+		if last == nil {
+			last = expr
+			continue
+		}
+
 		if expr.Pos().EndLine > last.Pos().EndLine || expr.Pos().End > last.Pos().End {
 			last = expr
 		}
 	}
 
 	if last == nil {
-		return Position{
-			Start:     hl.Token.Col,
-			End:       hl.Token.End,
-			StartLine: hl.Token.Line,
-			EndLine:   hl.Token.Line,
-		}
+		return tokenPos
 	}
 
 	return Position{

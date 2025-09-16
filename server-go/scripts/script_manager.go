@@ -96,7 +96,8 @@ func (s *ScriptManager) LoadScripts(path string, game *shared.Game, npcs map[uin
 
 			perf.ConstFold(program)
 
-			obj := evaluator.Eval(program, env)
+			eval := evaluator.NewEvaluator()
+			obj := eval.Eval(program, env)
 			if obj != nil && obj.Type() == object.ERROR_OBJ {
 				log.Printf("script %s errored %s", fullPath, obj.Inspect())
 			}

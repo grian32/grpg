@@ -32,7 +32,9 @@ func Run(str string) {
 		return
 	}
 
-	evaluated := evaluator.Eval(program, env)
+	eval := evaluator.NewEvaluator()
+
+	evaluated := eval.Eval(program, env)
 	if evaluated != nil {
 		if evaluated.Type() != object.NULL_OBJ {
 			io.WriteString(os.Stdout, evaluated.Inspect()+"\n")

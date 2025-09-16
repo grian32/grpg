@@ -52,11 +52,13 @@ fib(getMap(true)) + fib(getMap(false))
 
 	perf.ConstFold(program)
 
+	eval := NewEvaluator()
+
 	b.ResetTimer()
 
 	for b.Loop() {
 		env := object.NewEnvironment()
-		result := Eval(program, env)
+		result := eval.Eval(program, env)
 		_ = result
 	}
 }
@@ -78,11 +80,13 @@ func BenchmarkEvalBuiltinCalls(b *testing.B) {
 
 	perf.ConstFold(program)
 
+	eval := NewEvaluator()
+
 	b.ResetTimer()
 
 	for b.Loop() {
 		env := object.NewEnvironment()
-		result := Eval(program, env)
+		result := eval.Eval(program, env)
 		_ = result
 	}
 }
@@ -153,12 +157,13 @@ func runBenchWithoutFolding(b *testing.B, name, input string) {
 		l := lexer.New(input)
 		p := parser.New(l)
 		program := p.ParseProgram()
+		eval := NewEvaluator()
 
 		b.ResetTimer()
 
 		for b.Loop() {
 			env := object.NewEnvironment()
-			result := Eval(program, env)
+			result := eval.Eval(program, env)
 			_ = result
 		}
 	})
@@ -172,11 +177,13 @@ func runBenchWithFolding(b *testing.B, name, input string) {
 
 		perf.ConstFold(program)
 
+		eval := NewEvaluator()
+
 		b.ResetTimer()
 
 		for b.Loop() {
 			env := object.NewEnvironment()
-			result := Eval(program, env)
+			result := eval.Eval(program, env)
 			_ = result
 		}
 	})

@@ -29,7 +29,8 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 	env := object.NewEnclosedEnvinronment(scriptManager.Env)
 	addInteractBuiltins(env, game, player, objPos, scriptManager)
 
-	evaluator.Eval(script, env)
+	eval := evaluator.NewEvaluator()
+	eval.Eval(script, env)
 }
 
 func addInteractBuiltins(env *object.Environment, game *shared.Game, player *shared.Player, objPos util.Vector2I, scriptManager *scripts.ScriptManager) {

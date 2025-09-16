@@ -28,7 +28,8 @@ func (t *Talk) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, 
 	env := object.NewEnclosedEnvinronment(scriptManager.Env)
 	addTalkBuiltins(env, player, game, npcId)
 
-	evaluator.Eval(script, env)
+	eval := evaluator.NewEvaluator()
+	eval.Eval(script, env)
 }
 
 func addTalkBuiltins(env *object.Environment, player *shared.Player, game *shared.Game, npcId uint16) {

@@ -10,7 +10,7 @@ var builtins = map[string]*object.Builtin{
 	"len": {
 		Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			if len(args) != 1 {
-				return newError("wrong number of arguments. got=%d, want=1", len(args))
+				return newErrorObj("wrong number of arguments. got=%d, want=1", len(args))
 			}
 
 			switch arg := args[0].(type) {
@@ -19,7 +19,7 @@ var builtins = map[string]*object.Builtin{
 			case *object.Array:
 				return &object.Integer{Value: int64(len(arg.Elements))}
 			default:
-				return newError("argument to `len` not supported, got %s", args[0].Type())
+				return newErrorObj("argument to `len` not supported, got %s", args[0].Type())
 			}
 		},
 	},
@@ -45,7 +45,7 @@ var builtins = map[string]*object.Builtin{
 	"concat": {
 		Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			if len(args) != 2 {
-				return newError("wrong number of argument, got=%d, want=2", len(args))
+				return newErrorObj("wrong number of argument, got=%d, want=2", len(args))
 			}
 
 			firstArrArg, ok1 := args[0].(*object.Array)
@@ -64,12 +64,12 @@ var builtins = map[string]*object.Builtin{
 			}
 
 			if !(ok1 && ok2) {
-				return newError("one or both of the arguments to concat are not arrays")
+				return newErrorObj("one or both of the arguments to concat are not arrays")
 			}
 
 			// it's fine to check only first elem since arrays are guaranteed to be of the same type on all elems due to eval
 			if firstArrArg.Elements[0].Type() != secondArrArg.Elements[0].Type() {
-				return newError("both arrays passed to concat must be of the same element type")
+				return newErrorObj("both arrays passed to concat must be of the same element type")
 			}
 
 			concattedElems := slices.Concat(firstArrArg.Elements, secondArrArg.Elements)
@@ -90,12 +90,12 @@ const (
 
 func pushUnshift(use PushUnshift, args ...object.Object) object.Object {
 	if len(args) != 2 {
-		return newError("wrong number of arguments. got=%d, want=2", len(args))
+		return newErrorObj("wrong number of arguments. got=%d, want=2", len(args))
 	}
 
 	arrayArg, ok := args[0].(*object.Array)
 	if !ok {
-		return newError("first arg is not arr, got=%T(%+v)", args[0], args[0])
+		return newErrorObj("first arg is not arr, got=%T(%+v)", args[0], args[0])
 	}
 	itemArg := args[1]
 
@@ -106,7 +106,7 @@ func pushUnshift(use PushUnshift, args ...object.Object) object.Object {
 
 	arrType := arrayArg.Elements[0].Type()
 	if itemArg.Type() != arrType {
-		return newError("cannot add element of type %s to array of type %s", itemArg.Type(), arrType)
+		return newErrorObj("cannot add element of type %s to array of type %s", itemArg.Type(), arrType)
 	}
 
 	if use == PUSH {
@@ -116,4 +116,8 @@ func pushUnshift(use PushUnshift, args ...object.Object) object.Object {
 	}
 
 	return &object.Integer{Value: int64(len(arrayArg.Elements))}
+}
+
+func newErrorObj(format string, a ...any) *object.Error {
+	return &object.Error{Message: fmt.Sprintf(format, a...)}
 }
