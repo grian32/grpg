@@ -9,6 +9,7 @@ import (
 type Node interface {
 	TokenLiteral() string
 	String() string
+	Pos() Position
 }
 
 type Statement interface {
@@ -25,6 +26,17 @@ type Program struct {
 	Statements []Statement
 }
 
+func (p *Program) Pos() Position {
+	first := p.Statements[0].Pos()
+	last := p.Statements[len(p.Statements)-1].Pos()
+
+	return Position{
+		Start:     first.Start,
+		End:       last.End,
+		StartLine: first.StartLine,
+		EndLine:   last.EndLine,
+	}
+}
 func (p *Program) TokenLiteral() string {
 	if len(p.Statements) > 0 {
 		return p.Statements[0].TokenLiteral()
@@ -32,7 +44,6 @@ func (p *Program) TokenLiteral() string {
 		return ""
 	}
 }
-
 func (p *Program) String() string {
 	var out bytes.Buffer
 
@@ -49,6 +60,14 @@ type VarStatement struct {
 	Value Expression
 }
 
+func (vs *VarStatement) Pos() Position {
+	return Position{
+		Start:     vs.Token.Col,
+		End:       vs.Value.Pos().End,
+		StartLine: vs.Token.Line,
+		EndLine:   vs.Value.Pos().EndLine,
+	}
+}
 func (vs *VarStatement) statementNode()       { /* noop */ }
 func (vs *VarStatement) TokenLiteral() string { return vs.Token.Literal }
 func (vs *VarStatement) String() string {
@@ -70,6 +89,14 @@ type Identifier struct {
 	Value string
 }
 
+func (i *Identifier) Pos() Position {
+	return Position{
+		Start:     i.Token.Col,
+		End:       i.Token.End,
+		StartLine: i.Token.Line,
+		EndLine:   i.Token.Line,
+	}
+}
 func (i *Identifier) expressionNode()      { /* noop */ }
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string       { return i.Value }
@@ -79,6 +106,14 @@ type ReturnStatement struct {
 	ReturnValue Expression
 }
 
+func (rs *ReturnStatement) Pos() Position {
+	return Position{
+		Start:     rs.Token.Col,
+		End:       rs.ReturnValue.Pos().End,
+		StartLine: rs.Token.Line,
+		EndLine:   rs.ReturnValue.Pos().EndLine,
+	}
+}
 func (rs *ReturnStatement) statementNode()       { /* noop */ }
 func (rs *ReturnStatement) TokenLiteral() string { return rs.Token.Literal }
 func (rs *ReturnStatement) String() string {
@@ -100,6 +135,9 @@ type ExpressionStatement struct {
 	Expression Expression
 }
 
+func (es *ExpressionStatement) Pos() Position {
+	return es.Expression.Pos()
+}
 func (es *ExpressionStatement) statementNode()       { /* noop */ }
 func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal }
 func (es *ExpressionStatement) String() string {
@@ -115,6 +153,14 @@ type IntegerLiteral struct {
 	Value int64
 }
 
+func (il *IntegerLiteral) Pos() Position {
+	return Position{
+		Start:     il.Token.Col,
+		End:       il.Token.End,
+		StartLine: il.Token.Line,
+		EndLine:   il.Token.Line,
+	}
+}
 func (il *IntegerLiteral) expressionNode()      { /* noop */ }
 func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
 func (il *IntegerLiteral) String() string       { return il.Token.Literal }
@@ -125,6 +171,14 @@ type PrefixExpression struct {
 	Right    Expression
 }
 
+func (pe *PrefixExpression) Pos() Position {
+	return Position{
+		Start:     pe.Token.Col,
+		End:       pe.Right.Pos().End,
+		StartLine: pe.Token.Line,
+		EndLine:   pe.Token.Line,
+	}
+}
 func (pe *PrefixExpression) expressionNode()      { /* noop */ }
 func (pe *PrefixExpression) TokenLiteral() string { return pe.Token.Literal }
 func (pe *PrefixExpression) String() string {
@@ -138,6 +192,14 @@ type InfixExpression struct {
 	Right    Expression
 }
 
+func (ie *InfixExpression) Pos() Position {
+	return Position{
+		Start:     ie.Left.Pos().Start,
+		End:       ie.Right.Pos().End,
+		StartLine: ie.Left.Pos().StartLine,
+		EndLine:   ie.Right.Pos().EndLine,
+	}
+}
 func (ie *InfixExpression) expressionNode()      { /* noop */ }
 func (ie *InfixExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie *InfixExpression) String() string {
@@ -149,6 +211,14 @@ type Boolean struct {
 	Value bool
 }
 
+func (b *Boolean) Pos() Position {
+	return Position{
+		Start:     b.Token.Col,
+		End:       b.Token.End,
+		StartLine: b.Token.Line,
+		EndLine:   b.Token.Line,
+	}
+}
 func (b *Boolean) expressionNode()      { /* noop */ }
 func (b *Boolean) TokenLiteral() string { return b.Token.Literal }
 func (b *Boolean) String() string       { return b.Token.Literal }
@@ -160,6 +230,25 @@ type IfExpression struct {
 	Alternative *BlockStatement
 }
 
+func (ie *IfExpression) Pos() Position {
+	var endPos uint64 = 0
+	var endLine uint64 = 0
+
+	if ie.Alternative != nil {
+		endPos = ie.Alternative.Pos().End
+		endLine = ie.Alternative.Pos().End
+	} else {
+		endPos = ie.Consequence.Pos().End
+		endLine = ie.Consequence.Pos().End
+	}
+
+	return Position{
+		Start:     ie.Token.Col,
+		End:       endPos,
+		StartLine: ie.Token.Line,
+		EndLine:   endLine,
+	}
+}
 func (ie *IfExpression) expressionNode()      { /* noop */ }
 func (ie *IfExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie *IfExpression) String() string {
@@ -179,6 +268,16 @@ type BlockStatement struct {
 	Statements []Statement
 }
 
+func (bs *BlockStatement) Pos() Position {
+	first := bs.Statements[0]
+	last := bs.Statements[len(bs.Statements)-1]
+	return Position{
+		Start:     first.Pos().Start,
+		End:       last.Pos().End,
+		StartLine: first.Pos().StartLine,
+		EndLine:   first.Pos().EndLine,
+	}
+}
 func (bs *BlockStatement) statementNode()       { /* noop */ }
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 func (bs *BlockStatement) String() string {
@@ -197,6 +296,14 @@ type FunctionLiteral struct {
 	Body       *BlockStatement
 }
 
+func (fl *FunctionLiteral) Pos() Position {
+	return Position{
+		Start:     fl.Token.Col,
+		End:       fl.Body.Pos().End,
+		StartLine: fl.Token.Line,
+		EndLine:   fl.Body.Pos().EndLine,
+	}
+}
 func (fl *FunctionLiteral) expressionNode()      { /* noop */ }
 func (fl *FunctionLiteral) TokenLiteral() string { return fl.Token.Literal }
 func (fl *FunctionLiteral) String() string {
@@ -218,6 +325,16 @@ type CallExpresion struct {
 	Arguments []Expression
 }
 
+func (ce *CallExpresion) Pos() Position {
+	last := ce.Arguments[len(ce.Arguments)-1]
+
+	return Position{
+		Start:     ce.Token.Col,
+		End:       last.Pos().End,
+		StartLine: ce.Token.Line,
+		EndLine:   last.Pos().EndLine,
+	}
+}
 func (ce *CallExpresion) expressionNode()      { /* noop */ }
 func (ce *CallExpresion) TokenLiteral() string { return ce.Token.Literal }
 func (ce *CallExpresion) String() string {
@@ -239,6 +356,14 @@ type StringLiteral struct {
 	Value string
 }
 
+func (sl *StringLiteral) Pos() Position {
+	return Position{
+		Start:     sl.Token.Col,
+		End:       sl.Token.End,
+		StartLine: sl.Token.Line,
+		EndLine:   sl.Token.Line,
+	}
+}
 func (sl *StringLiteral) expressionNode()      { /* noop */ }
 func (sl *StringLiteral) TokenLiteral() string { return sl.Token.Literal }
 func (sl *StringLiteral) String() string       { return sl.Token.Literal }
@@ -248,6 +373,16 @@ type ArrayLiteral struct {
 	Elements []Expression
 }
 
+func (al *ArrayLiteral) Pos() Position {
+	last := al.Elements[len(al.Elements)-1]
+
+	return Position{
+		Start:     al.Token.Col,
+		End:       last.Pos().End,
+		StartLine: al.Token.Line,
+		EndLine:   last.Pos().EndLine,
+	}
+}
 func (al *ArrayLiteral) expressionNode()      { /* noop */ }
 func (al *ArrayLiteral) TokenLiteral() string { return al.Token.Literal }
 func (al *ArrayLiteral) String() string {
@@ -265,6 +400,14 @@ type IndexExpression struct {
 	Index Expression
 }
 
+func (ie *IndexExpression) Pos() Position {
+	return Position{
+		Start:     ie.Token.Col,
+		End:       ie.Index.Pos().End,
+		StartLine: ie.Token.Line,
+		EndLine:   ie.Index.Pos().EndLine,
+	}
+}
 func (ie *IndexExpression) expressionNode()      { /* noop */ }
 func (ie *IndexExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie *IndexExpression) String() string {
@@ -276,6 +419,31 @@ type HashLiteral struct {
 	Pairs map[Expression]Expression
 }
 
+func (hl *HashLiteral) Pos() Position {
+	var last Expression
+
+	for _, expr := range hl.Pairs {
+		if expr.Pos().EndLine > last.Pos().EndLine || expr.Pos().End > last.Pos().End {
+			last = expr
+		}
+	}
+
+	if last == nil {
+		return Position{
+			Start:     hl.Token.Col,
+			End:       hl.Token.End,
+			StartLine: hl.Token.Line,
+			EndLine:   hl.Token.Line,
+		}
+	}
+
+	return Position{
+		Start:     hl.Token.Col,
+		End:       last.Pos().End,
+		StartLine: hl.Token.Line,
+		EndLine:   last.Pos().EndLine,
+	}
+}
 func (hl *HashLiteral) expressionNode()      { /* noop */ }
 func (hl *HashLiteral) TokenLiteral() string { return hl.Token.Literal }
 func (hl *HashLiteral) String() string {
