@@ -326,13 +326,22 @@ type CallExpresion struct {
 }
 
 func (ce *CallExpresion) Pos() Position {
-	last := ce.Arguments[len(ce.Arguments)-1]
+	if len(ce.Arguments) > 0 {
+		last := ce.Arguments[len(ce.Arguments)-1]
+
+		return Position{
+			Start:     ce.Token.Col,
+			End:       last.Pos().End,
+			StartLine: ce.Token.Line,
+			EndLine:   last.Pos().EndLine,
+		}
+	}
 
 	return Position{
 		Start:     ce.Token.Col,
-		End:       last.Pos().End,
+		End:       ce.Token.End,
 		StartLine: ce.Token.Line,
-		EndLine:   last.Pos().EndLine,
+		EndLine:   ce.Token.Line,
 	}
 }
 func (ce *CallExpresion) expressionNode()      { /* noop */ }
