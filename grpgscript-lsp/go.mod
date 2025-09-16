@@ -14,4 +14,8 @@ require (
 	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
+	grpgscript v0.0.0
 )
+
+replace grpgscript  => ../grpgscript
+

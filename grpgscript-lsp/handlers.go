@@ -3,6 +3,8 @@ package grpgscript_lsp
 import (
 	"context"
 	"fmt"
+	"grpgscript/lexer"
+	"grpgscript/parser"
 
 	"go.lsp.dev/protocol"
 	"go.uber.org/zap"
@@ -80,11 +82,42 @@ func (h Handler) DidChange(ctx context.Context, params *protocol.DidChangeTextDo
 }
 
 func (h Handler) validateDocuments(uri protocol.DocumentURI, text string, ctx context.Context) []protocol.Diagnostic {
+	l := lexer.New(text)
+	p := parser.New(l)
+	_ = p.ParseProgram()
+
+	errors := p.Errors()
+	diags := make([]protocol.Diagnostic, len(errors))
+
 	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
 		Type:    protocol.MessageTypeInfo,
-		Message: text,
+		Message: fmt.Sprintf("%v", errors),
 	})
-	return []protocol.Diagnostic{}
+
+	for i, err := range errors {
+		diags[i] = protocol.Diagnostic{
+			Range: protocol.Range{
+				Start: protocol.Position{
+					Line:      uint32(err.Line),
+					Character: uint32(err.Col),
+				},
+				End: protocol.Position{
+					Line:      uint32(err.Line),
+					Character: uint32(err.End),
+				},
+			},
+			Severity: protocol.DiagnosticSeverityError,
+			Source:   "grpgscriptlsp",
+			Message:  err.Msg,
+		}
+	}
+
+	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
+		Type:    protocol.MessageTypeInfo,
+		Message: fmt.Sprintf("%v", diags),
+	})
+
+	return diags
 }
 
 func (h Handler) applyChanges(currText string, changes []protocol.TextDocumentContentChangeEvent) string {
