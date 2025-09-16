@@ -3,7 +3,9 @@ package grpgscript_lsp
 import (
 	"context"
 	"fmt"
+	"grpgscript/evaluator"
 	"grpgscript/lexer"
+	"grpgscript/object"
 	"grpgscript/parser"
 
 	"go.lsp.dev/protocol"
@@ -54,7 +56,7 @@ func (h Handler) Initialize(ctx context.Context, params *protocol.InitializePara
 
 func (h Handler) DidOpen(ctx context.Context, params *protocol.DidOpenTextDocumentParams) (err error) {
 	h.Documents.Set(params.TextDocument.URI, openParamsToDocuments(params))
-	diagnostics := h.validateDocuments(params.TextDocument.URI, params.TextDocument.Text, ctx)
+	diagnostics := h.validateDocuments(params.TextDocument.Text)
 
 	return h.Client.PublishDiagnostics(ctx, &protocol.PublishDiagnosticsParams{
 		URI:         params.TextDocument.URI,
@@ -73,7 +75,7 @@ func (h Handler) DidChange(ctx context.Context, params *protocol.DidChangeTextDo
 	doc.Text = updatedText
 	doc.Version = params.TextDocument.Version
 
-	diagnostics := h.validateDocuments(params.TextDocument.URI, updatedText, ctx)
+	diagnostics := h.validateDocuments(updatedText)
 
 	return h.Client.PublishDiagnostics(ctx, &protocol.PublishDiagnosticsParams{
 		URI:         params.TextDocument.URI,
@@ -81,18 +83,14 @@ func (h Handler) DidChange(ctx context.Context, params *protocol.DidChangeTextDo
 	})
 }
 
-func (h Handler) validateDocuments(uri protocol.DocumentURI, text string, ctx context.Context) []protocol.Diagnostic {
+func (h Handler) validateDocuments(text string) []protocol.Diagnostic {
 	l := lexer.New(text)
 	p := parser.New(l)
-	_ = p.ParseProgram()
+	program := p.ParseProgram()
 
 	errors := p.Errors()
-	diags := make([]protocol.Diagnostic, len(errors))
 
-	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
-		Type:    protocol.MessageTypeInfo,
-		Message: fmt.Sprintf("%v", errors),
-	})
+	diags := make([]protocol.Diagnostic, len(errors))
 
 	for i, err := range errors {
 		diags[i] = protocol.Diagnostic{
@@ -112,10 +110,31 @@ func (h Handler) validateDocuments(uri protocol.DocumentURI, text string, ctx co
 		}
 	}
 
-	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
-		Type:    protocol.MessageTypeInfo,
-		Message: fmt.Sprintf("%v", diags),
-	})
+	// unfortunately we can only really eval if the script passes parsing.
+	if len(errors) == 0 {
+		eval := evaluator.NewEvaluator()
+		env := object.NewEnvironment()
+
+		eval.Eval(program, env)
+
+		for _, err := range eval.Errors {
+			diags = append(diags, protocol.Diagnostic{
+				Range: protocol.Range{
+					Start: protocol.Position{
+						Line:      uint32(err.Position.StartLine),
+						Character: uint32(err.Position.Start),
+					},
+					End: protocol.Position{
+						Line:      uint32(err.Position.EndLine),
+						Character: uint32(err.Position.End),
+					},
+				},
+				Severity: protocol.DiagnosticSeverityError,
+				Source:   "grpgscriptlsp",
+				Message:  err.Msg,
+			})
+		}
+	}
 
 	return diags
 }
