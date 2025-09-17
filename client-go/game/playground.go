@@ -24,7 +24,7 @@ type Playground struct {
 }
 
 // this is reused in loginscreen.go can't rly avoid however
-var assetsDirectory = "../../grpg-assets/"
+var assetsDirectory = "../../grpg-assets/assets/"
 
 func (p *Playground) Setup() {
 	p.Game.Talkbox.CurrentName = "hi!"

@@ -36,7 +36,7 @@ var (
 		MaxY:        0,
 		CurrentTick: 0,
 	}
-	assetsDirectory = "../../grpg-assets/"
+	assetsDirectory = "../../grpg-assets/assets"
 	scriptManager   *scripts.ScriptManager
 )
 
