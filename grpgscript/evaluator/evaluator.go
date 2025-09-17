@@ -21,12 +21,16 @@ type EvalError struct {
 	Position ast.Position
 }
 
-type Evaluator struct {
+type ErrorStore struct {
 	Errors []EvalError
 }
 
+type Evaluator struct {
+	ErrorStore *ErrorStore
+}
+
 func NewEvaluator() *Evaluator {
-	return &Evaluator{Errors: make([]EvalError, 0)}
+	return &Evaluator{ErrorStore: &ErrorStore{Errors: make([]EvalError, 0)}}
 }
 
 func (e *Evaluator) Eval(node ast.Node, env *object.Environment) object.Object {
@@ -131,7 +135,7 @@ func (e *Evaluator) evalHashLiteral(node *ast.HashLiteral, env *object.Environme
 
 		hashable, ok := key.(object.Hashable)
 		if !ok {
-			return e.newError(pos, "unusable as hash key: %s", key.Type())
+			return e.ErrorStore.NewError(pos, "unusable as hash key: %s", key.Type())
 		}
 
 		val := e.Eval(valueNode, env)
@@ -157,7 +161,7 @@ func (e *Evaluator) evalIndexExpression(left, index object.Object, pos ast.Posit
 	case left.Type() == object.HASH_OBJ:
 		return e.evalHashIndexExpression(left, index, pos)
 	default:
-		return e.newError(pos, "index operator not supported: %s", left.Type())
+		return e.ErrorStore.NewError(pos, "index operator not supported: %s", left.Type())
 	}
 }
 
@@ -166,12 +170,12 @@ func (e *Evaluator) evalHashIndexExpression(left, index object.Object, pos ast.P
 
 	hashableIdx, ok := index.(object.Hashable)
 	if !ok {
-		return e.newError(pos, "unusable as hash key: %s", index.Type())
+		return e.ErrorStore.NewError(pos, "unusable as hash key: %s", index.Type())
 	}
 
 	val, ok := hash.Pairs[hashableIdx.HashKey()]
 	if !ok {
-		return e.newError(pos, "unknown hash key")
+		return e.ErrorStore.NewError(pos, "unknown hash key")
 	}
 
 	return val.Value
@@ -184,7 +188,7 @@ func (e *Evaluator) evalArrayIndexExpression(left, index object.Object, pos ast.
 	max := int64(len(arr.Elements) - 1)
 
 	if idx < 0 || idx > max {
-		return e.newError(pos, "index %d out of bounds on array of size %d", idx, len(arr.Elements))
+		return e.ErrorStore.NewError(pos, "index %d out of bounds on array of size %d", idx, len(arr.Elements))
 	}
 
 	return arr.Elements[idx]
@@ -199,7 +203,7 @@ func (e *Evaluator) applyFunction(fn object.Object, args []object.Object, env *o
 	case *object.Builtin:
 		return fn.Fn(env, args...)
 	default:
-		return e.newError(pos, "not a function, %s", fn.Type())
+		return e.ErrorStore.NewError(pos, "not a function, %s", fn.Type())
 	}
 }
 
@@ -244,7 +248,7 @@ func (e *Evaluator) evalArrayExpressions(exps []ast.Expression, env *object.Envi
 		}
 		// todo: see if this has significant perf impact or not.. if it does i'd rather just write code with multi type arrays and just not use it.
 		if evaluated.Type() != firstType {
-			return []object.Object{e.newError(pos, "arrays can only be of the same type, found type %s, in array of type %s", evaluated.Type(), firstType)}
+			return []object.Object{e.ErrorStore.NewError(pos, "arrays can only be of the same type, found type %s, in array of type %s", evaluated.Type(), firstType)}
 		}
 		result = append(result, evaluated)
 	}
@@ -261,7 +265,7 @@ func (e *Evaluator) evalIdentifier(node *ast.Identifier, env *object.Environment
 		return builtin
 	}
 
-	return e.newError(pos, "identifier not found: %s", node.Value)
+	return e.ErrorStore.NewError(pos, "identifier not found: %s", node.Value)
 }
 
 func (e *Evaluator) evalBlockStatement(node *ast.BlockStatement, env *object.Environment) object.Object {
@@ -308,9 +312,9 @@ func (e *Evaluator) evalInfixExpression(operator string, left, right object.Obje
 	case operator == "!=":
 		return boolLookup[left != right]
 	case left.Type() != right.Type():
-		return e.newError(pos, "type mismatch: %s %s %s", left.Type(), operator, right.Type())
+		return e.ErrorStore.NewError(pos, "type mismatch: %s %s %s", left.Type(), operator, right.Type())
 	default:
-		return e.newError(pos, "unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return e.ErrorStore.NewError(pos, "unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
@@ -326,7 +330,7 @@ func (e *Evaluator) evalStringInfixExpression(operator string, left, right objec
 	case "!=":
 		return &object.Boolean{Value: leftValue != rightValue}
 	default:
-		return e.newError(pos, "unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return e.ErrorStore.NewError(pos, "unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
@@ -352,7 +356,7 @@ func (e *Evaluator) evalIntegerInfixExpression(operator string, left, right obje
 	case "==":
 		return boolLookup[leftValue == rightValue]
 	default:
-		return e.newError(pos, "unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return e.ErrorStore.NewError(pos, "unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
@@ -363,13 +367,13 @@ func (e *Evaluator) evalPrefixExpression(operator string, right object.Object, p
 	case "-":
 		return e.evalMinusPrefixOperatorExpression(right, pos)
 	default:
-		return e.newError(pos, "unknown operator: %s%s", operator, right.Type())
+		return e.ErrorStore.NewError(pos, "unknown operator: %s%s", operator, right.Type())
 	}
 }
 
 func (e *Evaluator) evalBangOperatorExpression(right object.Object, pos ast.Position) object.Object {
 	if right.Type() != object.BOOLEAN_OBJ {
-		return e.newError(pos, "unknown operator: !%s", right.Type())
+		return e.ErrorStore.NewError(pos, "unknown operator: !%s", right.Type())
 	}
 
 	switch right {
@@ -385,7 +389,7 @@ func (e *Evaluator) evalBangOperatorExpression(right object.Object, pos ast.Posi
 
 func (e *Evaluator) evalMinusPrefixOperatorExpression(right object.Object, pos ast.Position) object.Object {
 	if right.Type() != object.INTEGER_OBJ {
-		return e.newError(pos, "unknown operator: -%s", right.Type())
+		return e.ErrorStore.NewError(pos, "unknown operator: -%s", right.Type())
 	}
 
 	value := right.(*object.Integer).Value
@@ -409,7 +413,7 @@ func (e *Evaluator) evalProgram(stmts []ast.Statement, env *object.Environment) 
 	return result
 }
 
-func (e *Evaluator) newError(pos ast.Position, format string, a ...any) *object.Error {
+func (e *ErrorStore) NewError(pos ast.Position, format string, a ...any) *object.Error {
 	msg := fmt.Sprintf(format, a...)
 	e.Errors = append(e.Errors, EvalError{
 		Msg:      msg,

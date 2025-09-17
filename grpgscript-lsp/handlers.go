@@ -122,7 +122,7 @@ func (h Handler) validateDocuments(text string, ctx context.Context) []protocol.
 
 		eval.Eval(program, env)
 
-		for _, err := range eval.Errors {
+		for _, err := range eval.ErrorStore.Errors {
 			diags = append(diags, protocol.Diagnostic{
 				Range: protocol.Range{
 					Start: protocol.Position{
