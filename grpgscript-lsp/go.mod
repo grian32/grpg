@@ -15,7 +15,9 @@ require (
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
 	grpgscript v0.0.0
+	grpg/data-go v0.0.0
 )
 
 replace grpgscript  => ../grpgscript
+replace grpg/data-go => ../data-go
 

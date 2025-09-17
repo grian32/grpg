@@ -3,6 +3,9 @@ package grpgscript_lsp
 import (
 	"context"
 	"fmt"
+	"grpg/data-go/grpgitem"
+	"grpg/data-go/grpgnpc"
+	"grpg/data-go/grpgobj"
 	"grpgscript/evaluator"
 	"grpgscript/lexer"
 	"grpgscript/object"
@@ -18,15 +21,40 @@ type Handler struct {
 	protocol.Server
 	Client    protocol.Client
 	Documents *DocumentStore
+	Env       *object.Environment
+	Objs      map[string]uint16
+	Items     map[string]uint16
+	Npcs      map[string]uint16
 }
 
-func NewHandler(ctx context.Context, server protocol.Server, client protocol.Client, logger *zap.Logger) (Handler, context.Context, error) {
+func NewHandler(ctx context.Context, server protocol.Server, client protocol.Client, objs []grpgobj.Obj, npcs []grpgnpc.Npc, items []grpgitem.Item, logger *zap.Logger) (Handler, context.Context, error) {
 	log = logger
-	return Handler{
+	h := Handler{
 		Server:    server,
 		Client:    client,
 		Documents: NewDocumentStore(),
-	}, ctx, nil
+		Env:       object.NewEnvironment(),
+		Objs:      make(map[string]uint16),
+		Items:     make(map[string]uint16),
+		Npcs:      make(map[string]uint16),
+	}
+
+	for _, obj := range objs {
+		h.Objs[obj.Name] = obj.ObjId
+		h.Env.Set(UppercaseAll(obj.Name), &object.Integer{Value: int64(obj.ObjId)})
+	}
+
+	for _, npc := range npcs {
+		h.Npcs[npc.Name] = npc.NpcId
+		h.Env.Set(UppercaseAll(npc.Name), &object.Integer{Value: int64(npc.NpcId)})
+	}
+
+	for _, item := range items {
+		h.Objs[item.Name] = item.ItemId
+		h.Env.Set(UppercaseAll(item.Name), &object.Integer{Value: int64(item.ItemId)})
+	}
+
+	return h, ctx, nil
 }
 
 func (h Handler) Initialize(ctx context.Context, params *protocol.InitializeParams) (*protocol.InitializeResult, error) {
@@ -118,7 +146,7 @@ func (h Handler) validateDocuments(text string, ctx context.Context) []protocol.
 	// unfortunately we can only really eval if the script passes parsing.
 	if len(diags) == 0 {
 		eval := evaluator.NewEvaluator()
-		env := object.NewEnvironment()
+		env := object.NewEnclosedEnvinronment(h.Env)
 
 		eval.Eval(program, env)
 
@@ -173,10 +201,6 @@ func openParamsToDocuments(params *protocol.DidOpenTextDocumentParams) *Document
 		Text:    params.TextDocument.Text,
 		Version: params.TextDocument.Version,
 	}
-}
-
-func isZeroRange(rang protocol.Range) bool {
-	return rang.Start.Line == 0 && rang.Start.Character == 0 && rang.End.Line == 0 && rang.End.Character == 0
 }
 
 func posToOffset(text string, pos protocol.Position) int {
