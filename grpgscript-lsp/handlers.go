@@ -56,7 +56,7 @@ func (h Handler) Initialize(ctx context.Context, params *protocol.InitializePara
 
 func (h Handler) DidOpen(ctx context.Context, params *protocol.DidOpenTextDocumentParams) (err error) {
 	h.Documents.Set(params.TextDocument.URI, openParamsToDocuments(params))
-	diagnostics := h.validateDocuments(params.TextDocument.Text)
+	diagnostics := h.validateDocuments(params.TextDocument.Text, ctx)
 
 	return h.Client.PublishDiagnostics(ctx, &protocol.PublishDiagnosticsParams{
 		URI:         params.TextDocument.URI,
@@ -75,7 +75,7 @@ func (h Handler) DidChange(ctx context.Context, params *protocol.DidChangeTextDo
 	doc.Text = updatedText
 	doc.Version = params.TextDocument.Version
 
-	diagnostics := h.validateDocuments(updatedText)
+	diagnostics := h.validateDocuments(updatedText, ctx)
 
 	return h.Client.PublishDiagnostics(ctx, &protocol.PublishDiagnosticsParams{
 		URI:         params.TextDocument.URI,
@@ -83,12 +83,17 @@ func (h Handler) DidChange(ctx context.Context, params *protocol.DidChangeTextDo
 	})
 }
 
-func (h Handler) validateDocuments(text string) []protocol.Diagnostic {
+func (h Handler) validateDocuments(text string, ctx context.Context) []protocol.Diagnostic {
 	l := lexer.New(text)
 	p := parser.New(l)
 	program := p.ParseProgram()
 
 	errors := p.Errors()
+
+	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
+		Type:    protocol.MessageTypeInfo,
+		Message: fmt.Sprintf("%s", text),
+	})
 
 	diags := make([]protocol.Diagnostic, len(errors))
 
@@ -111,7 +116,7 @@ func (h Handler) validateDocuments(text string) []protocol.Diagnostic {
 	}
 
 	// unfortunately we can only really eval if the script passes parsing.
-	if len(errors) == 0 {
+	if len(diags) == 0 {
 		eval := evaluator.NewEvaluator()
 		env := object.NewEnvironment()
 
@@ -136,6 +141,11 @@ func (h Handler) validateDocuments(text string) []protocol.Diagnostic {
 		}
 	}
 
+	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
+		Type:    protocol.MessageTypeInfo,
+		Message: fmt.Sprintf("%v", diags),
+	})
+
 	return diags
 }
 
@@ -144,12 +154,7 @@ func (h Handler) applyChanges(currText string, changes []protocol.TextDocumentCo
 
 	for _, change := range changes {
 		// per documentation: If range and rangeLength are omitted the new text is considered to be the full content of the document.
-		if change.RangeLength == 0 && isZeroRange(change.Range) {
-			text = change.Text
-			return text
-		} else {
-			text = h.applyRangeChanges(text, change.Range, change.Text)
-		}
+		text = h.applyRangeChanges(text, change.Range, change.Text)
 	}
 
 	return text
