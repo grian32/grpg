@@ -269,7 +269,7 @@ type BlockStatement struct {
 }
 
 func (bs *BlockStatement) Pos() Position {
-	if bs.Statements != nil {
+	if bs.Statements != nil && len(bs.Statements) > 0 {
 		first := bs.Statements[0]
 		last := bs.Statements[len(bs.Statements)-1]
 		return Position{
@@ -279,7 +279,12 @@ func (bs *BlockStatement) Pos() Position {
 			EndLine:   first.Pos().EndLine,
 		}
 	}
-	return Position{}
+	return Position{
+		Start:     bs.Token.Col,
+		End:       bs.Token.End,
+		StartLine: bs.Token.Line,
+		EndLine:   bs.Token.Line,
+	}
 }
 func (bs *BlockStatement) statementNode()       { /* noop */ }
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
