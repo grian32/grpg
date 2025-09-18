@@ -93,13 +93,30 @@ func matchType(obj object.Object, want TypeTag, env *object.Environment, eval *e
 		return ok
 	case FUNCTION:
 		fnc, ok := obj.(*object.Function)
-		_ = eval.Eval(fnc.Body, env)
+		execAll(fnc.Body, eval, env)
 		return ok
 	case NULL:
 		return true
 	}
 
 	return false
+}
+
+func execAll(block *ast.BlockStatement, eval *evaluator.Evaluator, env *object.Environment) {
+	for _, stmt := range block.Statements {
+		expr, ok := stmt.(*ast.ExpressionStatement)
+		if !ok {
+			return
+		}
+		if ifExpr, ok := expr.Expression.(*ast.IfExpression); ok {
+			execAll(ifExpr.Consequence, eval, env)
+			if ifExpr.Alternative != nil {
+				execAll(ifExpr.Alternative, eval, env)
+			}
+		} else {
+			eval.Eval(expr, env)
+		}
+	}
 }
 
 func getReturn(want TypeTag) object.Object {
