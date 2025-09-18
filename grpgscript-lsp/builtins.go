@@ -4,6 +4,7 @@ import (
 	"grpgscript/ast"
 	"grpgscript/evaluator"
 	"grpgscript/object"
+	"strings"
 )
 
 type TypeTag byte
@@ -33,14 +34,34 @@ type BuiltinDefinition struct {
 	Name          string
 	ArgumentNames []string
 	Types         []TypeTag
+	Label         string
 	ReturnType    TypeTag
 }
 
 func NewBuiltinDefinition(name string, argNames []string, types []TypeTag, returnType TypeTag) BuiltinDefinition {
+	if len(argNames) != len(types) {
+		panic("builtin definition cannot have mismatched argname and type len")
+	}
+
+	var b strings.Builder
+	b.WriteString(name)
+	b.WriteByte('(')
+	for i, s := range argNames {
+		b.WriteString(s)
+		b.WriteByte(' ')
+		b.WriteString(types[i].String())
+		if i < len(argNames)-1 {
+			b.WriteString(", ")
+		}
+	}
+	b.WriteByte(')')
+
 	return BuiltinDefinition{
 		Name:          name,
 		ArgumentNames: argNames,
 		Types:         types,
+		Label:         b.String(),
+		ReturnType:    returnType,
 	}
 }
 

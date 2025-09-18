@@ -10,3 +10,9 @@ func UppercaseAll(str string) string {
 	}
 	return string(chars)
 }
+
+func IsAlpha(char byte) bool {
+	return (char >= 'a' && char <= 'z') ||
+		(char >= 'A' && char <= 'Z') ||
+		char == '_'
+}

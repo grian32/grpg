@@ -10,12 +10,29 @@ import (
 	"grpgscript/lexer"
 	"grpgscript/object"
 	"grpgscript/parser"
+	"strings"
 
 	"go.lsp.dev/protocol"
 	"go.uber.org/zap"
 )
 
 var log *zap.Logger
+
+var langBuiltinCompletions = []string{
+	"println",
+	"len",
+	"concat",
+	"unshift",
+	"push",
+}
+
+var langBuiltinLabels = map[string]string{
+	"println": "println(STRING)",
+	"len":     "len(ARRAY|STRING) INT",
+	"concat":  "concat(ARRAY, ARRAY) ARRAY",
+	"unshift": "unshift(ARRAY, ANY) INT",
+	"push":    "push(ARRAY, ANY) INT",
+}
 
 type Handler struct {
 	protocol.Server
@@ -78,6 +95,10 @@ func (h Handler) Initialize(ctx context.Context, params *protocol.InitializePara
 				Change:    protocol.TextDocumentSyncKindIncremental,
 				Save:      &protocol.SaveOptions{IncludeText: true},
 			},
+			CompletionProvider: &protocol.CompletionOptions{
+				ResolveProvider:   false,
+				TriggerCharacters: []string{},
+			},
 		},
 		ServerInfo: &protocol.ServerInfo{
 			Name:    "grpgscriptlsp",
@@ -88,7 +109,7 @@ func (h Handler) Initialize(ctx context.Context, params *protocol.InitializePara
 
 func (h Handler) DidOpen(ctx context.Context, params *protocol.DidOpenTextDocumentParams) (err error) {
 	h.Documents.Set(params.TextDocument.URI, openParamsToDocuments(params))
-	diagnostics := h.validateDocuments(params.TextDocument.Text, ctx)
+	diagnostics := h.validateDocuments(params.TextDocument.Text)
 
 	return h.Client.PublishDiagnostics(ctx, &protocol.PublishDiagnosticsParams{
 		URI:         params.TextDocument.URI,
@@ -107,7 +128,7 @@ func (h Handler) DidChange(ctx context.Context, params *protocol.DidChangeTextDo
 	doc.Text = updatedText
 	doc.Version = params.TextDocument.Version
 
-	diagnostics := h.validateDocuments(updatedText, ctx)
+	diagnostics := h.validateDocuments(updatedText)
 
 	return h.Client.PublishDiagnostics(ctx, &protocol.PublishDiagnosticsParams{
 		URI:         params.TextDocument.URI,
@@ -115,17 +136,52 @@ func (h Handler) DidChange(ctx context.Context, params *protocol.DidChangeTextDo
 	})
 }
 
-func (h Handler) validateDocuments(text string, ctx context.Context) []protocol.Diagnostic {
+func (h Handler) Completion(ctx context.Context, params *protocol.CompletionParams) (*protocol.CompletionList, error) {
+	document, ok := h.Documents.Get(params.TextDocument.URI)
+	if !ok {
+		return nil, fmt.Errorf("document not found: %s", params.TextDocument.URI)
+	}
+	line := strings.Split(document.Text, "\n")[params.Position.Line]
+
+	prefix := getPrefixForLine(line, params.Position.Character)
+
+	list := &protocol.CompletionList{
+		IsIncomplete: true,
+		Items:        make([]protocol.CompletionItem, 0),
+	}
+	for _, s := range langBuiltinCompletions {
+		if strings.HasPrefix(s, prefix) {
+			list.Items = append(list.Items, protocol.CompletionItem{
+				Label:      langBuiltinLabels[s],
+				Kind:       protocol.CompletionItemKindFunction,
+				InsertText: s + "()",
+			})
+		}
+	}
+
+	for s, def := range h.Definitions {
+		brackets := ""
+		if len(def.Types) > 0 && def.Types[len(def.Types)-1] == FUNCTION {
+			brackets = " {}"
+		}
+		if strings.HasPrefix(s, prefix) {
+			list.Items = append(list.Items, protocol.CompletionItem{
+				Label:      def.Label,
+				Kind:       protocol.CompletionItemKindFunction,
+				InsertText: s + "()" + brackets,
+			})
+		}
+	}
+
+	return list, nil
+}
+
+func (h Handler) validateDocuments(text string) []protocol.Diagnostic {
 	l := lexer.New(text)
 	p := parser.New(l)
 	program := p.ParseProgram()
 
 	errors := p.Errors()
-
-	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
-		Type:    protocol.MessageTypeInfo,
-		Message: fmt.Sprintf("%s", text),
-	})
 
 	diags := make([]protocol.Diagnostic, len(errors))
 
@@ -173,11 +229,6 @@ func (h Handler) validateDocuments(text string, ctx context.Context) []protocol.
 		}
 	}
 
-	_ = h.Client.LogMessage(ctx, &protocol.LogMessageParams{
-		Type:    protocol.MessageTypeInfo,
-		Message: fmt.Sprintf("%v", diags),
-	})
-
 	return diags
 }
 
@@ -197,6 +248,21 @@ func (h Handler) applyRangeChanges(text string, rang protocol.Range, changed str
 	end := posToOffset(text, rang.End)
 
 	return text[:start] + changed + text[end:]
+}
+
+func getPrefixForLine(line string, col uint32) string {
+	var startCol uint32 = 0
+
+	if col > 0 {
+		for i := col - 1; i > 0; i-- {
+			if !IsAlpha(line[i]) {
+				startCol = i + 1
+				break
+			}
+		}
+	}
+
+	return line[startCol:col]
 }
 
 func openParamsToDocuments(params *protocol.DidOpenTextDocumentParams) *Document {
