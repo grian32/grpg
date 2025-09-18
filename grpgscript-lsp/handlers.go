@@ -19,12 +19,13 @@ var log *zap.Logger
 
 type Handler struct {
 	protocol.Server
-	Client    protocol.Client
-	Documents *DocumentStore
-	Env       *object.Environment
-	Objs      map[string]uint16
-	Items     map[string]uint16
-	Npcs      map[string]uint16
+	Client      protocol.Client
+	Documents   *DocumentStore
+	Env         *object.Environment
+	Objs        map[string]uint16
+	Items       map[string]uint16
+	Npcs        map[string]uint16
+	Definitions map[string]BuiltinDefinition
 }
 
 func NewHandler(ctx context.Context, server protocol.Server, client protocol.Client, objs []grpgobj.Obj, npcs []grpgnpc.Npc, items []grpgitem.Item, logger *zap.Logger) (Handler, context.Context, error) {
@@ -53,6 +54,9 @@ func NewHandler(ctx context.Context, server protocol.Server, client protocol.Cli
 		h.Objs[item.Name] = item.ItemId
 		h.Env.Set(UppercaseAll(item.Name), &object.Integer{Value: int64(item.ItemId)})
 	}
+
+	h.Definitions = BuildDefinitions()
+	MockBuiltins(h.Env, h.Definitions)
 
 	return h, ctx, nil
 }

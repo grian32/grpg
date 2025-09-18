@@ -1,6 +1,8 @@
 package grpgscript_lsp
 
 import (
+	"grpgscript/ast"
+	"grpgscript/evaluator"
 	"grpgscript/object"
 )
 
@@ -10,12 +12,36 @@ const (
 	INT TypeTag = iota
 	STRING
 	FUNCTION
+	NULL
 )
+
+func (tt TypeTag) String() string {
+	switch tt {
+	case INT:
+		return "INT"
+	case STRING:
+		return "STRING"
+	case FUNCTION:
+		return "FUNCTION"
+	case NULL:
+		return "NULL"
+	}
+	return ""
+}
 
 type BuiltinDefinition struct {
 	Name          string
 	ArgumentNames []string
 	Types         []TypeTag
+	ReturnType    TypeTag
+}
+
+func NewBuiltinDefinition(name string, argNames []string, types []TypeTag, returnType TypeTag) BuiltinDefinition {
+	return BuiltinDefinition{
+		Name:          name,
+		ArgumentNames: argNames,
+		Types:         types,
+	}
 }
 
 type NamedBuiltin struct {
@@ -23,29 +49,41 @@ type NamedBuiltin struct {
 	Builtin *object.Builtin
 }
 
+func NewNamedBuiltin(name string, builtin *object.Builtin) NamedBuiltin {
+	return NamedBuiltin{
+		Name:    name,
+		Builtin: builtin,
+	}
+}
+
 func MockBuiltin(def BuiltinDefinition, subBuiltins []NamedBuiltin) *object.Builtin {
 	return &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, pos ast.Position, errorStore *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != len(def.Types) {
-				// todo: err
+				errorStore.NewError(pos, "got %d arguments for %s, want %d arguments", len(args), def.Name, len(def.Types))
+				return getReturn(def.ReturnType)
 			}
 
-			for i, want := range def.Types {
-				if !matchType(args[i], want) {
-					// todo: err
+			if subBuiltins != nil {
+				for _, sub := range subBuiltins {
+					env.Set(sub.Name, sub.Builtin)
 				}
 			}
 
-			for _, sub := range subBuiltins {
-				env.Set(sub.Name, sub.Builtin)
+			for i, want := range def.Types {
+				eval := &evaluator.Evaluator{ErrorStore: errorStore}
+				if !matchType(args[i], want, env, eval) {
+					errorStore.NewError(pos, "arg %s for %s is not of type %s", def.ArgumentNames[i], def.Name, def.Types[i].String())
+					return getReturn(def.ReturnType)
+				}
 			}
 
-			return nil
+			return getReturn(def.ReturnType)
 		},
 	}
 }
 
-func matchType(obj object.Object, want TypeTag) bool {
+func matchType(obj object.Object, want TypeTag, env *object.Environment, eval *evaluator.Evaluator) bool {
 	switch want {
 	case INT:
 		_, ok := obj.(*object.Integer)
@@ -54,9 +92,26 @@ func matchType(obj object.Object, want TypeTag) bool {
 		_, ok := obj.(*object.String)
 		return ok
 	case FUNCTION:
-		_, ok := obj.(*object.Function)
+		fnc, ok := obj.(*object.Function)
+		_ = eval.Eval(fnc.Body, env)
 		return ok
+	case NULL:
+		return true
 	}
 
 	return false
+}
+
+func getReturn(want TypeTag) object.Object {
+	switch want {
+	case INT:
+		return &object.Integer{Value: -1}
+	case STRING:
+		return &object.String{Value: ""}
+	case FUNCTION:
+		return nil
+	case NULL:
+		return nil
+	}
+	return nil
 }
