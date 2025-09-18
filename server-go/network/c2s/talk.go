@@ -3,6 +3,7 @@ package c2s
 import (
 	"cmp"
 	"grpg/data-go/gbuf"
+	"grpgscript/ast"
 	"grpgscript/evaluator"
 	"grpgscript/object"
 	"log"
@@ -35,7 +36,7 @@ func (t *Talk) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, 
 func addTalkBuiltins(env *object.Environment, player *shared.Player, game *shared.Game, npcId uint16) {
 	// i could probably make this cleaner by making it generic but it's only 2 functions
 	env.Set("talkPlayer", &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != 1 {
 				log.Printf("warn: script tried to call talkPlayer with less or more than 1 arg\n")
 				return nil
@@ -56,7 +57,7 @@ func addTalkBuiltins(env *object.Environment, player *shared.Player, game *share
 		},
 	})
 	env.Set("talkNpc", &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != 1 {
 				log.Printf("warn: script tried to call talkNpc with less or more than 1 arg\n")
 				return nil
@@ -80,7 +81,7 @@ func addTalkBuiltins(env *object.Environment, player *shared.Player, game *share
 		},
 	})
 	env.Set("clearDialogueQueue", &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != 0 {
 				log.Printf("warn: script tried to call clearDialogueQueue with non zero args\n")
 			}
@@ -91,7 +92,7 @@ func addTalkBuiltins(env *object.Environment, player *shared.Player, game *share
 		},
 	})
 	env.Set("startDialogue", &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != 0 {
 				log.Printf("warn: script tried to call startDialogue with non zero args\n")
 			}

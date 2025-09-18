@@ -2,6 +2,7 @@ package scripts
 
 import (
 	"grpg/data-go/grpgnpc"
+	"grpgscript/ast"
 	"grpgscript/object"
 	"log"
 	"server/network"
@@ -12,7 +13,7 @@ import (
 
 func AddGlobals(env *object.Environment, game *shared.Game, npcs map[uint16]*grpgnpc.Npc) {
 	env.Set("spawnNpc", &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != 3 {
 				log.Printf("warn: script tried to call spawnNpc with less or more than 3 args")
 			}

@@ -8,8 +8,28 @@ import (
 	"strings"
 )
 
+// EvalError i think this makes more sense in evaluator along with error store but that's life
+type EvalError struct {
+	Msg      string
+	Position ast.Position
+}
+
+type ErrorStore struct {
+	Errors []EvalError
+}
+
+func (e *ErrorStore) NewError(pos ast.Position, format string, a ...any) *Error {
+	msg := fmt.Sprintf(format, a...)
+	e.Errors = append(e.Errors, EvalError{
+		Msg:      msg,
+		Position: pos,
+	})
+
+	return &Error{Message: msg}
+}
+
 type ObjectType string
-type BuiltinFunction func(env *Environment, args ...Object) Object
+type BuiltinFunction func(env *Environment, pos ast.Position, errorStore *ErrorStore, args ...Object) Object
 
 const (
 	INTEGER_OBJ      = "INTEGER"

@@ -3,6 +3,7 @@ package c2s
 import (
 	"cmp"
 	"grpg/data-go/gbuf"
+	"grpgscript/ast"
 	"grpgscript/evaluator"
 	"grpgscript/object"
 	"log"
@@ -35,12 +36,12 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 
 func addInteractBuiltins(env *object.Environment, game *shared.Game, player *shared.Player, objPos util.Vector2I, scriptManager *scripts.ScriptManager) {
 	env.Set("getObjState", &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			return &object.Integer{Value: int64(game.TrackedObjs[objPos].State)}
 		},
 	})
 	env.Set("setObjState", &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != 1 {
 				log.Printf("warn: script tries to call setObjState in onInteract ctx with non-1 arguments")
 				return nil
@@ -61,7 +62,7 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 		},
 	})
 	env.Set("playerInvAdd", &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != 1 {
 				log.Printf("warn: script tries to call playerInvAdd in onInteract ctx with non-1 arguments")
 				return nil
@@ -81,7 +82,7 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 		},
 	})
 	env.Set("timer", &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != 2 {
 				log.Printf("warn: script tries to call timer in onInteract ctx with non-2 arguments")
 				return nil

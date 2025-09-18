@@ -16,21 +16,12 @@ var boolLookup = map[bool]*object.Boolean{
 	false: FALSE,
 }
 
-type EvalError struct {
-	Msg      string
-	Position ast.Position
-}
-
-type ErrorStore struct {
-	Errors []EvalError
-}
-
 type Evaluator struct {
-	ErrorStore *ErrorStore
+	ErrorStore *object.ErrorStore
 }
 
 func NewEvaluator() *Evaluator {
-	return &Evaluator{ErrorStore: &ErrorStore{Errors: make([]EvalError, 0)}}
+	return &Evaluator{ErrorStore: &object.ErrorStore{Errors: make([]object.EvalError, 0)}}
 }
 
 func (e *Evaluator) Eval(node ast.Node, env *object.Environment) object.Object {
@@ -201,7 +192,7 @@ func (e *Evaluator) applyFunction(fn object.Object, args []object.Object, env *o
 		evaluated := e.Eval(fn.Body, extendedEnv)
 		return unwrapReturnValue(evaluated)
 	case *object.Builtin:
-		return fn.Fn(env, args...)
+		return fn.Fn(env, pos, e.ErrorStore, args...)
 	default:
 		return e.ErrorStore.NewError(pos, "not a function, %s", fn.Type())
 	}
@@ -411,16 +402,6 @@ func (e *Evaluator) evalProgram(stmts []ast.Statement, env *object.Environment) 
 	}
 
 	return result
-}
-
-func (e *ErrorStore) NewError(pos ast.Position, format string, a ...any) *object.Error {
-	msg := fmt.Sprintf(format, a...)
-	e.Errors = append(e.Errors, EvalError{
-		Msg:      msg,
-		Position: pos,
-	})
-
-	return &object.Error{Message: msg}
 }
 
 func unwrapReturnValue(obj object.Object) object.Object {

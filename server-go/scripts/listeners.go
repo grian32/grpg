@@ -1,6 +1,7 @@
 package scripts
 
 import (
+	"grpgscript/ast"
 	"grpgscript/object"
 	"log"
 )
@@ -8,7 +9,7 @@ import (
 func AddListeners(env *object.Environment, scriptManager *ScriptManager) {
 	// TODO: figure out some better way to do some of this, atleast some of the validation
 	env.Set("onInteract", &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != 2 {
 				log.Println("warn: script tried to call onInteract with non-2 arguments")
 				return nil
@@ -32,7 +33,7 @@ func AddListeners(env *object.Environment, scriptManager *ScriptManager) {
 		},
 	})
 	env.Set("onTalkNpc", &object.Builtin{
-		Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != 2 {
 				log.Printf("warn: script tried to call onTalkNpc with less or more than 2 arguments.")
 				return nil
