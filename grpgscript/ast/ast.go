@@ -269,14 +269,17 @@ type BlockStatement struct {
 }
 
 func (bs *BlockStatement) Pos() Position {
-	first := bs.Statements[0]
-	last := bs.Statements[len(bs.Statements)-1]
-	return Position{
-		Start:     first.Pos().Start,
-		End:       last.Pos().End,
-		StartLine: first.Pos().StartLine,
-		EndLine:   first.Pos().EndLine,
+	if bs.Statements != nil {
+		first := bs.Statements[0]
+		last := bs.Statements[len(bs.Statements)-1]
+		return Position{
+			Start:     first.Pos().Start,
+			End:       last.Pos().End,
+			StartLine: first.Pos().StartLine,
+			EndLine:   first.Pos().EndLine,
+		}
 	}
+	return Position{}
 }
 func (bs *BlockStatement) statementNode()       { /* noop */ }
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
