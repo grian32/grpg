@@ -44,16 +44,20 @@ func NewBuiltinDefinition(name string, argNames []string, types []TypeTag, retur
 	}
 
 	var b strings.Builder
+
 	b.WriteString(name)
 	b.WriteByte('(')
+
 	for i, s := range argNames {
 		b.WriteString(s)
 		b.WriteByte(' ')
 		b.WriteString(types[i].String())
+
 		if i < len(argNames)-1 {
 			b.WriteString(", ")
 		}
 	}
+
 	b.WriteByte(')')
 
 	return BuiltinDefinition{
