@@ -154,9 +154,10 @@ func (h Handler) Completion(ctx context.Context, params *protocol.CompletionPara
 	for _, s := range langBuiltinCompletions {
 		if strings.HasPrefix(s, prefix) {
 			list.Items = append(list.Items, protocol.CompletionItem{
-				Label:      langBuiltinLabels[s],
-				Kind:       protocol.CompletionItemKindFunction,
-				InsertText: s + "()",
+				Label:            langBuiltinLabels[s],
+				Kind:             protocol.CompletionItemKindFunction,
+				InsertTextFormat: protocol.InsertTextFormatSnippet,
+				InsertText:       s + "($0)",
 			})
 		}
 	}
@@ -174,7 +175,7 @@ func (h Handler) Completion(ctx context.Context, params *protocol.CompletionPara
 
 			if obj.Type() == object.FUNCTION_OBJ || obj.Type() == object.BUILTIN_OBJ {
 				kind = protocol.CompletionItemKindFunction
-				insertText += "()"
+				insertText += "($0)"
 
 				if def, ok := h.Definitions[s]; ok {
 					label = def.Label
@@ -187,10 +188,11 @@ func (h Handler) Completion(ctx context.Context, params *protocol.CompletionPara
 			}
 
 			list.Items = append(list.Items, protocol.CompletionItem{
-				Label:      label,
-				Kind:       kind,
-				InsertText: insertText,
-				Detail:     detail,
+				Label:            label,
+				Kind:             kind,
+				InsertTextFormat: protocol.InsertTextFormatSnippet,
+				InsertText:       insertText,
+				Detail:           detail,
 			})
 		}
 	}
