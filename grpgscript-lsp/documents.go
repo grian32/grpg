@@ -1,6 +1,7 @@
 package grpgscript_lsp
 
 import (
+	"grpgscript/object"
 	"sync"
 
 	"go.lsp.dev/protocol"
@@ -15,6 +16,7 @@ type Document struct {
 	URI     protocol.DocumentURI
 	Text    string
 	Version int32
+	Env     *object.Environment
 }
 
 func NewDocumentStore() *DocumentStore {

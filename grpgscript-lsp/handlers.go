@@ -108,8 +108,9 @@ func (h Handler) Initialize(ctx context.Context, params *protocol.InitializePara
 }
 
 func (h Handler) DidOpen(ctx context.Context, params *protocol.DidOpenTextDocumentParams) (err error) {
-	h.Documents.Set(params.TextDocument.URI, openParamsToDocuments(params))
-	diagnostics := h.validateDocuments(params.TextDocument.Text)
+	h.Documents.Set(params.TextDocument.URI, openParamsToDocuments(params, h.Env))
+	doc, _ := h.Documents.Get(params.TextDocument.URI)
+	diagnostics := h.validateDocuments(params.TextDocument.Text, doc)
 
 	return h.Client.PublishDiagnostics(ctx, &protocol.PublishDiagnosticsParams{
 		URI:         params.TextDocument.URI,
@@ -128,7 +129,7 @@ func (h Handler) DidChange(ctx context.Context, params *protocol.DidChangeTextDo
 	doc.Text = updatedText
 	doc.Version = params.TextDocument.Version
 
-	diagnostics := h.validateDocuments(updatedText)
+	diagnostics := h.validateDocuments(updatedText, doc)
 
 	return h.Client.PublishDiagnostics(ctx, &protocol.PublishDiagnosticsParams{
 		URI:         params.TextDocument.URI,
@@ -149,6 +150,7 @@ func (h Handler) Completion(ctx context.Context, params *protocol.CompletionPara
 		IsIncomplete: true,
 		Items:        make([]protocol.CompletionItem, 0),
 	}
+
 	for _, s := range langBuiltinCompletions {
 		if strings.HasPrefix(s, prefix) {
 			list.Items = append(list.Items, protocol.CompletionItem{
@@ -159,16 +161,36 @@ func (h Handler) Completion(ctx context.Context, params *protocol.CompletionPara
 		}
 	}
 
-	for s, def := range h.Definitions {
-		brackets := ""
-		if len(def.Types) > 0 && def.Types[len(def.Types)-1] == FUNCTION {
-			brackets = " {}"
-		}
+	doc, _ := h.Documents.Get(params.TextDocument.URI)
+
+	for s := range doc.Env.Names {
 		if strings.HasPrefix(s, prefix) {
+			obj, _ := doc.Env.Get(s)
+
+			label := s
+			kind := protocol.CompletionItemKindVariable
+			insertText := s
+			detail := ""
+
+			if obj.Type() == object.FUNCTION_OBJ || obj.Type() == object.BUILTIN_OBJ {
+				kind = protocol.CompletionItemKindFunction
+				insertText += "()"
+
+				if def, ok := h.Definitions[s]; ok {
+					label = def.Label
+					if len(def.Types) > 0 && def.Types[len(def.Types)-1] == FUNCTION {
+						insertText += " {}"
+					}
+				}
+			} else {
+				detail = obj.Inspect()
+			}
+
 			list.Items = append(list.Items, protocol.CompletionItem{
-				Label:      def.Label,
-				Kind:       protocol.CompletionItemKindFunction,
-				InsertText: s + "()" + brackets,
+				Label:      label,
+				Kind:       kind,
+				InsertText: insertText,
+				Detail:     detail,
 			})
 		}
 	}
@@ -176,7 +198,7 @@ func (h Handler) Completion(ctx context.Context, params *protocol.CompletionPara
 	return list, nil
 }
 
-func (h Handler) validateDocuments(text string) []protocol.Diagnostic {
+func (h Handler) validateDocuments(text string, doc *Document) []protocol.Diagnostic {
 	l := lexer.New(text)
 	p := parser.New(l)
 	program := p.ParseProgram()
@@ -206,9 +228,11 @@ func (h Handler) validateDocuments(text string) []protocol.Diagnostic {
 	// unfortunately we can only really eval if the script passes parsing.
 	if len(diags) == 0 {
 		eval := evaluator.NewEvaluator()
-		env := object.NewEnclosedEnvinronment(h.Env)
+		newEnv := cloneEnv(h.Env)
 
-		eval.Eval(program, env)
+		eval.Eval(program, newEnv)
+
+		doc.Env = newEnv
 
 		for _, err := range eval.ErrorStore.Errors {
 			diags = append(diags, protocol.Diagnostic{
@@ -265,12 +289,26 @@ func getPrefixForLine(line string, col uint32) string {
 	return line[startCol:col]
 }
 
-func openParamsToDocuments(params *protocol.DidOpenTextDocumentParams) *Document {
+func openParamsToDocuments(params *protocol.DidOpenTextDocumentParams, hEnv *object.Environment) *Document {
+	env := cloneEnv(hEnv)
+
 	return &Document{
 		URI:     params.TextDocument.URI,
 		Text:    params.TextDocument.Text,
 		Version: params.TextDocument.Version,
+		Env:     env,
 	}
+}
+
+func cloneEnv(env *object.Environment) *object.Environment {
+	newEnv := object.NewEnvironment()
+
+	for s := range env.Names {
+		obj, _ := env.Get(s)
+		newEnv.Set(s, obj)
+	}
+
+	return newEnv
 }
 
 func posToOffset(text string, pos protocol.Position) int {
