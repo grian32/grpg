@@ -35,4 +35,4 @@ The Map Editor is GUI tool for editing chunk maps and exporting them to GRPG's b
 
 GRPGScript is GRPG's content scripting language. It can technically be used independently of GRPG although you won't be able to do much with it. The language is meant to be used as a library.
 
-There is also a [tree-sitter](https://github.com/grian32/tree-sitter-grpgscript) for GRPGScript, along with an LSP located in `grpgscript-lsp/`, a Zed Plugin is also located in `grpgscript-lsp/editors/zed` and an Intellij Plugin is planned.
+There is also a [tree-sitter](https://github.com/grian32/tree-sitter-grpgscript) for GRPGScript, along with an LSP located in `grpgscript-lsp/`, a Zed Plugin is also located in `grpgscript-lsp/editors/zed`.
