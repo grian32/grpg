@@ -198,7 +198,6 @@ func (rp *RemotePlayer) Update(game *Game) {
 		} else if rp.RealY > targetY {
 			rp.RealY -= speed
 		}
-		rp.CurrFrame++
 	}
 
 	rp.PrevX = rp.X

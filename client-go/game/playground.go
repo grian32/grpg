@@ -219,17 +219,13 @@ func drawWorld(p *Playground) {
 func drawPlayer(p *Playground) {
 	player := p.Game.Player
 
-	if player.Facing == shared.LEFT {
-		sourceRec := rl.Rectangle{
-			X:      float32(player.CurrFrame * 64),
-			Y:      0,
-			Width:  64,
-			Height: 64,
-		}
-		rl.DrawTextureRec(p.PlayerTextures[player.Facing], sourceRec, rl.Vector2{X: float32(player.RealX), Y: float32(player.RealY)}, rl.White)
-	} else {
-		rl.DrawTexture(p.PlayerTextures[player.Facing], player.RealX, player.RealY, rl.White)
+	sourceRec := rl.Rectangle{
+		X:      float32(player.CurrFrame * 64),
+		Y:      0,
+		Width:  64,
+		Height: 64,
 	}
+	rl.DrawTextureRec(p.PlayerTextures[player.Facing], sourceRec, rl.Vector2{X: float32(player.RealX), Y: float32(player.RealY)}, rl.White)
 
 	rl.DrawTextEx(
 		p.Font,
@@ -242,9 +238,15 @@ func drawPlayer(p *Playground) {
 }
 
 func drawOtherPlayers(p *Playground) {
-	// TODO: render based on naim sprite sheet.
 	for _, player := range p.Game.OtherPlayers {
-		rl.DrawTexture(p.PlayerTextures[player.Facing], player.RealX, player.RealY, rl.White)
+		sourceRec := rl.Rectangle{
+			X:      float32(player.CurrFrame * 64),
+			Y:      0,
+			Width:  64,
+			Height: 64,
+		}
+		rl.DrawTextureRec(p.PlayerTextures[player.Facing], sourceRec, rl.Vector2{X: float32(player.RealX), Y: float32(player.RealY)}, rl.White)
+
 		rl.DrawTextEx(
 			p.Font,
 			player.Name,
