@@ -24,21 +24,21 @@ type Playground struct {
 }
 
 // this is reused in loginscreen.go can't rly avoid however
-var assetsDirectory = "../../grpg-assets/assets/"
+var assetsDirectory = "../../grpg-assets/"
 
 func (p *Playground) Setup() {
 	p.Game.Talkbox.CurrentName = "hi!"
 	p.Font = rl.LoadFont(assetsDirectory + "font.ttf")
 	p.CurrActionString = "Current Action: None :("
 
-	p.Textures = loadTextures(assetsDirectory + "textures.grpgtex")
-	p.Game.Objs = loadObjs(assetsDirectory + "objs.grpgobj")
-	p.Game.Tiles = loadTiles(assetsDirectory + "tiles.grpgtile")
-	p.Game.Items = loadItems(assetsDirectory + "items.grpgitem")
-	p.Game.Npcs = loadNpcs(assetsDirectory + "npcs.grpgnpc")
+	p.Textures = loadTextures(assetsDirectory + "assets/textures.grpgtex")
+	p.Game.Objs = loadObjs(assetsDirectory + "assets/objs.grpgobj")
+	p.Game.Tiles = loadTiles(assetsDirectory + "assets/tiles.grpgtile")
+	p.Game.Items = loadItems(assetsDirectory + "assets/items.grpgitem")
+	p.Game.Npcs = loadNpcs(assetsDirectory + "assets/npcs.grpgnpc")
 	p.Zones = loadMaps(assetsDirectory+"maps/", p.Game)
 
-	otherTex := loadOtherTex(assetsDirectory + "other.grpgtex")
+	otherTex := loadOtherTex(assetsDirectory + "assets/other.grpgtex")
 
 	p.GameframeRight = otherTex["gameframe_right"]
 	p.GameframeBottom = otherTex["gameframe_bottom"]

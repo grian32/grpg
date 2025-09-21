@@ -36,7 +36,7 @@ var (
 		MaxY:        0,
 		CurrentTick: 0,
 	}
-	assetsDirectory = "../../grpg-assets/assets"
+	assetsDirectory = "../../grpg-assets/"
 	scriptManager   *scripts.ScriptManager
 )
 
@@ -74,17 +74,17 @@ func main() {
 		log.Fatal("Failed to start: ", err)
 	}
 
-	objs, err := LoadObjs(assetsDirectory + "objs.grpgobj")
+	objs, err := LoadObjs(assetsDirectory + "assets/objs.grpgobj")
 	if err != nil {
 		log.Fatal("Failed loading objs: ", err)
 	}
 
-	items, err := LoadItems(assetsDirectory + "items.grpgitem")
+	items, err := LoadItems(assetsDirectory + "assets/items.grpgitem")
 	if err != nil {
 		log.Fatal("Failed loading items: ", err)
 	}
 
-	npcs, err := LoadNpcs(assetsDirectory + "npcs.grpgnpc")
+	npcs, err := LoadNpcs(assetsDirectory + "assets/npcs.grpgnpc")
 	if err != nil {
 		log.Fatal("Failed loading npcs: ", err)
 	}
