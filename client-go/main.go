@@ -6,8 +6,9 @@ import (
 	"client/shared"
 	"client/util"
 	"flag"
+	"log"
 
-	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var (
@@ -38,35 +39,56 @@ var (
 	}
 )
 
+// GameWrapper TODO: figure out some way to make this part of gscene manager maybe? main issue is cyclical import due to network, possible fix swap scene to its own pkg
+type GameWrapper struct {
+	ebScene shared.GScene
+	packets chan network.ChanPacket
+	game    *shared.Game
+}
+
+func (g *GameWrapper) Update() error {
+	processPackets(g.packets, g.game)
+	return g.ebScene.Update()
+}
+
+func (g *GameWrapper) Draw(screen *ebiten.Image) {
+	g.ebScene.Draw(screen)
+}
+
+func (g *GameWrapper) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return int(g.game.ScreenWidth), int(g.game.ScreenHeight)
+}
+
 func main() {
 	windowTitle := flag.String("title", "GRPG Client", "the window title")
 
 	flag.Parse()
 
-	rl.InitWindow(g.ScreenWidth, g.ScreenHeight, *windowTitle)
+	//rl.InitWindow(g.ScreenWidth, g.ScreenHeight, *windowTitle)
+	ebiten.SetWindowSize(int(g.ScreenWidth), int(g.ScreenHeight))
+	ebiten.SetWindowTitle(*windowTitle)
 
 	g.SceneManager.SwitchTo(&game.LoginScreen{
 		Game: g,
 	})
 
-	defer rl.CloseWindow()
+	//defer rl.CloseWindow()
 	defer g.Conn.Close()
 
 	serverPackets := make(chan network.ChanPacket, 100)
 
 	go network.ReadServerPackets(g.Conn, serverPackets)
 
-	rl.SetTargetFPS(60)
+	//rl.SetTargetFPS(60)
 
-	for !rl.WindowShouldClose() {
-		processPackets(serverPackets, g)
+	ebGame := &GameWrapper{
+		ebScene: g.SceneManager.CurrentScene,
+		packets: serverPackets,
+		game:    g,
+	}
 
-		g.SceneManager.CurrentScene.Loop()
-		rl.BeginDrawing()
-
-		g.SceneManager.CurrentScene.Render()
-
-		rl.EndDrawing()
+	if err := ebiten.RunGame(ebGame); err != nil {
+		log.Fatal(err)
 	}
 
 	// if i defer this it tries to double free for w/e reason, not sure why

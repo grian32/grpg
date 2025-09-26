@@ -1,10 +1,12 @@
 package shared
 
+import "github.com/hajimehoshi/ebiten/v2"
+
 type GScene interface {
 	Setup()
 	Cleanup()
-	Loop()
-	Render()
+	Update() error
+	Draw(screen *ebiten.Image)
 }
 
 type GSceneManager struct {

@@ -1,7 +1,6 @@
 package game
 
 import (
-	"bytes"
 	"client/shared"
 	"client/util"
 	"grpg/data-go/gbuf"
@@ -9,48 +8,43 @@ import (
 	"grpg/data-go/grpgmap"
 	"grpg/data-go/grpgnpc"
 	"grpg/data-go/grpgobj"
-	"grpg/data-go/grpgtex"
 	"grpg/data-go/grpgtile"
-	"image"
-	"image/draw"
 	"log"
 	"os"
 	"path/filepath"
-
-	"github.com/gen2brain/jpegxl"
-	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-func loadTextures(path string) map[uint16]rl.Texture2D {
-	rlTextures := make(map[uint16]rl.Texture2D)
-
-	grpgTexBytes, err := os.ReadFile(path)
-
-	if err != nil {
-		log.Fatal("Failed reading GRPGTEX file")
-	}
-
-	buf := gbuf.NewGBuf(grpgTexBytes)
-	header, err := grpgtex.ReadHeader(buf)
-	if err != nil {
-		log.Fatalf("failed reading grpgtex header: %v", err)
-	}
-
-	if string(header.Magic[:]) != "GRPGTEX\x00" {
-		log.Fatal("File is not GRPGTEX file.")
-	}
-
-	textures, err := grpgtex.ReadTextures(buf)
-	if err != nil {
-		log.Fatalf("failed reading grpgtex textures: %v", err)
-	}
-
-	for _, tex := range textures {
-		rlTextures[tex.InternalIdInt] = jpegXlImgBytesToRlTexture(tex.ImageBytes)
-	}
-
-	return rlTextures
-}
+//
+//func loadTextures(path string) map[uint16]rl.Texture2D {
+//	rlTextures := make(map[uint16]rl.Texture2D)
+//
+//	grpgTexBytes, err := os.ReadFile(path)
+//
+//	if err != nil {
+//		log.Fatal("Failed reading GRPGTEX file")
+//	}
+//
+//	buf := gbuf.NewGBuf(grpgTexBytes)
+//	header, err := grpgtex.ReadHeader(buf)
+//	if err != nil {
+//		log.Fatalf("failed reading grpgtex header: %v", err)
+//	}
+//
+//	if string(header.Magic[:]) != "GRPGTEX\x00" {
+//		log.Fatal("File is not GRPGTEX file.")
+//	}
+//
+//	textures, err := grpgtex.ReadTextures(buf)
+//	if err != nil {
+//		log.Fatalf("failed reading grpgtex textures: %v", err)
+//	}
+//
+//	for _, tex := range textures {
+//		rlTextures[tex.InternalIdInt] = jpegXlImgBytesToRlTexture(tex.ImageBytes)
+//	}
+//
+//	return rlTextures
+//}
 
 // loadMaps returns a map of zone, while mutating the passed in game to set collision maps and max x/y
 func loadMaps(dirPath string, game *shared.Game) map[util.Vector2I]grpgmap.Zone {
@@ -246,54 +240,54 @@ func loadItems(path string) map[uint16]grpgitem.Item {
 	return itemMap
 }
 
-func jpegXlImgBytesToRlTexture(imgBytes []byte) rl.Texture2D {
-	img, err := jpegxl.Decode(bytes.NewReader(imgBytes))
-	if err != nil {
-		log.Fatalf("failed reading jpegxl tex: %v", err)
-	}
+//func jpegXlImgBytesToRlTexture(imgBytes []byte) rl.Texture2D {
+//	img, err := jpegxl.Decode(bytes.NewReader(imgBytes))
+//	if err != nil {
+//		log.Fatalf("failed reading jpegxl tex: %v", err)
+//	}
+//
+//	bounds := img.Bounds()
+//	rgba := image.NewRGBA(bounds)
+//	draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
+//
+//	rlImage := rl.NewImage(
+//		rgba.Pix,
+//		int32(bounds.Dx()),
+//		int32(bounds.Dy()),
+//		1,
+//		rl.UncompressedR8g8b8a8,
+//	)
+//
+//	rlTex := rl.LoadTextureFromImage(rlImage)
+//	return rlTex
+//}
 
-	bounds := img.Bounds()
-	rgba := image.NewRGBA(bounds)
-	draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
-
-	rlImage := rl.NewImage(
-		rgba.Pix,
-		int32(bounds.Dx()),
-		int32(bounds.Dy()),
-		1,
-		rl.UncompressedR8g8b8a8,
-	)
-
-	rlTex := rl.LoadTextureFromImage(rlImage)
-	return rlTex
-}
-
-func loadOtherTex(path string) map[string]rl.Texture2D {
-	rlTextures := make(map[string]rl.Texture2D)
-
-	grpgTexBytes, err := os.ReadFile(path)
-
-	if err != nil {
-		log.Fatal("failed reading GRPGTEX file")
-	}
-
-	buf := gbuf.NewGBuf(grpgTexBytes)
-	header, err := grpgtex.ReadHeader(buf)
-	if err != nil {
-		log.Fatalf("failed reading grpgtex header: %v", err)
-	}
-
-	if string(header.Magic[:]) != "GRPGTEX\x00" {
-		log.Fatal("file is not GRPGTEX file")
-	}
-
-	textures, err := grpgtex.ReadTextures(buf)
-	if err != nil {
-		log.Fatalf("failed reading grpgtex textures: %v", err)
-	}
-	for _, tex := range textures {
-		rlTextures[string(tex.InternalIdString)] = jpegXlImgBytesToRlTexture(tex.ImageBytes)
-	}
-
-	return rlTextures
-}
+//func loadOtherTex(path string) map[string]rl.Texture2D {
+//	rlTextures := make(map[string]rl.Texture2D)
+//
+//	grpgTexBytes, err := os.ReadFile(path)
+//
+//	if err != nil {
+//		log.Fatal("failed reading GRPGTEX file")
+//	}
+//
+//	buf := gbuf.NewGBuf(grpgTexBytes)
+//	header, err := grpgtex.ReadHeader(buf)
+//	if err != nil {
+//		log.Fatalf("failed reading grpgtex header: %v", err)
+//	}
+//
+//	if string(header.Magic[:]) != "GRPGTEX\x00" {
+//		log.Fatal("file is not GRPGTEX file")
+//	}
+//
+//	textures, err := grpgtex.ReadTextures(buf)
+//	if err != nil {
+//		log.Fatalf("failed reading grpgtex textures: %v", err)
+//	}
+//	for _, tex := range textures {
+//		rlTextures[string(tex.InternalIdString)] = jpegXlImgBytesToRlTexture(tex.ImageBytes)
+//	}
+//
+//	return rlTextures
+//}
