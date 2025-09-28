@@ -16,6 +16,12 @@ import (
 type LoginScreen struct {
 	LoginButton     *gebitenui.GButton
 	UsernameTextbox *gebitenui.GTextbox
+	Font48          *gebitenui.GFont
+	Font24          *gebitenui.GFont
+	HalfWidth       float64
+	HalfHeight      float64
+	GRPGTextX       float64
+	EnterNameTextX  float64
 	LoginName       string
 	Game            *shared.Game
 }
@@ -30,19 +36,33 @@ func (l *LoginScreen) Setup() {
 	var assetsDirectory = "../../grpg-assets/"
 	fontBig, err1 := gebitenui.NewGFont(assetsDirectory+"font.ttf", 48)
 	fontSmall, err2 := gebitenui.NewGFont(assetsDirectory+"font.ttf", 24)
-	// would be same error eitherway in this case lol
+	// would be same error eitherway in this case lol, same font, diff size
 	if err := cmp.Or(err1, err2); err != nil {
 		log.Fatalf("failed creating font: %v\n", err)
 	}
 
-	_ = fontBig
+	l.Font48 = fontBig
+	l.Font24 = fontSmall
+
 	textures := loadTex(assetsDirectory + "assets/login.grpgtex")
+
+	halfScreenWidth := float64(l.Game.ScreenWidth / 2)
+	halfScreenHeight := float64(l.Game.ScreenHeight / 2)
+
+	l.HalfWidth = halfScreenWidth
+	l.HalfHeight = halfScreenHeight
+	width, _ := fontBig.MeasureString("GRPG")
+	l.GRPGTextX = halfScreenWidth - (width / 2.0)
+	nameWidth, _ := fontSmall.MeasureString("Enter Name Below")
+	l.EnterNameTextX = halfScreenWidth - (nameWidth / 2.0)
+
+	btnTex := textures["login_button"]
 
 	btn, err := gebitenui.NewButton(
 		"Login",
-		float64(l.Game.ScreenWidth/2)-60,
-		float64(l.Game.ScreenHeight/2)-200,
-		textures["login_button"],
+		halfScreenWidth-float64(btnTex.Bounds().Dx()/2.0),
+		halfScreenHeight-125,
+		btnTex,
 		fontSmall,
 		func() {
 			fmt.Println("logging in!")
@@ -53,25 +73,38 @@ func (l *LoginScreen) Setup() {
 	}
 	l.LoginButton = btn
 
+	textboxTex := textures["login_name_textbox"]
+
+	l.UsernameTextbox = gebitenui.NewTextBox(
+		halfScreenWidth-float64(textboxTex.Bounds().Dx()/2.0),
+		halfScreenHeight-250,
+		8,
+		textboxTex,
+		fontSmall,
+		24,
+		0,
+	)
 }
 
 func (l *LoginScreen) Update() error {
 	l.LoginButton.Update()
+	l.UsernameTextbox.Update()
 	return nil
 }
 
 func (l *LoginScreen) Draw(screen *ebiten.Image) {
-	screen.Fill(util.ValuesRGB(17, 33, 43))
-	l.LoginButton.Draw(screen)
-	//rl.ClearBackground(rl.Black)
+	bgColor := util.ValuesRGB(17, 33, 43)
 
-	halfWidth := l.Game.ScreenWidth / 2
-	halfHeight := l.Game.ScreenHeight / 2
+	screen.Fill(bgColor)
+	l.LoginButton.Draw(screen)
+	l.UsernameTextbox.Draw(screen)
+
+	l.Font48.Draw(screen, "GRPG", l.GRPGTextX, l.HalfHeight-375)
+	l.Font24.Draw(screen, "Enter Name Below", l.EnterNameTextX, l.HalfHeight-275)
 
 	//drawCenteredText(l, halfWidth, float32(halfHeight-375), 48.0, 0.0, "GRPG Client", rl.White)
 	//rl.DrawRectangle(halfWidth-200, halfHeight-300, 400, 200, rl.NewColor(186, 109, 22, 255))
 	//drawCenteredText(l, halfWidth, float32(halfHeight-275), 24.0, 0.4, "Enter Name Below:", rl.White)
-	drawLayout(l, halfWidth, halfHeight)
 
 	if l.Game.ShowFailedLogin {
 		//drawCenteredText(l, halfWidth, 900.0, 24.0, 0.0, "Login failed, name most likely already taken", rl.Red)
