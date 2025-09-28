@@ -2,15 +2,22 @@ package game
 
 import (
 	"client/shared"
+	"client/util"
+	"cmp"
+	"fmt"
 	"image/color"
+	"log"
+
+	gebitenui "github.com/grian32/gebiten-ui"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type LoginScreen struct {
-	//Font      rl.Font
-	LoginName string
-	Game      *shared.Game
+	LoginButton     *gebitenui.GButton
+	UsernameTextbox *gebitenui.GTextbox
+	LoginName       string
+	Game            *shared.Game
 }
 
 func (l *LoginScreen) Cleanup() {
@@ -20,35 +27,42 @@ func (l *LoginScreen) Cleanup() {
 }
 
 func (l *LoginScreen) Setup() {
-	//l.Font = rl.LoadFont(assetsDirectory + "font.ttf")
-	//
-	//rg.SetFont(l.Font)
-	//rg.SetStyle(rg.DEFAULT, rg.TEXT_SIZE, 20)
+	var assetsDirectory = "../../grpg-assets/"
+	fontBig, err1 := gebitenui.NewGFont(assetsDirectory+"font.ttf", 48)
+	fontSmall, err2 := gebitenui.NewGFont(assetsDirectory+"font.ttf", 24)
+	// would be same error eitherway in this case lol
+	if err := cmp.Or(err1, err2); err != nil {
+		log.Fatalf("failed creating font: %v\n", err)
+	}
 
-	//bgCol := util.RGBInt64Color(232, 152, 16)
-	//buttonHoverCol := util.RGBInt64Color(227, 160, 43)
-	//buttonPresedCol := util.RGBInt64Color(204, 144, 39)
-	//
-	//white := util.RGBInt64Color(255, 255, 255)
-	//rg.SetStyle(rg.TEXTBOX, rg.BASE_COLOR_PRESSED, bgCol)
-	//
-	//rg.SetStyle(rg.BUTTON, rg.BASE_COLOR_NORMAL, bgCol)
-	//rg.SetStyle(rg.BUTTON, rg.BASE_COLOR_FOCUSED, buttonHoverCol)
-	//rg.SetStyle(rg.BUTTON, rg.BASE_COLOR_PRESSED, buttonPresedCol)
-	//
-	//rg.SetStyle(rg.DEFAULT, rg.BORDER_COLOR_PRESSED, white)
-	//rg.SetStyle(rg.DEFAULT, rg.TEXT_COLOR_PRESSED, white)
-	//rg.SetStyle(rg.DEFAULT, rg.BORDER_COLOR_NORMAL, white)
-	//rg.SetStyle(rg.DEFAULT, rg.TEXT_COLOR_NORMAL, white)
-	//rg.SetStyle(rg.DEFAULT, rg.BORDER_COLOR_FOCUSED, white)
-	//rg.SetStyle(rg.DEFAULT, rg.TEXT_COLOR_FOCUSED, white)
+	_ = fontBig
+	textures := loadTex(assetsDirectory + "assets/login.grpgtex")
+
+	btn, err := gebitenui.NewButton(
+		"Login",
+		float64(l.Game.ScreenWidth/2)-60,
+		float64(l.Game.ScreenHeight/2)-200,
+		textures["login_button"],
+		fontSmall,
+		func() {
+			fmt.Println("logging in!")
+		},
+	)
+	if err != nil {
+		log.Fatalf("failed to intialize login button: %v\n\n", err)
+	}
+	l.LoginButton = btn
+
 }
 
 func (l *LoginScreen) Update() error {
+	l.LoginButton.Update()
 	return nil
 }
 
-func (l *LoginScreen) Draw(image *ebiten.Image) {
+func (l *LoginScreen) Draw(screen *ebiten.Image) {
+	screen.Fill(util.ValuesRGB(17, 33, 43))
+	l.LoginButton.Draw(screen)
 	//rl.ClearBackground(rl.Black)
 
 	halfWidth := l.Game.ScreenWidth / 2

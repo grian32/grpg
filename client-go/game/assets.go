@@ -1,6 +1,7 @@
 package game
 
 import (
+	"bytes"
 	"client/shared"
 	"client/util"
 	"grpg/data-go/gbuf"
@@ -8,10 +9,14 @@ import (
 	"grpg/data-go/grpgmap"
 	"grpg/data-go/grpgnpc"
 	"grpg/data-go/grpgobj"
+	"grpg/data-go/grpgtex"
 	"grpg/data-go/grpgtile"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/gen2brain/jpegxl"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 //
@@ -262,32 +267,37 @@ func loadItems(path string) map[uint16]grpgitem.Item {
 //	return rlTex
 //}
 
-//func loadOtherTex(path string) map[string]rl.Texture2D {
-//	rlTextures := make(map[string]rl.Texture2D)
-//
-//	grpgTexBytes, err := os.ReadFile(path)
-//
-//	if err != nil {
-//		log.Fatal("failed reading GRPGTEX file")
-//	}
-//
-//	buf := gbuf.NewGBuf(grpgTexBytes)
-//	header, err := grpgtex.ReadHeader(buf)
-//	if err != nil {
-//		log.Fatalf("failed reading grpgtex header: %v", err)
-//	}
-//
-//	if string(header.Magic[:]) != "GRPGTEX\x00" {
-//		log.Fatal("file is not GRPGTEX file")
-//	}
-//
-//	textures, err := grpgtex.ReadTextures(buf)
-//	if err != nil {
-//		log.Fatalf("failed reading grpgtex textures: %v", err)
-//	}
-//	for _, tex := range textures {
-//		rlTextures[string(tex.InternalIdString)] = jpegXlImgBytesToRlTexture(tex.ImageBytes)
-//	}
-//
-//	return rlTextures
-//}
+func loadTex(path string) map[string]*ebiten.Image {
+	ebitenTextures := make(map[string]*ebiten.Image)
+
+	grpgTexBytes, err := os.ReadFile(path)
+
+	if err != nil {
+		log.Fatal("failed reading GRPGTEX file")
+	}
+
+	buf := gbuf.NewGBuf(grpgTexBytes)
+	header, err := grpgtex.ReadHeader(buf)
+	if err != nil {
+		log.Fatalf("failed reading grpgtex header: %v", err)
+	}
+
+	if string(header.Magic[:]) != "GRPGTEX\x00" {
+		log.Fatal("file is not GRPGTEX file")
+	}
+
+	textures, err := grpgtex.ReadTextures(buf)
+	if err != nil {
+		log.Fatalf("failed reading grpgtex textures: %v", err)
+	}
+	for _, tex := range textures {
+		r := bytes.NewReader(tex.ImageBytes)
+		img, err := jpegxl.Decode(r)
+		if err != nil {
+			log.Fatalf("failed decoding jpgxl texture: %v", err)
+		}
+		ebitenTextures[string(tex.InternalIdString)] = ebiten.NewImageFromImage(img)
+	}
+
+	return ebitenTextures
+}
