@@ -1,10 +1,10 @@
 package game
 
 import (
+	"client/network/c2s"
 	"client/shared"
 	"client/util"
 	"cmp"
-	"fmt"
 	"image/color"
 	"log"
 
@@ -22,6 +22,7 @@ type LoginScreen struct {
 	HalfHeight      float64
 	GRPGTextX       float64
 	EnterNameTextX  float64
+	FailedTextX     float64
 	LoginName       string
 	Game            *shared.Game
 }
@@ -55,6 +56,8 @@ func (l *LoginScreen) Setup() {
 	l.GRPGTextX = halfScreenWidth - (width / 2.0)
 	nameWidth, _ := fontSmall.MeasureString("Enter Name Below")
 	l.EnterNameTextX = halfScreenWidth - (nameWidth / 2.0)
+	loginFailedWidth, _ := fontSmall.MeasureString("Login failed. Name already taken.")
+	l.FailedTextX = halfScreenWidth - (loginFailedWidth / 2.0)
 
 	btnTex := textures["login_button"]
 
@@ -65,7 +68,12 @@ func (l *LoginScreen) Setup() {
 		btnTex,
 		fontSmall,
 		func() {
-			fmt.Println("logging in!")
+			if l.LoginName != "" {
+				l.Game.Player.Name = l.LoginName
+				shared.SendPacket(l.Game.Conn, &c2s.LoginPacket{
+					PlayerName: l.LoginName,
+				})
+			}
 		},
 	)
 	if err != nil {
@@ -83,6 +91,9 @@ func (l *LoginScreen) Setup() {
 		fontSmall,
 		24,
 		0,
+		func(newText string) {
+			l.LoginName = newText
+		},
 	)
 }
 
@@ -99,15 +110,10 @@ func (l *LoginScreen) Draw(screen *ebiten.Image) {
 	l.LoginButton.Draw(screen)
 	l.UsernameTextbox.Draw(screen)
 
-	l.Font48.Draw(screen, "GRPG", l.GRPGTextX, l.HalfHeight-375)
-	l.Font24.Draw(screen, "Enter Name Below", l.EnterNameTextX, l.HalfHeight-275)
-
-	//drawCenteredText(l, halfWidth, float32(halfHeight-375), 48.0, 0.0, "GRPG Client", rl.White)
-	//rl.DrawRectangle(halfWidth-200, halfHeight-300, 400, 200, rl.NewColor(186, 109, 22, 255))
-	//drawCenteredText(l, halfWidth, float32(halfHeight-275), 24.0, 0.4, "Enter Name Below:", rl.White)
-
+	l.Font48.Draw(screen, "GRPG", l.GRPGTextX, l.HalfHeight-375, color.White)
+	l.Font24.Draw(screen, "Enter Name Below", l.EnterNameTextX, l.HalfHeight-275, color.White)
 	if l.Game.ShowFailedLogin {
-		//drawCenteredText(l, halfWidth, 900.0, 24.0, 0.0, "Login failed, name most likely already taken", rl.Red)
+		l.Font24.Draw(screen, "Login failed. Name already taken.", l.FailedTextX, float64(l.Game.ScreenHeight)*0.95, util.ValuesRGB(255, 0, 0))
 	}
 }
 
