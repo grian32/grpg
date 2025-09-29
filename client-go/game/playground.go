@@ -24,6 +24,7 @@ type Playground struct {
 	Game             *shared.Game
 	GameframeRight   *ebiten.Image
 	GameframeBottom  *ebiten.Image
+	SkillIcons       map[shared.Skill]*ebiten.Image
 	InventoryButton  *gebitenui.GTextureButton
 	SkillsButton     *gebitenui.GTextureButton
 	PlayerTextures   map[shared.Direction]*ebiten.Image
@@ -80,12 +81,15 @@ func (p *Playground) Setup() {
 	p.PlayerTextures[shared.LEFT] = otherTex["player_left"]
 	p.PlayerTextures[shared.RIGHT] = otherTex["player_right"]
 
+	p.SkillIcons = make(map[shared.Skill]*ebiten.Image)
+	p.SkillIcons[shared.Foraging] = otherTex["foraging_icon"]
+
 	p.InventoryButton = gebitenui.NewTextureButton(768+64+16, 0, otherTex["inv_button"], func() {
-		log.Println("clicking inventory button")
+		p.Game.GameframeContainerRenderType = shared.Inventory
 	})
 
 	p.SkillsButton = gebitenui.NewTextureButton(768+128+32, 0, otherTex["skills_button"], func() {
-		log.Println("clicking skills button")
+		p.Game.GameframeContainerRenderType = shared.Skills
 	})
 }
 
@@ -307,7 +311,9 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 			}
 		}
 	} else if p.Game.GameframeContainerRenderType == shared.Skills {
-		// TODO
+		// TODO: render skills out automatically as i add more of them
+		util.DrawImage(screen, p.SkillIcons[shared.Foraging], 768+64, 64)
+		p.Font16.Draw(screen, "1", 768+64+32, 128-16, util.Yellow)
 	}
 
 	util.DrawImage(screen, p.GameframeBottom, 0, 768)
