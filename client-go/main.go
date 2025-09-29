@@ -63,22 +63,19 @@ func main() {
 
 	flag.Parse()
 
-	//rl.InitWindow(g.ScreenWidth, g.ScreenHeight, *windowTitle)
 	ebiten.SetWindowSize(int(g.ScreenWidth), int(g.ScreenHeight))
 	ebiten.SetWindowTitle(*windowTitle)
+	ebiten.SetTPS(60)
 
 	g.SceneManager.SwitchTo(&game.LoginScreen{
 		Game: g,
 	})
 
-	//defer rl.CloseWindow()
 	defer g.Conn.Close()
 
 	serverPackets := make(chan network.ChanPacket, 100)
 
 	go network.ReadServerPackets(g.Conn, serverPackets)
-
-	//rl.SetTargetFPS(60)
 
 	ebGame := &GameWrapper{
 		gsm:     g.SceneManager,

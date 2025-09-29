@@ -2,6 +2,7 @@ package game
 
 import (
 	"client/util"
+	"fmt"
 	"grpg/data-go/grpgmap"
 	"image"
 	"image/color"
@@ -15,6 +16,9 @@ import (
 
 type Playground struct {
 	Font16           *gebitenui.GFont
+	Font18           *gebitenui.GFont
+	Font20           *gebitenui.GFont
+	Font24           *gebitenui.GFont
 	Game             *shared.Game
 	GameframeRight   *ebiten.Image
 	GameframeBottom  *ebiten.Image
@@ -35,7 +39,22 @@ func (p *Playground) Setup() {
 	if err != nil {
 		log.Fatalf("failed loading font: %v\n\n", err)
 	}
+	font18, err := gebitenui.NewGFont(assetsDirectory+"font.ttf", 18)
+	if err != nil {
+		log.Fatalf("failed loading font: %v\n\n", err)
+	}
+	font20, err := gebitenui.NewGFont(assetsDirectory+"font.ttf", 20)
+	if err != nil {
+		log.Fatalf("failed loading font: %v\n\n", err)
+	}
+	font24, err := gebitenui.NewGFont(assetsDirectory+"font.ttf", 24)
+	if err != nil {
+		log.Fatalf("failed loading font: %v\n\n", err)
+	}
 	p.Font16 = font16
+	p.Font18 = font18
+	p.Font20 = font20
+	p.Font24 = font24
 
 	p.CurrActionString = "Current Action: None :("
 
@@ -50,6 +69,7 @@ func (p *Playground) Setup() {
 
 	p.GameframeRight = otherTex["gameframe_right"]
 	p.GameframeBottom = otherTex["gameframe_bottom"]
+	fmt.Println(p.GameframeBottom)
 
 	p.PlayerTextures = make(map[shared.Direction]*ebiten.Image)
 	p.PlayerTextures[shared.UP] = otherTex["player_up"]
@@ -64,7 +84,7 @@ func (p *Playground) Cleanup() {
 }
 
 func (p *Playground) Update() error {
-	//		player := p.Game.Player
+	player := p.Game.Player
 	//
 	//		if rl.IsKeyPressed(rl.KeyW) {
 	//			player.SendMovePacket(p.Game, player.X, player.Y-1, shared.UP)
@@ -80,16 +100,16 @@ func (p *Playground) Update() error {
 	//			shared.SendPacket(p.Game.Conn, &c2s.Continue{})
 	//		}
 	//
-	//		crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
-	//
-	//		// pass crossed zone here as im already computing it for camera
-	//		player.Update(p.Game, crossedZone)
-	//
-	//		for _, rp := range p.Game.OtherPlayers {
-	//			rp.Update(p.Game)
-	//		}
-	//
-	//		updateCurrActionString(p)
+	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
+
+	//pass crossed zone here as im already computing it for camera
+	player.Update(p.Game, crossedZone)
+
+	for _, rp := range p.Game.OtherPlayers {
+		rp.Update(p.Game)
+	}
+
+	updateCurrActionString(p)
 	//
 	//		// needs to be done last but crossed zone check must be doing before player is updated as that changes prev x/y
 	//		updateCamera(p, crossedZone)
@@ -110,12 +130,12 @@ func (p *Playground) Draw(screen *ebiten.Image) {
 	//rl.BeginMode2D(camera)
 	//
 	//drawWorld(p)
-	//drawOtherPlayers(p)
+	drawOtherPlayers(p, screen)
 	drawPlayer(p, screen)
 	//
 	//rl.EndMode2D()
 	//
-	//drawGameFrame(p)
+	drawGameFrame(p, screen)
 }
 func updateCamera(p *Playground, crossedZone bool) {
 	player := p.Game.Player
@@ -158,11 +178,11 @@ func updateCurrActionString(p *Playground) {
 	trackedObj, objExists := p.Game.TrackedObjs[facingCoord]
 	trackedNpc, npcExists := p.Game.TrackedNpcs[facingCoord]
 	if objExists {
-		p.CurrActionString = trackedObj.DataObj.InteractText
+		p.CurrActionString = "Current Action: " + trackedObj.DataObj.InteractText
 	} else if npcExists {
 		p.CurrActionString = "Talk to " + trackedNpc.NpcData.Name
 	} else {
-		p.CurrActionString = "None :("
+		p.CurrActionString = "Curret Action: None :("
 	}
 }
 
@@ -227,78 +247,67 @@ func drawPlayer(p *Playground, screen *ebiten.Image) {
 			Y: 64,
 		},
 	}
-	//sub := rl.DrawTextureRec(p.PlayerTextures[player.Facing], sourceRec, rl.Vector2{X: float32(player.RealX), Y: float32(player.RealY)}, rl.White)
 	sub := util.SubImage(p.PlayerTextures[player.Facing], sourceRec)
 	util.DrawImage(screen, sub, player.RealX, player.RealY)
 
-	//rl.DrawTextEx(
-	//	p.Font,
-	//	player.Name,
-	//	rl.Vector2{X: float32(player.RealX), Y: float32(player.RealY)},
-	//	16,
-	//	0,
-	//	rl.White,
-	//)
 	p.Font16.Draw(screen, player.Name, float64(player.RealX), float64(player.RealY), color.White)
 }
 
-//
-//func drawOtherPlayers(p *Playground) {
-//	for _, player := range p.Game.OtherPlayers {
-//		sourceRec := rl.Rectangle{
-//			X:      float32(player.CurrFrame * 64),
-//			Y:      0,
-//			Width:  64,
-//			Height: 64,
-//		}
-//		rl.DrawTextureRec(p.PlayerTextures[player.Facing], sourceRec, rl.Vector2{X: float32(player.RealX), Y: float32(player.RealY)}, rl.White)
-//
-//		rl.DrawTextEx(
-//			p.Font,
-//			player.Name,
-//			rl.Vector2{X: float32(player.RealX), Y: float32(player.RealY)},
-//			16,
-//			0,
-//			rl.Red,
-//		)
-//	}
-//}
-//
-//func drawGameFrame(p *Playground) {
-//	player := p.Game.Player
-//	rl.DrawTexture(p.GameframeRight, 768, 0, rl.White)
-//
-//	currItemRealPos := rl.Vector2{X: 768 + 64, Y: 64}
-//
-//	for idx, item := range p.Game.Player.Inventory {
-//		if item.ItemId == 0 {
-//			continue
-//		}
-//
-//		data := p.Game.Items[item.ItemId]
-//		tex := p.Textures[data.Texture]
-//		rl.DrawTexture(tex, int32(currItemRealPos.X), int32(currItemRealPos.Y), rl.White)
-//
-//		textPos := rl.Vector2Add(currItemRealPos, rl.Vector2{X: 16, Y: 0})
-//		rl.DrawTextEx(p.Font, fmt.Sprintf("%d", item.Count), textPos, 18, 0, rl.White)
-//
-//		currItemRealPos.X += 64
-//		if (idx+1)%4 == 0 {
-//			currItemRealPos.Y += 64
-//			currItemRealPos.X = 768 + 64
-//		}
-//	}
-//
-//	rl.DrawTexture(p.GameframeBottom, 0, 768, rl.White)
-//
-//	talkbox := p.Game.Talkbox
-//	// x is offset from 0, y has offset added, to be placed in the right spot
-//	rl.DrawTextEx(p.Font, "Current Action: "+p.CurrActionString, rl.Vector2{X: 110, Y: 768 + 28 + 3}, 20, 0, rl.White)
-//	if talkbox.Active {
-//		rl.DrawTextEx(p.Font, talkbox.CurrentName, rl.Vector2{X: 110 + 332, Y: 768 + 28 + 3}, 24, 0, rl.White)
-//		rl.DrawTextEx(p.Font, talkbox.CurrentMessage, rl.Vector2{X: 90, Y: 840}, 24, 0, rl.White)
-//	}
-//
-//	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
-//	rl.DrawTextEx(p.Font, playerCoords, rl.Vector2{X: 768, Y: 800}, 24, 0, rl.White)
-//}
+func drawOtherPlayers(p *Playground, screen *ebiten.Image) {
+	for _, player := range p.Game.OtherPlayers {
+		currFrame64 := int(player.CurrFrame * 64)
+		sourceRec := image.Rectangle{
+			Min: image.Point{
+				X: currFrame64,
+				Y: 0,
+			},
+			Max: image.Point{
+				X: currFrame64 + 64,
+				Y: 64,
+			},
+		}
+		sub := util.SubImage(p.PlayerTextures[player.Facing], sourceRec)
+		util.DrawImage(screen, sub, player.RealX, player.RealY)
+
+		p.Font16.Draw(screen, player.Name, float64(player.RealX), float64(player.RealY), util.Red)
+	}
+}
+
+func drawGameFrame(p *Playground, screen *ebiten.Image) {
+	player := p.Game.Player
+	util.DrawImage(screen, p.GameframeRight, 768, 0)
+
+	var currItemRealPosX int32 = 768 + 64
+	var currItemRealPosY int32 = 64
+
+	for idx, item := range p.Game.Player.Inventory {
+		if item.ItemId == 0 {
+			continue
+		}
+
+		data := p.Game.Items[item.ItemId]
+		tex := p.Textures[data.Texture]
+		util.DrawImage(tex, screen, currItemRealPosX, currItemRealPosY)
+
+		p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+16), float64(currItemRealPosY), color.White)
+
+		currItemRealPosX += 64
+		if (idx+1)%4 == 0 {
+			currItemRealPosY += 64
+			currItemRealPosX = 768 + 64
+		}
+	}
+
+	util.DrawImage(screen, p.GameframeBottom, 0, 768)
+
+	talkbox := p.Game.Talkbox
+	// x is offset from 0, y has offset added, to be placed in the right spot
+	p.Font20.Draw(screen, p.CurrActionString, 110, 768+28+3, color.White)
+	if talkbox.Active {
+		p.Font24.Draw(screen, talkbox.CurrentName, 110+332, 768+28+3, color.White)
+		p.Font24.Draw(screen, talkbox.CurrentMessage, 90, 840, color.White)
+	}
+
+	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
+	p.Font24.Draw(screen, playerCoords, 768, 800, color.White)
+}
