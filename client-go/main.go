@@ -39,20 +39,19 @@ var (
 	}
 )
 
-// GameWrapper TODO: figure out some way to make this part of gscene manager maybe? main issue is cyclical import due to network, possible fix swap scene to its own pkg
 type GameWrapper struct {
-	ebScene shared.GScene
+	gsm     *shared.GSceneManager
 	packets chan network.ChanPacket
 	game    *shared.Game
 }
 
 func (g *GameWrapper) Update() error {
 	processPackets(g.packets, g.game)
-	return g.ebScene.Update()
+	return g.gsm.CurrentScene.Update()
 }
 
 func (g *GameWrapper) Draw(screen *ebiten.Image) {
-	g.ebScene.Draw(screen)
+	g.gsm.CurrentScene.Draw(screen)
 }
 
 func (g *GameWrapper) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -82,7 +81,7 @@ func main() {
 	//rl.SetTargetFPS(60)
 
 	ebGame := &GameWrapper{
-		ebScene: g.SceneManager.CurrentScene,
+		gsm:     g.SceneManager,
 		packets: serverPackets,
 		game:    g,
 	}
