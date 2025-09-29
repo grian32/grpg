@@ -231,16 +231,16 @@ func drawWorld(p *Playground, screen *ebiten.Image) {
 func drawPlayer(p *Playground, screen *ebiten.Image) {
 	player := p.Game.Player
 
-	// TODO: surely there's a better name for this
-	currFrame64 := int(player.CurrFrame * 64)
+	const frameSize = 64
+	srcX := int(player.CurrFrame) * frameSize
 	sourceRec := image.Rectangle{
 		Min: image.Point{
-			X: currFrame64,
+			X: srcX,
 			Y: 0,
 		},
 		Max: image.Point{
-			X: currFrame64 + 64,
-			Y: 64,
+			X: srcX + frameSize,
+			Y: frameSize,
 		},
 	}
 	sub := util.SubImage(p.PlayerTextures[player.Facing], sourceRec)
@@ -251,15 +251,16 @@ func drawPlayer(p *Playground, screen *ebiten.Image) {
 
 func drawOtherPlayers(p *Playground, screen *ebiten.Image) {
 	for _, player := range p.Game.OtherPlayers {
-		currFrame64 := int(player.CurrFrame * 64)
+		const frameSize = 64
+		srcX := int(player.CurrFrame) * frameSize
 		sourceRec := image.Rectangle{
 			Min: image.Point{
-				X: currFrame64,
+				X: srcX,
 				Y: 0,
 			},
 			Max: image.Point{
-				X: currFrame64 + 64,
-				Y: 64,
+				X: srcX + frameSize,
+				Y: frameSize,
 			},
 		}
 		sub := util.SubImage(p.PlayerTextures[player.Facing], sourceRec)
