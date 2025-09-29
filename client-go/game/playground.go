@@ -25,6 +25,7 @@ type Playground struct {
 	GameframeRight   *ebiten.Image
 	GameframeBottom  *ebiten.Image
 	InventoryButton  *gebitenui.GTextureButton
+	SkillsButton     *gebitenui.GTextureButton
 	PlayerTextures   map[shared.Direction]*ebiten.Image
 	Textures         map[uint16]*ebiten.Image
 	Zones            map[util.Vector2I]grpgmap.Zone
@@ -82,6 +83,10 @@ func (p *Playground) Setup() {
 	p.InventoryButton = gebitenui.NewTextureButton(768+64+16, 0, otherTex["inv_button"], func() {
 		log.Println("clicking inventory button")
 	})
+
+	p.SkillsButton = gebitenui.NewTextureButton(768+128+32, 0, otherTex["skills_button"], func() {
+		log.Println("clicking skills button")
+	})
 }
 
 func (p *Playground) Cleanup() {
@@ -118,6 +123,7 @@ func (p *Playground) Update() error {
 	updateCurrActionString(p)
 	updateCamera(p, crossedZone)
 	p.InventoryButton.Update()
+	p.SkillsButton.Update()
 	return nil
 }
 
@@ -279,25 +285,29 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 	player := p.Game.Player
 	util.DrawImage(screen, p.GameframeRight, 768, 0)
 
-	var currItemRealPosX int32 = 768 + 64
-	var currItemRealPosY int32 = 64
+	if p.Game.GameframeContainerRenderType == shared.Inventory {
+		var currItemRealPosX int32 = 768 + 64
+		var currItemRealPosY int32 = 64
 
-	for idx, item := range p.Game.Player.Inventory {
-		if item.ItemId == 0 {
-			continue
+		for idx, item := range p.Game.Player.Inventory {
+			if item.ItemId == 0 {
+				continue
+			}
+
+			data := p.Game.Items[item.ItemId]
+			tex := p.Textures[data.Texture]
+			util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
+
+			p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+16), float64(currItemRealPosY), color.White)
+
+			currItemRealPosX += 64
+			if (idx+1)%4 == 0 {
+				currItemRealPosY += 64
+				currItemRealPosX = 768 + 64
+			}
 		}
-
-		data := p.Game.Items[item.ItemId]
-		tex := p.Textures[data.Texture]
-		util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
-
-		p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+16), float64(currItemRealPosY), color.White)
-
-		currItemRealPosX += 64
-		if (idx+1)%4 == 0 {
-			currItemRealPosY += 64
-			currItemRealPosX = 768 + 64
-		}
+	} else if p.Game.GameframeContainerRenderType == shared.Skills {
+		// TODO
 	}
 
 	util.DrawImage(screen, p.GameframeBottom, 0, 768)
@@ -310,6 +320,7 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 		p.Font24.Draw(screen, talkbox.CurrentMessage, 90, 840, color.White)
 	}
 	p.InventoryButton.Draw(screen)
+	p.SkillsButton.Draw(screen)
 
 	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
 	p.Font24.Draw(screen, playerCoords, 768, 800, color.White)

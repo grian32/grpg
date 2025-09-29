@@ -32,10 +32,11 @@ var (
 			Inventory: [24]shared.InventoryItem{},
 			Name:      "",
 		},
-		Talkbox:         shared.Talkbox{},
-		OtherPlayers:    map[string]*shared.RemotePlayer{},
-		Conn:            network.StartConn(),
-		ShowFailedLogin: false,
+		Talkbox:                      shared.Talkbox{},
+		OtherPlayers:                 map[string]*shared.RemotePlayer{},
+		Conn:                         network.StartConn(),
+		ShowFailedLogin:              false,
+		GameframeContainerRenderType: shared.Inventory,
 	}
 )
 
