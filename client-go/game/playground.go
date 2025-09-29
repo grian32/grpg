@@ -24,6 +24,7 @@ type Playground struct {
 	Game             *shared.Game
 	GameframeRight   *ebiten.Image
 	GameframeBottom  *ebiten.Image
+	InventoryButton  *gebitenui.GButton
 	PlayerTextures   map[shared.Direction]*ebiten.Image
 	Textures         map[uint16]*ebiten.Image
 	Zones            map[util.Vector2I]grpgmap.Zone
@@ -71,13 +72,17 @@ func (p *Playground) Setup() {
 
 	p.GameframeRight = otherTex["gameframe_right"]
 	p.GameframeBottom = otherTex["gameframe_bottom"]
-	fmt.Println(p.GameframeBottom)
 
 	p.PlayerTextures = make(map[shared.Direction]*ebiten.Image)
 	p.PlayerTextures[shared.UP] = otherTex["player_up"]
 	p.PlayerTextures[shared.DOWN] = otherTex["player_down"]
 	p.PlayerTextures[shared.LEFT] = otherTex["player_left"]
 	p.PlayerTextures[shared.RIGHT] = otherTex["player_right"]
+
+	btn, err := gebitenui.NewButton("", 768+64+16, 0, otherTex["inv_button"], font24, func() {
+		log.Println("clicking inventory button")
+	})
+	p.InventoryButton = btn
 }
 
 func (p *Playground) Cleanup() {
@@ -113,6 +118,7 @@ func (p *Playground) Update() error {
 
 	updateCurrActionString(p)
 	updateCamera(p, crossedZone)
+	p.InventoryButton.Update()
 	return nil
 }
 
@@ -304,6 +310,7 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 		p.Font24.Draw(screen, talkbox.CurrentName, 110+332, 768+28+3, color.White)
 		p.Font24.Draw(screen, talkbox.CurrentMessage, 90, 840, color.White)
 	}
+	p.InventoryButton.Draw(screen)
 
 	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
 	p.Font24.Draw(screen, playerCoords, 768, 800, color.White)
