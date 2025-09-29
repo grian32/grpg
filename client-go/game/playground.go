@@ -24,7 +24,7 @@ type Playground struct {
 	Game             *shared.Game
 	GameframeRight   *ebiten.Image
 	GameframeBottom  *ebiten.Image
-	InventoryButton  *gebitenui.GButton
+	InventoryButton  *gebitenui.GTextureButton
 	PlayerTextures   map[shared.Direction]*ebiten.Image
 	Textures         map[uint16]*ebiten.Image
 	Zones            map[util.Vector2I]grpgmap.Zone
@@ -79,10 +79,9 @@ func (p *Playground) Setup() {
 	p.PlayerTextures[shared.LEFT] = otherTex["player_left"]
 	p.PlayerTextures[shared.RIGHT] = otherTex["player_right"]
 
-	btn, err := gebitenui.NewButton("", 768+64+16, 0, otherTex["inv_button"], font24, func() {
+	p.InventoryButton = gebitenui.NewTextureButton(768+64+16, 0, otherTex["inv_button"], func() {
 		log.Println("clicking inventory button")
 	})
-	p.InventoryButton = btn
 }
 
 func (p *Playground) Cleanup() {

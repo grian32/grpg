@@ -4,7 +4,7 @@ go 1.25
 
 require (
 	github.com/gen2brain/jpegxl v0.4.5
-	github.com/grian32/gebiten-ui v0.0.4
+	github.com/grian32/gebiten-ui v0.0.5
 	github.com/hajimehoshi/ebiten/v2 v2.8.8
 	grpg/data-go v0.0.0
 )
