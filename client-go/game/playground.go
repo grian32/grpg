@@ -1,6 +1,7 @@
 package game
 
 import (
+	"client/network/c2s"
 	"client/util"
 	"fmt"
 	"grpg/data-go/grpgmap"
@@ -8,10 +9,11 @@ import (
 	"image/color"
 	"log"
 
+	"client/shared"
+
 	gebitenui "github.com/grian32/gebiten-ui"
 	"github.com/hajimehoshi/ebiten/v2"
-
-	"client/shared"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type Playground struct {
@@ -85,21 +87,21 @@ func (p *Playground) Cleanup() {
 
 func (p *Playground) Update() error {
 	player := p.Game.Player
-	//
-	//		if rl.IsKeyPressed(rl.KeyW) {
-	//			player.SendMovePacket(p.Game, player.X, player.Y-1, shared.UP)
-	//		} else if rl.IsKeyPressed(rl.KeyS) {
-	//			player.SendMovePacket(p.Game, player.X, player.Y+1, shared.DOWN)
-	//		} else if rl.IsKeyPressed(rl.KeyA) {
-	//			player.SendMovePacket(p.Game, player.X-1, player.Y, shared.LEFT)
-	//		} else if rl.IsKeyPressed(rl.KeyD) {
-	//			player.SendMovePacket(p.Game, player.X+1, player.Y, shared.RIGHT)
-	//		} else if rl.IsKeyPressed(rl.KeyQ) {
-	//			player.SendInteractPacket(p.Game)
-	//		} else if p.Game.Talkbox.Active && rl.IsKeyPressed(rl.KeySpace) {
-	//			shared.SendPacket(p.Game.Conn, &c2s.Continue{})
-	//		}
-	//
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
+		player.SendMovePacket(p.Game, player.X, player.Y-1, shared.UP)
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		player.SendMovePacket(p.Game, player.X, player.Y+1, shared.DOWN)
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		player.SendMovePacket(p.Game, player.X-1, player.Y, shared.LEFT)
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyD) {
+		player.SendMovePacket(p.Game, player.X+1, player.Y, shared.RIGHT)
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+		player.SendInteractPacket(p.Game)
+	} else if p.Game.Talkbox.Active && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		shared.SendPacket(p.Game.Conn, &c2s.Continue{})
+	}
+
 	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
 
 	//pass crossed zone here as im already computing it for camera
@@ -110,33 +112,25 @@ func (p *Playground) Update() error {
 	}
 
 	updateCurrActionString(p)
-	//
-	//		// needs to be done last but crossed zone check must be doing before player is updated as that changes prev x/y
-	//		updateCamera(p, crossedZone)
-	//
+	updateCamera(p, crossedZone)
 	return nil
 }
 
 func (p *Playground) Draw(screen *ebiten.Image) {
-	//rl.ClearBackground(rl.Black)
-	//
-	//camera := rl.Camera2D{
-	//	Offset:   rl.Vector2{X: 0, Y: 0},
-	//	Target:   p.CameraTarget,
-	//	Rotation: 0,
-	//	Zoom:     1,
-	//}
-	//
-	//rl.BeginMode2D(camera)
-	//
-	//drawWorld(p)
-	drawOtherPlayers(p, screen)
-	drawPlayer(p, screen)
-	//
-	//rl.EndMode2D()
-	//
+	worldImage := ebiten.NewImage(1024, 1024)
+
+	drawWorld(p, worldImage)
+	drawOtherPlayers(p, worldImage)
+	drawPlayer(p, worldImage)
+
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(-p.CameraTarget.X, -p.CameraTarget.Y)
+
+	screen.DrawImage(worldImage, op)
+
 	drawGameFrame(p, screen)
 }
+
 func updateCamera(p *Playground, crossedZone bool) {
 	player := p.Game.Player
 
@@ -186,52 +180,54 @@ func updateCurrActionString(p *Playground) {
 	}
 }
 
-//	func drawWorld(p *Playground) {
-//		player := p.Game.Player
-//
-//		mapTiles := p.Zones[util.Vector2I{X: p.Game.Player.ChunkX, Y: p.Game.Player.ChunkY}]
-//
-//		for i := range 256 {
-//			localX := int32(i % 16)
-//			localY := int32(i / 16)
-//
-//			dx := localX * p.Game.TileSize
-//			dy := localY * p.Game.TileSize
-//
-//			texId := p.Game.Tiles[uint16(mapTiles.Tiles[i])].TexId
-//
-//			tex := p.Textures[texId]
-//			rl.DrawTexture(tex, dx, dy, rl.White)
-//
-//			worldPos := util.Vector2I{
-//				X: localX + (player.ChunkX * 16),
-//				Y: localY + (player.ChunkY * 16),
-//			}
-//
-//			obj := mapTiles.Objs[i]
-//			if obj != 0 {
-//				trackedObj, ok := p.Game.TrackedObjs[worldPos]
-//
-//				// fallback pretty much, might not be necessary in the future
-//				var state uint16 = 0
-//				if ok {
-//					state = uint16(trackedObj.State)
-//				}
-//
-//				objTexId := p.Game.Objs[uint16(mapTiles.Objs[i])].Textures[state]
-//
-//				objTex := p.Textures[objTexId]
-//				rl.DrawTexture(objTex, dx, dy, rl.White)
-//			} else {
-//				// TODO: maybe don't render if player is standing over?
-//				trackedNpc, ok := p.Game.TrackedNpcs[worldPos]
-//				if ok {
-//					npcTexId := trackedNpc.NpcData.TextureId
-//					rl.DrawTexture(p.Textures[npcTexId], dx, dy, rl.White)
-//				}
-//			}
-//		}
-//	}
+func drawWorld(p *Playground, screen *ebiten.Image) {
+	player := p.Game.Player
+
+	mapTiles := p.Zones[util.Vector2I{X: p.Game.Player.ChunkX, Y: p.Game.Player.ChunkY}]
+
+	for i := range 256 {
+		localX := int32(i % 16)
+		localY := int32(i / 16)
+
+		dx := localX * p.Game.TileSize
+		dy := localY * p.Game.TileSize
+
+		texId := p.Game.Tiles[uint16(mapTiles.Tiles[i])].TexId
+
+		tex := p.Textures[texId]
+
+		util.DrawImage(screen, tex, dx, dy)
+
+		worldPos := util.Vector2I{
+			X: localX + (player.ChunkX * 16),
+			Y: localY + (player.ChunkY * 16),
+		}
+
+		obj := mapTiles.Objs[i]
+		if obj != 0 {
+			trackedObj, ok := p.Game.TrackedObjs[worldPos]
+
+			// fallback pretty much, might not be necessary in the future
+			var state uint16 = 0
+			if ok {
+				state = uint16(trackedObj.State)
+			}
+
+			objTexId := p.Game.Objs[uint16(mapTiles.Objs[i])].Textures[state]
+
+			objTex := p.Textures[objTexId]
+			util.DrawImage(screen, objTex, dx, dy)
+		} else {
+			// TODO: maybe don't render if player is standing over?
+			trackedNpc, ok := p.Game.TrackedNpcs[worldPos]
+			if ok {
+				npcTexId := trackedNpc.NpcData.TextureId
+				util.DrawImage(screen, p.Textures[npcTexId], dx, dy)
+			}
+		}
+	}
+}
+
 func drawPlayer(p *Playground, screen *ebiten.Image) {
 	player := p.Game.Player
 
@@ -287,7 +283,7 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 
 		data := p.Game.Items[item.ItemId]
 		tex := p.Textures[data.Texture]
-		util.DrawImage(tex, screen, currItemRealPosX, currItemRealPosY)
+		util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
 
 		p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+16), float64(currItemRealPosY), color.White)
 
