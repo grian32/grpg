@@ -28,9 +28,6 @@ type LoginScreen struct {
 }
 
 func (l *LoginScreen) Cleanup() {
-	//if l.Font.Texture.ID != 0 {
-	//	rl.UnloadFont(l.Font)
-	//}
 }
 
 func (l *LoginScreen) Setup() {
@@ -77,7 +74,7 @@ func (l *LoginScreen) Setup() {
 		},
 	)
 	if err != nil {
-		log.Fatalf("failed to intialize login button: %v\n\n", err)
+		log.Fatalf("failed to intialize login button: %v\n", err)
 	}
 	l.LoginButton = btn
 
