@@ -19,37 +19,41 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-//
-//func loadTextures(path string) map[uint16]rl.Texture2D {
-//	rlTextures := make(map[uint16]rl.Texture2D)
-//
-//	grpgTexBytes, err := os.ReadFile(path)
-//
-//	if err != nil {
-//		log.Fatal("Failed reading GRPGTEX file")
-//	}
-//
-//	buf := gbuf.NewGBuf(grpgTexBytes)
-//	header, err := grpgtex.ReadHeader(buf)
-//	if err != nil {
-//		log.Fatalf("failed reading grpgtex header: %v", err)
-//	}
-//
-//	if string(header.Magic[:]) != "GRPGTEX\x00" {
-//		log.Fatal("File is not GRPGTEX file.")
-//	}
-//
-//	textures, err := grpgtex.ReadTextures(buf)
-//	if err != nil {
-//		log.Fatalf("failed reading grpgtex textures: %v", err)
-//	}
-//
-//	for _, tex := range textures {
-//		rlTextures[tex.InternalIdInt] = jpegXlImgBytesToRlTexture(tex.ImageBytes)
-//	}
-//
-//	return rlTextures
-//}
+func loadTextures(path string) map[uint16]*ebiten.Image {
+	ebitenTextures := make(map[uint16]*ebiten.Image)
+
+	grpgTexBytes, err := os.ReadFile(path)
+
+	if err != nil {
+		log.Fatal("Failed reading GRPGTEX file")
+	}
+
+	buf := gbuf.NewGBuf(grpgTexBytes)
+	header, err := grpgtex.ReadHeader(buf)
+	if err != nil {
+		log.Fatalf("failed reading grpgtex header: %v", err)
+	}
+
+	if string(header.Magic[:]) != "GRPGTEX\x00" {
+		log.Fatal("File is not GRPGTEX file.")
+	}
+
+	textures, err := grpgtex.ReadTextures(buf)
+	if err != nil {
+		log.Fatalf("failed reading grpgtex textures: %v", err)
+	}
+
+	for _, tex := range textures {
+		r := bytes.NewReader(tex.ImageBytes)
+		jxl, err := jpegxl.Decode(r)
+		if err != nil {
+			log.Fatalf("failed to decode jxl for tex %s: %v\n", tex.InternalIdString, err)
+		}
+		ebitenTextures[tex.InternalIdInt] = ebiten.NewImageFromImage(jxl)
+	}
+
+	return ebitenTextures
+}
 
 // loadMaps returns a map of zone, while mutating the passed in game to set collision maps and max x/y
 func loadMaps(dirPath string, game *shared.Game) map[util.Vector2I]grpgmap.Zone {
