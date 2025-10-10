@@ -44,8 +44,8 @@ func (m *Move) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, 
 	if player.DialogueQueue.MaxIndex > 0 {
 		player.DialogueQueue.Clear()
 		// rest doesnt matter just let default init here
+		network.SendPacket(player.Conn, &s2c.Talkbox{Type: s2c.CLEAR}, game)
 	}
-	network.SendPacket(player.Conn, &s2c.Talkbox{Type: s2c.CLEAR}, game)
 	if crossedZone {
 		network.UpdatePlayersByChunk(prevChunkPos, game, &s2c.PlayersUpdate{ChunkPos: prevChunkPos})
 		network.SendPacket(player.Conn, &s2c.ObjUpdate{ChunkPos: chunkPos, Rebuild: true}, game)
