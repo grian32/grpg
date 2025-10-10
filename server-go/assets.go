@@ -55,6 +55,7 @@ func LoadMaps(dir string, game *shared.Game, objs []grpgobj.Obj) {
 					y := (idx / 16) + (int(header.ChunkY) * 16)
 
 					game.CollisionMap[util.Vector2I{X: uint32(x), Y: uint32(y)}] = struct{}{}
+					game.Objs[util.Vector2I{X: uint32(x), Y: uint32(y)}] = struct{}{}
 
 					data := objs[obj-1]
 

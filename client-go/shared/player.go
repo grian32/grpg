@@ -3,7 +3,6 @@ package shared
 import (
 	"client/network/c2s"
 	"client/util"
-	"fmt"
 	"log"
 )
 
@@ -90,8 +89,10 @@ func (lp *LocalPlayer) GetFacingCoord() util.Vector2I {
 	case UP:
 		return util.Vector2I{X: lp.X, Y: lp.Y - 1}
 	default:
-		panic(fmt.Sprintf("unexpected shared.Direction: %#v", lp.Facing))
+		log.Fatalf("unexpected shared.Direction: %#v", lp.Facing)
 	}
+
+	return util.Vector2I{}
 }
 
 func (lp *LocalPlayer) Update(game *Game, crossedZone bool) {
