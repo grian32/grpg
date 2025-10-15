@@ -17,14 +17,16 @@ import (
 )
 
 type Playground struct {
-	Font16           *gebitenui.GFont
-	Font18           *gebitenui.GFont
-	Font20           *gebitenui.GFont
-	Font24           *gebitenui.GFont
-	Game             *shared.Game
-	GameframeRight   *ebiten.Image
-	GameframeBottom  *ebiten.Image
-	SkillIcons       map[shared.Skill]*ebiten.Image
+	Font16          *gebitenui.GFont
+	Font18          *gebitenui.GFont
+	Font20          *gebitenui.GFont
+	Font24          *gebitenui.GFont
+	Game            *shared.Game
+	GameframeRight  *ebiten.Image
+	GameframeBottom *ebiten.Image
+	SkillIcons      map[shared.Skill]*gebitenui.GHoverTexture
+	// TODO
+	ForagingHoverMsg string
 	InventoryButton  *gebitenui.GTextureButton
 	SkillsButton     *gebitenui.GTextureButton
 	PlayerTextures   map[shared.Direction]*ebiten.Image
@@ -81,8 +83,17 @@ func (p *Playground) Setup() {
 	p.PlayerTextures[shared.LEFT] = otherTex["player_left"]
 	p.PlayerTextures[shared.RIGHT] = otherTex["player_right"]
 
-	p.SkillIcons = make(map[shared.Skill]*ebiten.Image)
-	p.SkillIcons[shared.Foraging] = otherTex["foraging_icon"]
+	p.SkillIcons = make(map[shared.Skill]*gebitenui.GHoverTexture)
+	// TODO
+	p.ForagingHoverMsg = "hello"
+
+	hoverTex := ebiten.NewImage(80, 40)
+	hoverTex.Fill(color.White)
+
+	foragingIconTex := otherTex["foraging_icon"]
+	font16.Draw(foragingIconTex, "1", 32, 48, util.Yellow)
+
+	p.SkillIcons[shared.Foraging] = gebitenui.NewHoverTexture(768+64, 64, 768+(64*5), foragingIconTex, &p.ForagingHoverMsg, hoverTex, font16)
 
 	p.InventoryButton = gebitenui.NewTextureButton(768+64+16, 0, otherTex["inv_button"], func() {
 		p.Game.GameframeContainerRenderType = shared.Inventory
@@ -128,6 +139,7 @@ func (p *Playground) Update() error {
 	updateCamera(p, crossedZone)
 	p.InventoryButton.Update()
 	p.SkillsButton.Update()
+	p.SkillIcons[shared.Foraging].Update()
 	return nil
 }
 
@@ -311,9 +323,7 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 			}
 		}
 	} else if p.Game.GameframeContainerRenderType == shared.Skills {
-		// TODO: render skills out automatically as i add more of them
-		util.DrawImage(screen, p.SkillIcons[shared.Foraging], 768+64, 64)
-		p.Font16.Draw(screen, "1", 768+64+32, 128-16, util.Yellow)
+		p.SkillIcons[shared.Foraging].Draw(screen)
 	}
 
 	util.DrawImage(screen, p.GameframeBottom, 0, 768)

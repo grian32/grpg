@@ -30,6 +30,7 @@ var (
 		Players:     map[*shared.Player]struct{}{},
 		Connections: make(map[net.Conn]*shared.Player),
 		TrackedObjs: make(map[util.Vector2I]*shared.GameObj),
+		Objs:        make(map[util.Vector2I]struct{}),
 		TrackedNpcs: make(map[util.Vector2I]*shared.GameNpc),
 		Mu:          sync.RWMutex{},
 		MaxX:        0,
