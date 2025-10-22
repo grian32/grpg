@@ -29,6 +29,7 @@ var (
 	g = &shared.Game{
 		Players:     map[*shared.Player]struct{}{},
 		Connections: make(map[net.Conn]*shared.Player),
+		Objs:        make(map[util.Vector2I]struct{}),
 		TrackedObjs: make(map[util.Vector2I]*shared.GameObj),
 		TrackedNpcs: make(map[util.Vector2I]*shared.GameNpc),
 		Mu:          sync.RWMutex{},
