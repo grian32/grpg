@@ -84,16 +84,16 @@ func (p *Playground) Setup() {
 	p.PlayerTextures[shared.RIGHT] = otherTex["player_right"]
 
 	p.SkillIcons = make(map[shared.Skill]*gebitenui.GHoverTexture)
+
 	// TODO
-	p.ForagingHoverMsg = "hello"
+	p.ForagingHoverMsg = "1234567 XP"
 
-	hoverTex := ebiten.NewImage(80, 40)
-	hoverTex.Fill(color.White)
-
+	hoverTex := otherTex["hover_tex"]
 	foragingIconTex := otherTex["foraging_icon"]
+
 	font16.Draw(foragingIconTex, "1", 32, 48, util.Yellow)
 
-	p.SkillIcons[shared.Foraging] = gebitenui.NewHoverTexture(768+64, 64, 768+(64*5), foragingIconTex, &p.ForagingHoverMsg, hoverTex, font16)
+	p.SkillIcons[shared.Foraging] = gebitenui.NewHoverTexture(768+64, 64, 768+(64*5), foragingIconTex, &p.ForagingHoverMsg, hoverTex, font16, color.White)
 
 	p.InventoryButton = gebitenui.NewTextureButton(768+64+16, 0, otherTex["inv_button"], func() {
 		p.Game.GameframeContainerRenderType = shared.Inventory
@@ -102,6 +102,7 @@ func (p *Playground) Setup() {
 	p.SkillsButton = gebitenui.NewTextureButton(768+128+32, 0, otherTex["skills_button"], func() {
 		p.Game.GameframeContainerRenderType = shared.Skills
 	})
+	//
 }
 
 func (p *Playground) Cleanup() {
@@ -139,7 +140,10 @@ func (p *Playground) Update() error {
 	updateCamera(p, crossedZone)
 	p.InventoryButton.Update()
 	p.SkillsButton.Update()
-	p.SkillIcons[shared.Foraging].Update()
+
+	for _, si := range p.SkillIcons {
+		si.Update()
+	}
 	return nil
 }
 
@@ -323,7 +327,9 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 			}
 		}
 	} else if p.Game.GameframeContainerRenderType == shared.Skills {
-		p.SkillIcons[shared.Foraging].Draw(screen)
+		for _, si := range p.SkillIcons {
+			si.Draw(screen)
+		}
 	}
 
 	util.DrawImage(screen, p.GameframeBottom, 0, 768)
