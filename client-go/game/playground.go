@@ -38,7 +38,6 @@ type Playground struct {
 }
 
 func (p *Playground) Setup() {
-	// this is reused in loginscreen.go can't rly avoid however
 	var assetsDirectory = "../../grpg-assets/"
 
 	// need to update this to independent sizes when the time comes

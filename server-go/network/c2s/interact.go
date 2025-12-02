@@ -24,13 +24,18 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 
 	objPos := util.Vector2I{X: x, Y: y}
 
+	playerFacingCooord := player.GetFacingCoord()
 	if player.GetFacingCoord() != objPos {
-		fmt.Printf("warn: player %s tried to interact with obj that he isn't facing %d, %d", player.Name, x, y)
+		fmt.Printf("warn: player %s @ facing %d, %d, %s tried to interact with obj @ %d, %d that he isn't facing\n",
+			player.Name,
+			playerFacingCooord.X, playerFacingCooord.Y,
+			shared.DirectionString(player.Facing),
+			x, y)
 		return
 	}
 
 	if _, ok := game.Objs[objPos]; !ok {
-		fmt.Printf("warn: player %s tried to interact with obj that doesn't exist %d, %d", player.Name, x, y)
+		fmt.Printf("warn: player %s tried to interact with obj that doesn't exist %d, %d\n", player.Name, x, y)
 		return
 	}
 

@@ -97,13 +97,13 @@ func (p *Player) SaveToDB(db *sql.DB) error {
 func (p *Player) GetFacingCoord() util.Vector2I {
 	switch p.Facing {
 	case UP:
-		return util.Vector2I{X: p.Pos.X, Y: p.Pos.Y + 1}
-	case RIGHT:
-		return util.Vector2I{X: p.Pos.X - 1, Y: p.Pos.Y}
-	case DOWN:
-		return util.Vector2I{X: p.Pos.X + 1, Y: p.Pos.Y}
-	case LEFT:
 		return util.Vector2I{X: p.Pos.X, Y: p.Pos.Y - 1}
+	case RIGHT:
+		return util.Vector2I{X: p.Pos.X + 1, Y: p.Pos.Y}
+	case DOWN:
+		return util.Vector2I{X: p.Pos.X, Y: p.Pos.Y + 1}
+	case LEFT:
+		return util.Vector2I{X: p.Pos.X - 1, Y: p.Pos.Y}
 	default:
 		log.Fatalf("unexpected Direction: %#v", p.Facing)
 	}
