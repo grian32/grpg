@@ -101,7 +101,6 @@ func (p *Playground) Setup() {
 	p.SkillsButton = gebitenui.NewTextureButton(768+128+32, 0, otherTex["skills_button"], func() {
 		p.Game.GameframeContainerRenderType = shared.Skills
 	})
-	//
 }
 
 func (p *Playground) Cleanup() {
