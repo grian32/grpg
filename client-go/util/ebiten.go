@@ -14,5 +14,6 @@ func SubImage(orig *ebiten.Image, rect image.Rectangle) *ebiten.Image {
 func DrawImage(screen *ebiten.Image, img *ebiten.Image, x, y int32) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(x), float64(y))
+	op.Filter = ebiten.FilterNearest
 	screen.DrawImage(img, op)
 }

@@ -155,6 +155,7 @@ func (p *Playground) Draw(screen *ebiten.Image) {
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-p.CameraTarget.X, -p.CameraTarget.Y)
+	op.Filter = ebiten.FilterNearest
 
 	screen.DrawImage(worldImage, op)
 

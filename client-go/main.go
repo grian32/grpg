@@ -15,6 +15,7 @@ var (
 	g = &shared.Game{
 		ScreenWidth:  1152,
 		ScreenHeight: 960,
+		ScreenRatio:  1152.0/960.0,
 		TileSize:     64,
 		MaxX:         0,
 		MaxY:         0,
@@ -48,6 +49,15 @@ type GameWrapper struct {
 
 func (g *GameWrapper) Update() error {
 	processPackets(g.packets, g.game)
+	ww, wh := ebiten.WindowSize();
+	currRatio := float64(ww) / float64(wh);
+
+	if currRatio > g.game.ScreenRatio {
+		ebiten.SetWindowSize(int(float64(wh) * g.game.ScreenRatio), wh)
+	} else {
+		ebiten.SetWindowSize(ww, int(float64(ww) / g.game.ScreenRatio))
+	}
+
 	return g.gsm.CurrentScene.Update()
 }
 
@@ -66,6 +76,8 @@ func main() {
 
 	ebiten.SetWindowSize(int(g.ScreenWidth), int(g.ScreenHeight))
 	ebiten.SetWindowTitle(*windowTitle)
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	ebiten.SetWindowSizeLimits(int(g.ScreenWidth / 2), int(g.ScreenHeight / 2), int(g.ScreenWidth), int(g.ScreenHeight))
 	ebiten.SetTPS(60)
 
 	g.SceneManager.SwitchTo(&game.LoginScreen{

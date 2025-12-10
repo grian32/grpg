@@ -21,6 +21,7 @@ const (
 type Game struct {
 	ScreenWidth  int32
 	ScreenHeight int32
+	ScreenRatio  float64
 	MaxX         uint16
 	MaxY         uint16
 	CollisionMap map[util.Vector2I]struct{}
