@@ -7,3 +7,7 @@ func MinI(val, min int32) int32 {
 		return min
 	}
 }
+
+func StringPtr(s string) *string {
+	return &s
+}

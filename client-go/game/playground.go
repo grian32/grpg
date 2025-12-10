@@ -25,8 +25,9 @@ type Playground struct {
 	GameframeRight  *ebiten.Image
 	GameframeBottom *ebiten.Image
 	SkillIcons      map[shared.Skill]*gebitenui.GHoverTexture
+	SkillHoverMsgs 	map[shared.Skill]*string;
 	// TODO
-	ForagingHoverMsg string
+	// ForagingHoverMsg string
 	InventoryButton  *gebitenui.GTextureButton
 	SkillsButton     *gebitenui.GTextureButton
 	PlayerTextures   map[shared.Direction]*ebiten.Image
@@ -83,16 +84,16 @@ func (p *Playground) Setup() {
 	p.PlayerTextures[shared.RIGHT] = otherTex["player_right"]
 
 	p.SkillIcons = make(map[shared.Skill]*gebitenui.GHoverTexture)
+	p.SkillHoverMsgs = make(map[shared.Skill]*string)
 
-	// TODO
-	p.ForagingHoverMsg = "1234567 XP"
-
+	// TODO: refactor this into its own function at some point when i add more skills, it'll probably end up being rather manual unfortunately, don't think there's much i can do
 	hoverTex := otherTex["hover_tex"]
 	foragingIconTex := otherTex["foraging_icon"]
 
 	font16.Draw(foragingIconTex, "1", 32, 48, util.Yellow)
 
-	p.SkillIcons[shared.Foraging] = gebitenui.NewHoverTexture(768+64, 64, 768+(64*5), foragingIconTex, &p.ForagingHoverMsg, hoverTex, font16, color.White)
+	p.SkillHoverMsgs[shared.Foraging] = util.StringPtr("1234567 XP");
+	p.SkillIcons[shared.Foraging] = gebitenui.NewHoverTexture(768+64, 64, 768+(64*5), foragingIconTex, p.SkillHoverMsgs[shared.Foraging], hoverTex, font16, color.White)
 
 	p.InventoryButton = gebitenui.NewTextureButton(768+64+16, 0, otherTex["inv_button"], func() {
 		p.Game.GameframeContainerRenderType = shared.Inventory
