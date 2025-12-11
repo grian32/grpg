@@ -38,4 +38,4 @@
   ] @operator
 
 ((identifier) @function.builtin
-  (#match? @function.builtin "^(println|len|push|unshift|concat|onInteract|onTalkNpc|spawnNpc|getObjState|setObjState|playerInvAdd|timer|talkPlayer|talkNpc|clearDialogueQueue|startDialogue)$"))
+  (#match? @function.builtin "^(println|len|push|unshift|concat|onInteract|onTalkNpc|spawnNpc|getObjState|setObjState|playerInvAdd|playerAddXp|timer|talkPlayer|talkNpc|clearDialogueQueue|startDialogue)$"))

@@ -8,7 +8,7 @@ repository = "https://github.com/grian32/grpg/"
 
 [language_servers.grpgscriptlsp]
 name = "grpgscriptlsp"
-language = "GRPGScript"
+languages = ["GRPGScript"]
 
 [grammars.grpgscript]
 repository = "https://github.com/grian32/tree-sitter-grpgscript"
