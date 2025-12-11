@@ -92,7 +92,8 @@ func (p *Playground) Setup() {
 
 	font16.Draw(foragingIconTex, "1", 32, 48, util.Yellow)
 
-	p.SkillHoverMsgs[shared.Foraging] = util.StringPtr("1234567 XP");
+	// TODO make hovertex bigger for 8 digit
+	p.SkillHoverMsgs[shared.Foraging] = util.StringPtr("12345678 XP");
 	p.SkillIcons[shared.Foraging] = gebitenui.NewHoverTexture(768+64, 64, 768+(64*5), foragingIconTex, p.SkillHoverMsgs[shared.Foraging], hoverTex, font16, color.White)
 
 	p.InventoryButton = gebitenui.NewTextureButton(768+64+16, 0, otherTex["inv_button"], func() {

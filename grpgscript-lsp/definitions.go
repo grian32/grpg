@@ -47,6 +47,13 @@ func BuildDefinitions() map[string]BuiltinDefinition {
 		NULL,
 	)
 
+	defMap["playerAddXp"] = NewBuiltinDefinition(
+		"playerAddXp",
+		[]string{"xpId", "xpAmount"},
+		[]TypeTag{INT, INT},
+		NULL,
+	)
+
 	defMap["timer"] = NewBuiltinDefinition(
 		"timer",
 		[]string{"tickCount", "callback"},
@@ -92,6 +99,7 @@ func MockBuiltins(env *object.Environment, definitions map[string]BuiltinDefinit
 		NewNamedBuiltin("getObjState", MockBuiltin(definitions["getObjState"], nil)),
 		NewNamedBuiltin("setObjState", MockBuiltin(definitions["setObjState"], nil)),
 		NewNamedBuiltin("playerInvAdd", MockBuiltin(definitions["playerInvAdd"], nil)),
+		NewNamedBuiltin("playerAddXp", MockBuiltin(definitions["playerAddXp"], nil)),
 		NewNamedBuiltin("timer", MockBuiltin(definitions["timer"], nil)),
 	}))
 

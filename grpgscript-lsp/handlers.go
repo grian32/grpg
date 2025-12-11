@@ -72,6 +72,8 @@ func NewHandler(ctx context.Context, server protocol.Server, client protocol.Cli
 		h.Env.Set(UppercaseAll(item.Name), &object.Integer{Value: int64(item.ItemId)})
 	}
 
+	h.Env.Set("FORAGING", &object.Integer{Value: 0})
+
 	h.Definitions = BuildDefinitions()
 	MockBuiltins(h.Env, h.Definitions)
 
