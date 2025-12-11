@@ -7,6 +7,11 @@ import (
 	"server/util"
 )
 
+type SkillInfo struct {
+	Level uint8
+	XP    uint32
+}
+
 type Player struct {
 	Pos util.Vector2I
 	// might not need these will see how design pans out
@@ -15,6 +20,7 @@ type Player struct {
 	Inventory     Inventory
 	Name          string
 	DialogueQueue DialogueQueue
+	Skills		  map[Skill]*SkillInfo
 	Conn          net.Conn
 }
 
@@ -44,6 +50,10 @@ func (p *Player) LoadFromDB(db *sql.DB) error {
 	p.Pos = pos
 	p.ChunkPos = chunkPos
 	p.Inventory = inv
+
+	// TODO
+	p.Skills = make(map[Skill]*SkillInfo)
+	p.Skills[FORAGING] = &SkillInfo{Level: 1, XP: 0}
 
 	return nil
 }
@@ -108,4 +118,18 @@ func (p *Player) GetFacingCoord() util.Vector2I {
 		log.Fatalf("unexpected Direction: %#v", p.Facing)
 	}
 	return util.Vector2I{}
+}
+
+func (p *Player) AddXp(skill Skill, xpAmount uint32) {
+	xp := p.Skills[skill].XP
+	if xp >= util.MAX_XP {
+		return
+	}
+
+	if xp + xpAmount >= util.MAX_XP {
+		p.Skills[skill].XP = util.MAX_XP;
+		return
+	}
+
+	p.Skills[skill].XP = xp + xpAmount
 }

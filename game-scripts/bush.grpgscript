@@ -2,6 +2,7 @@ onInteract(BERRY_BUSH) {
     if (getObjState() == 0) {
         setObjState(1);
         playerInvAdd(BERRIES);
+        playerAddXp(FORAGING, 30);
 
         timer(100) {
             setObjState(0);

@@ -62,6 +62,11 @@ func (s *ScriptManager) LoadNpcConstants(npcs map[uint16]*grpgnpc.Npc) {
 	}
 }
 
+func (s *ScriptManager) LoadSkillConstants() {
+	// TODO: might need to modify this to be based off of the enum or something? but seems effort compared to this, since reflection
+	s.Env.Set("FORAGING", &object.Integer{Value: int64(0)})
+}
+
 func (s *ScriptManager) LoadScripts(path string, game *shared.Game, npcs map[uint16]*grpgnpc.Npc) error {
 	env := object.NewEnclosedEnvinronment(s.Env)
 	AddListeners(env, s)

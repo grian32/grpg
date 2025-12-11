@@ -77,6 +77,8 @@ var LEVEL_XP [75]uint32 = [75]uint32 {
     9607040,
 }
 
+const MAX_XP uint32 = 99_999_999
+
 func GetXPForLevel(level uint8) uint32 {
 	return LEVEL_XP[level - 1]
 }

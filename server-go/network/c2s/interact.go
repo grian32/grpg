@@ -98,6 +98,37 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 			return nil
 		},
 	})
+	env.Set("playerAddXp", &object.Builtin{
+		Fn: func(env *object.Environment, pos ast.Position, errorStore *object.ErrorStore, args ...object.Object) object.Object {
+			if len(args) != 2 {
+				log.Printf("warn: script tries to call playerAddXp in onInteract ctx with non-2 arguments")
+				return nil
+			}
+
+			skillId, ok := args[0].(*object.Integer)
+			if !ok {
+				log.Printf("warn: script tries to call playerAddXp in onInteract ctx without int arg in skill position")
+				return nil
+			}
+
+			amount, ok := args[1].(*object.Integer)
+			if !ok {
+				log.Printf("warn: script tries to call playerAddXp in onInteract ctx without int arg in xp position")
+				return nil
+			}
+
+			// TODO: need some better way of checking this lol
+			if skillId.Value != 0 {
+				log.Printf("warn: script tries to call playerAddXp in onInteract ctx with invalid skill id")
+				return nil
+			}
+
+			player.AddXp(shared.Skill(skillId.Value), uint32(amount.Value))
+			log.Printf("%v", player.Skills)
+
+			return nil
+		},
+	})
 	env.Set("timer", &object.Builtin{
 		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
 			if len(args) != 2 {
