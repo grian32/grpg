@@ -8,15 +8,13 @@ impl zed::Extension for GRPGScriptLsp{
     where
         Self: Sized
     {
-        let work_dir = std::env::current_dir().unwrap();
-        let binary_path = zed::download_file(
+        zed::download_file(
             "http://51.83.129.212:4022/assets/grpgscriptlsp",
             "./grpgscriptlsp",
             zed_extension_api::DownloadedFileType::Uncompressed,
-        );
-        binary_path.expect("failed to dl lsp");
+        ).expect("grpgscriptlsp: failed to download lsp binary");
 
-        zed::make_file_executable("./grpgscriptlsp").unwrap();
+        zed::make_file_executable("./grpgscriptlsp").expect("grpgscriptlsp: failed to make lsp binary executable");
 
         Self {  }
     }
