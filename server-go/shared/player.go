@@ -132,4 +132,15 @@ func (p *Player) AddXp(skill Skill, xpAmount uint32) {
 	}
 
 	p.Skills[skill].XP = xp + xpAmount
+
+	newXp := p.Skills[skill].XP
+
+	if p.Skills[skill].Level < 75 {
+		for i := p.Skills[skill].Level; i < 74; i++ {
+			if newXp > util.LEVEL_XP[i] {
+				p.Skills[skill].Level = uint8(i + 1);
+				break;
+			}
+		}
+	}
 }
