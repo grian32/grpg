@@ -124,7 +124,6 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 			}
 
 			player.AddXp(shared.Skill(skillId.Value), uint32(amount.Value))
-			log.Printf("%v", player.Skills)
 
 			return nil
 		},

@@ -97,6 +97,7 @@ func main() {
 	scriptManager.LoadObjConstants(objs)
 	scriptManager.LoadItemConstants(items)
 	scriptManager.LoadNpcConstants(npcs)
+	scriptManager.LoadSkillConstants()
 
 	err = scriptManager.LoadScripts("../game-scripts", g, npcs)
 	if err != nil {
