@@ -7,11 +7,6 @@ import (
 	"server/util"
 )
 
-type SkillInfo struct {
-	Level uint8
-	XP    uint32
-}
-
 type Player struct {
 	Pos util.Vector2I
 	// might not need these will see how design pans out
@@ -25,12 +20,13 @@ type Player struct {
 }
 
 func (p *Player) LoadFromDB(db *sql.DB) error {
-	row := db.QueryRow("SELECT x, y, inventory FROM players WHERE name = ?", p.Name)
+	row := db.QueryRow("SELECT x, y, inventory, skills FROM players WHERE name = ?", p.Name)
 
 	var loadedX int
 	var loadedY int
 	var invBlob []byte
-	err := row.Scan(&loadedX, &loadedY, &invBlob)
+	var skillsBlob []byte
+	err := row.Scan(&loadedX, &loadedY, &invBlob, &skillsBlob)
 
 	if err == sql.ErrNoRows {
 		return nil
@@ -46,14 +42,15 @@ func (p *Player) LoadFromDB(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
+	skills, err := DecodeSkillsFromBlob(skillsBlob);
+	if err != nil {
+		return err
+	}
 
 	p.Pos = pos
 	p.ChunkPos = chunkPos
 	p.Inventory = inv
-
-	// TODO
-	p.Skills = make(map[Skill]*SkillInfo)
-	p.Skills[FORAGING] = &SkillInfo{Level: 1, XP: 0}
+	p.Skills = skills;
 
 	return nil
 }
@@ -73,24 +70,24 @@ func (p *Player) SaveToDB(db *sql.DB) error {
 	}
 
 	if err == sql.ErrNoRows {
-		stmt, err := tx.Prepare("INSERT INTO players(player_id, name, x, y, inventory) VALUES (NULL, ?, ?, ?)")
+		stmt, err := tx.Prepare("INSERT INTO players(player_id, name, x, y, inventory, skills) VALUES (NULL, ?, ?, ?, ?)")
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob())
+		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills))
 		if err != nil {
 			return err
 		}
 	} else {
-		stmt, err := tx.Prepare("UPDATE players SET x=?, y=?, inventory=? WHERE player_id=?")
+		stmt, err := tx.Prepare("UPDATE players SET x=?, y=?, inventory=?, skills=? WHERE player_id=?")
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), existingId)
+		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), existingId)
 		if err != nil {
 			return err
 		}
