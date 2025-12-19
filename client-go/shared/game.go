@@ -33,6 +33,7 @@ type Game struct {
 	Items                        map[uint16]grpgitem.Item
 	TrackedObjs                  map[util.Vector2I]*GameObj
 	TrackedNpcs                  map[util.Vector2I]*GameNpc
+	Skills						 map[Skill]*SkillInfo
 	TileSize                     int32
 	SceneManager                 *GSceneManager
 	Player                       *LocalPlayer

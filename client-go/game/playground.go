@@ -26,8 +26,6 @@ type Playground struct {
 	GameframeBottom *ebiten.Image
 	SkillIcons      map[shared.Skill]*gebitenui.GHoverTexture
 	SkillHoverMsgs 	map[shared.Skill]*string;
-	// TODO
-	// ForagingHoverMsg string
 	InventoryButton  *gebitenui.GTextureButton
 	SkillsButton     *gebitenui.GTextureButton
 	PlayerTextures   map[shared.Direction]*ebiten.Image

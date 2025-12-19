@@ -70,6 +70,13 @@ func (g *GameWrapper) Layout(outsideWidth, outsideHeight int) (screenWidth, scre
 }
 
 func main() {
+	g.Skills = make(map[shared.Skill]*shared.SkillInfo);
+	for i := shared.Foraging; i <= shared.Foraging; i++ {
+		g.Skills[i] = &shared.SkillInfo{
+			Level: 1,
+			XP: 0,
+		}
+	}
 	windowTitle := flag.String("title", "GRPG Client", "the window title")
 
 	flag.Parse()
