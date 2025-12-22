@@ -23,6 +23,8 @@ var (
 		ObjIdByLoc:   make(map[util.Vector2I]uint16),
 		TrackedObjs:  make(map[util.Vector2I]*shared.GameObj),
 		TrackedNpcs:  make(map[util.Vector2I]*shared.GameNpc),
+		Skills: 		make(map[shared.Skill]*shared.SkillInfo),
+		SkillHoverMsgs: make(map[shared.Skill]*string),
 		SceneManager: &shared.GSceneManager{},
 		Player: &shared.LocalPlayer{
 			X:         0,
@@ -70,12 +72,12 @@ func (g *GameWrapper) Layout(outsideWidth, outsideHeight int) (screenWidth, scre
 }
 
 func main() {
-	g.Skills = make(map[shared.Skill]*shared.SkillInfo);
 	for i := shared.Foraging; i <= shared.Foraging; i++ {
 		g.Skills[i] = &shared.SkillInfo{
 			Level: 1,
 			XP: 0,
 		}
+		g.SkillHoverMsgs[i] = util.StringPtr("0 XP");
 	}
 	windowTitle := flag.String("title", "GRPG Client", "the window title")
 

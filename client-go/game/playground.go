@@ -25,7 +25,6 @@ type Playground struct {
 	GameframeRight  *ebiten.Image
 	GameframeBottom *ebiten.Image
 	SkillIcons      map[shared.Skill]*gebitenui.GHoverTexture
-	SkillHoverMsgs 	map[shared.Skill]*string;
 	InventoryButton  *gebitenui.GTextureButton
 	SkillsButton     *gebitenui.GTextureButton
 	PlayerTextures   map[shared.Direction]*ebiten.Image
@@ -82,17 +81,12 @@ func (p *Playground) Setup() {
 	p.PlayerTextures[shared.RIGHT] = otherTex["player_right"]
 
 	p.SkillIcons = make(map[shared.Skill]*gebitenui.GHoverTexture)
-	p.SkillHoverMsgs = make(map[shared.Skill]*string)
 
 	// TODO: refactor this into its own function at some point when i add more skills, it'll probably end up being rather manual unfortunately, don't think there's much i can do
 	hoverTex := otherTex["hover_tex"]
 	foragingIconTex := otherTex["foraging_icon"]
 
-	font16.Draw(foragingIconTex, "1", 32, 48, util.Yellow)
-
-	// TODO make hovertex bigger for 8 digit
-	p.SkillHoverMsgs[shared.Foraging] = util.StringPtr("12345678 XP");
-	p.SkillIcons[shared.Foraging] = gebitenui.NewHoverTexture(768+64, 64, 768+(64*5), foragingIconTex, p.SkillHoverMsgs[shared.Foraging], hoverTex, font16, color.White)
+	p.SkillIcons[shared.Foraging] = gebitenui.NewHoverTexture(768+64, 64, 768+(64*5), foragingIconTex, p.Game.SkillHoverMsgs[shared.Foraging], hoverTex, font16, color.White)
 
 	p.InventoryButton = gebitenui.NewTextureButton(768+64+16, 0, otherTex["inv_button"], func() {
 		p.Game.GameframeContainerRenderType = shared.Inventory
@@ -328,6 +322,10 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 	} else if p.Game.GameframeContainerRenderType == shared.Skills {
 		for _, si := range p.SkillIcons {
 			si.Draw(screen)
+		}
+		for i := shared.Foraging; i <= shared.Foraging; i++ {
+			// TODO: maybe string can be pre computed by packet here?
+			p.Font16.Draw(screen, fmt.Sprintf("%d", p.Game.Skills[i].Level), 768+64+32, 64+48, util.Yellow)
 		}
 	}
 

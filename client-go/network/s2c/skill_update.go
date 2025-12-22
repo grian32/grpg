@@ -29,8 +29,11 @@ func (s *SkillUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 			return
 		}
 
-		game.Skills[shared.Skill(skillId)].Level = level;
-		game.Skills[shared.Skill(skillId)].XP = xp;
-		fmt.Printf("skills update: %v\n", game.Skills[shared.Foraging]);
+
+		skill := shared.Skill(skillId)
+		game.Skills[skill].Level = level;
+		game.Skills[skill].XP = xp;
+		// decent chance this whole system is dogshit perf, need to reconsider it at some point lol
+		*game.SkillHoverMsgs[skill] = fmt.Sprintf("%d XP", xp)
 	}
 }

@@ -34,6 +34,7 @@ type Game struct {
 	TrackedObjs                  map[util.Vector2I]*GameObj
 	TrackedNpcs                  map[util.Vector2I]*GameNpc
 	Skills						 map[Skill]*SkillInfo
+	SkillHoverMsgs 				 map[Skill]*string;
 	TileSize                     int32
 	SceneManager                 *GSceneManager
 	Player                       *LocalPlayer
