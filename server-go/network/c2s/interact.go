@@ -126,7 +126,7 @@ func addInteractBuiltins(env *object.Environment, game *shared.Game, player *sha
 			player.AddXp(shared.Skill(skillId.Value), uint32(amount.Value))
 			// i fear i can't do this inside player.AddXp due to import cycles :s
 			network.SendPacket(player.Conn, &s2c.SkillUpdate{
-				SkillId: shared.Skill(skillId.Value),
+				SkillIds: []shared.Skill{shared.Skill(skillId.Value)},
 				Player: player,
 			}, game)
 

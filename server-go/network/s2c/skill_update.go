@@ -7,7 +7,7 @@ import (
 
 type SkillUpdate struct {
 	Player *shared.Player
-	SkillId shared.Skill
+	SkillIds []shared.Skill
 }
 
 func (s *SkillUpdate) Opcode() byte {
@@ -15,7 +15,11 @@ func (s *SkillUpdate) Opcode() byte {
 }
 
 func (s *SkillUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
-	buf.WriteByte(byte(s.SkillId))
-	buf.WriteByte(s.Player.Skills[s.SkillId].Level)
-	buf.WriteUint32(s.Player.Skills[s.SkillId].XP)
+	buf.WriteByte(byte(len(s.SkillIds)))
+
+	for _, skillId := range s.SkillIds {
+		buf.WriteByte(byte(skillId))
+		buf.WriteByte(s.Player.Skills[skillId].Level)
+		buf.WriteUint32(s.Player.Skills[skillId].XP)
+	}
 }

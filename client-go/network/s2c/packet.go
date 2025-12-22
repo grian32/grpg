@@ -23,7 +23,7 @@ var (
 	InventoryUpdateData = PacketData{Opcode: 0x05, Length: -1, Handler: &InventoryUpdate{}}
 	NpcUpdateData       = PacketData{Opcode: 0x06, Length: -1, Handler: &NpcUpdate{}}
 	TalkboxData         = PacketData{Opcode: 0x07, Length: -1, Handler: &Talkbox{}}
-	SkillUpdateData 	= PacketData{Opcode: 0x08, Length: 6, Handler: &SkillUpdate{}}
+	SkillUpdateData 	= PacketData{Opcode: 0x08, Length: 7, Handler: &SkillUpdate{}}
 )
 
 var Packets = map[byte]PacketData{
