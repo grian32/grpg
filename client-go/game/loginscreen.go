@@ -11,6 +11,7 @@ import (
 	gebitenui "github.com/grian32/gebiten-ui"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 type LoginScreen struct {
@@ -25,9 +26,11 @@ type LoginScreen struct {
 	FailedTextX     float64
 	LoginName       string
 	Game            *shared.Game
+	MusicPlayer     *audio.Player
 }
 
 func (l *LoginScreen) Cleanup() {
+	l.MusicPlayer.Pause()
 }
 
 func (l *LoginScreen) Setup() {
@@ -92,6 +95,13 @@ func (l *LoginScreen) Setup() {
 			l.LoginName = newText
 		},
 	)
+
+	audio, err := loadLoginMusic(assetsDirectory)
+	if err != nil {
+		log.Fatalf("failed to load login audio: %v\n", err)
+	}
+	l.MusicPlayer = audio
+	l.MusicPlayer.Play()
 }
 
 func (l *LoginScreen) Update() error {
