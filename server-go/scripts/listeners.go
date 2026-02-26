@@ -1,58 +1,48 @@
 package scripts
 
-import (
-	"grpgscript/ast"
-	"grpgscript/object"
-	"log"
-)
+type ObjInteractFunc func(ctx *ObjInteractCtx)
+type NpcTalkFunc func(ctx *NpcTalkContext)
 
-func AddListeners(env *object.Environment, scriptManager *ScriptManager) {
-	// TODO: figure out some better way to do some of this, atleast some of the validation
-	env.Set("onInteract", &object.Builtin{
-		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
-			if len(args) != 2 {
-				log.Println("warn: script tried to call onInteract with non-2 arguments")
-				return nil
-			}
+type PendingObjInteract struct {
+	id uint16
+	fn ObjInteractFunc
+}
 
-			id, ok := args[0].(*object.Integer)
-			if !ok {
-				log.Println("warn: script tried to call onInteract with non integer argument")
-				return nil
-			}
+type pendingNpcTalk struct {
+	id uint16
+	fn NpcTalkFunc
+}
 
-			fn, ok := args[1].(*object.Function)
-			if !ok {
-				log.Println("warn: script tried to call onInteract with non function argument")
-				return nil
-			}
+type pendingNpcSpawn struct {
+	npcId uint16
+	x     uint32
+	y     uint32
+}
 
-			scriptManager.InteractScripts[uint16(id.Value)] = fn.Body
+var pendingObjInteracts []PendingObjInteract
 
-			return nil
-		},
+var pendingNpcTalks []pendingNpcTalk
+
+var pendingNpcSpawns []pendingNpcSpawn
+
+func OnObjInteract(objId uint16, fnc ObjInteractFunc) {
+	pendingObjInteracts = append(pendingObjInteracts, PendingObjInteract{
+		id: objId,
+		fn: fnc,
 	})
-	env.Set("onTalkNpc", &object.Builtin{
-		Fn: func(env *object.Environment, _ ast.Position, _ *object.ErrorStore, args ...object.Object) object.Object {
-			if len(args) != 2 {
-				log.Printf("warn: script tried to call onTalkNpc with less or more than 2 arguments.")
-				return nil
-			}
-			id, ok := args[0].(*object.Integer)
-			if !ok {
-				log.Printf("script tried to call onTalkNpc with non integer argument")
-				return nil
-			}
+}
 
-			fn, ok := args[1].(*object.Function)
-			if !ok {
-				log.Fatal("script tried to call onTalkNpc with non function argument")
-				return nil
-			}
+func OnTalkNpc(npcId uint16, fnc NpcTalkFunc) {
+	pendingNpcTalks = append(pendingNpcTalks, pendingNpcTalk{
+		id: npcId,
+		fn: fnc,
+	})
+}
 
-			scriptManager.NpcTalkScripts[uint16(id.Value)] = fn.Body
-
-			return nil
-		},
+func SpawnNpc(npcId uint16, x uint32, y uint32) {
+	pendingNpcSpawns = append(pendingNpcSpawns, pendingNpcSpawn{
+		npcId: npcId,
+		x:     x,
+		y:     y,
 	})
 }

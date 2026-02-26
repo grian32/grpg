@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"encoding/binary"
 	"grpg/data-go/gbuf"
-	"grpgscript/evaluator"
 	"io"
 	"log"
 	"net"
@@ -80,11 +79,6 @@ func main() {
 		log.Fatal("Failed loading objs: ", err)
 	}
 
-	items, err := LoadItems(assetsDirectory + "assets/items.grpgitem")
-	if err != nil {
-		log.Fatal("Failed loading items: ", err)
-	}
-
 	npcs, err := LoadNpcs(assetsDirectory + "assets/npcs.grpgnpc")
 	if err != nil {
 		log.Fatal("Failed loading npcs: ", err)
@@ -92,17 +86,7 @@ func main() {
 
 	LoadMaps(assetsDirectory+"maps/", g, objs)
 
-	scriptManager = scripts.NewScriptManager()
-
-	scriptManager.LoadObjConstants(objs)
-	scriptManager.LoadItemConstants(items)
-	scriptManager.LoadNpcConstants(npcs)
-	scriptManager.LoadSkillConstants()
-
-	err = scriptManager.LoadScripts("../game-scripts", g, npcs)
-	if err != nil {
-		log.Fatal("Failed loading scripts: ", err)
-	}
+	scriptManager = scripts.NewScriptManager(g, npcs)
 
 	packets := make(chan ChanPacket, 1000)
 

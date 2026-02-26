@@ -4,8 +4,6 @@ go 1.24.4
 
 require grpg/data-go v0.0.0
 
-require grpgscript v0.0.0
-
 require (
 	github.com/golang-migrate/migrate/v4 v4.18.3 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -15,5 +13,3 @@ require (
 )
 
 replace grpg/data-go => ../data-go
-
-replace grpgscript => ../grpgscript

@@ -1,124 +1,62 @@
 package scripts
 
 import (
-	"errors"
-	"grpg/data-go/grpgitem"
 	"grpg/data-go/grpgnpc"
-	"grpg/data-go/grpgobj"
-	"grpgscript/ast"
-	"grpgscript/evaluator"
-	"grpgscript/lexer"
-	"grpgscript/object"
-	"grpgscript/parser"
-	"grpgscript/perf"
 	"log"
-	"os"
-	"path/filepath"
 	"server/shared"
-	"strings"
+	"server/util"
 )
 
-// ScriptManager TODO: dubious name
 type ScriptManager struct {
-	Env             *object.Environment
-	InteractScripts map[uint16]*ast.BlockStatement
-	NpcTalkScripts  map[uint16]*ast.BlockStatement
-	TimedScripts    map[uint32][]TimedScript
+	InteractScripts map[uint16]ObjInteractFunc
+	NpcTalkScripts  map[uint16]NpcTalkFunc
+	TimedScripts    map[uint32][]TimerFunc
 }
 
-func (s *ScriptManager) AddTimedScript(tick uint32, script TimedScript) {
+func (s *ScriptManager) AddTimedScript(tick uint32, script TimerFunc) {
 	_, ok := s.TimedScripts[tick]
 	if !ok {
-		s.TimedScripts[tick] = []TimedScript{script}
+		s.TimedScripts[tick] = []TimerFunc{script}
 	} else {
 		s.TimedScripts[tick] = append(s.TimedScripts[tick], script)
 	}
 }
 
-func NewScriptManager() *ScriptManager {
-	return &ScriptManager{
-		InteractScripts: make(map[uint16]*ast.BlockStatement),
-		TimedScripts:    make(map[uint32][]TimedScript),
-		NpcTalkScripts:  make(map[uint16]*ast.BlockStatement),
-		Env:             object.NewEnvironment(),
-	}
-}
-
-func (s *ScriptManager) LoadObjConstants(objs []grpgobj.Obj) {
-	for _, obj := range objs {
-		s.Env.Set(uppercaseAll(obj.Name), &object.Integer{Value: int64(obj.ObjId)})
-	}
-}
-
-func (s *ScriptManager) LoadItemConstants(items []grpgitem.Item) {
-	for _, item := range items {
-		s.Env.Set(uppercaseAll(item.Name), &object.Integer{Value: int64(item.ItemId)})
-	}
-}
-
-func (s *ScriptManager) LoadNpcConstants(npcs map[uint16]*grpgnpc.Npc) {
-	for _, npc := range npcs {
-		s.Env.Set(uppercaseAll(npc.Name), &object.Integer{Value: int64(npc.NpcId)})
-	}
-}
-
-func (s *ScriptManager) LoadSkillConstants() {
-	// TODO: might need to modify this to be based off of the enum or something? but seems effort compared to this, since reflection
-	s.Env.Set("FORAGING", &object.Integer{Value: int64(0)})
-}
-
-func (s *ScriptManager) LoadScripts(path string, game *shared.Game, npcs map[uint16]*grpgnpc.Npc) error {
-	env := object.NewEnclosedEnvinronment(s.Env)
-	AddListeners(env, s)
-	AddGlobals(env, game, npcs)
-
-	entries, err := os.ReadDir(path)
-
-	if err != nil {
-		return err
+func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptManager {
+	s := &ScriptManager{
+		InteractScripts: make(map[uint16]ObjInteractFunc),
+		NpcTalkScripts:  make(map[uint16]NpcTalkFunc),
+		TimedScripts:    make(map[uint32][]TimerFunc),
 	}
 
-	for _, entry := range entries {
-		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".grpgscript") {
-			fullPath := filepath.Join(path, entry.Name())
+	for _, reg := range pendingObjInteracts {
+		s.InteractScripts[reg.id] = reg.fn
+	}
 
-			bytes, err := os.ReadFile(fullPath)
-			if err != nil {
-				return err
-			}
+	for _, reg := range pendingNpcTalks {
+		s.NpcTalkScripts[reg.id] = reg.fn
+	}
 
-			l := lexer.New(string(bytes))
-			p := parser.New(l)
-			program := p.ParseProgram()
+	for _, reg := range pendingNpcSpawns {
+		npcData, ok := npcs[reg.npcId]
+		if !ok {
+			log.Printf("unknown npc %d for npcSpawn", reg.npcId)
+			continue
+		}
 
-			if len(p.Errors()) != 0 {
-				log.Printf("Found errors parsing script: %s\n", fullPath)
-				for _, err := range p.Errors() {
-					log.Println(err.String())
-				}
-				return errors.New("errors parsing scripts")
-			}
+		pos := util.Vector2I{X: reg.x, Y: reg.y}
+		chunkPos := util.Vector2I{X: pos.X / 16, Y: pos.Y / 16}
 
-			perf.ConstFold(program)
-
-			eval := evaluator.NewEvaluator()
-			obj := eval.Eval(program, env)
-			if obj != nil && obj.Type() == object.ERROR_OBJ {
-				log.Printf("script %s errored %s", fullPath, obj.Inspect())
-			}
+		game.TrackedNpcs[pos] = &shared.GameNpc{
+			Pos:      pos,
+			NpcData:  npcData,
+			ChunkPos: chunkPos,
 		}
 	}
 
-	return nil
-}
+	pendingObjInteracts = nil
+	pendingNpcTalks = nil
+	pendingNpcSpawns = nil
 
-func uppercaseAll(str string) string {
-	chars := []int32(str)
-
-	for i, b := range str {
-		if b >= 'a' && b <= 'z' {
-			chars[i] = b - 32
-		}
-	}
-	return string(chars)
+	return s
 }
