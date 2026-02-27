@@ -1,20 +1,20 @@
 package scripts
 
 type ObjInteractFunc func(ctx *ObjInteractCtx)
-type NpcTalkFunc func(ctx *NpcTalkContext)
+type NpcTalkFunc func(ctx *NpcTalkCtx)
 
 type PendingObjInteract struct {
-	id uint16
+	id ObjConstant
 	fn ObjInteractFunc
 }
 
 type pendingNpcTalk struct {
-	id uint16
+	id NpcConstant
 	fn NpcTalkFunc
 }
 
 type pendingNpcSpawn struct {
-	npcId uint16
+	npcId NpcConstant
 	x     uint32
 	y     uint32
 }
@@ -25,21 +25,21 @@ var pendingNpcTalks []pendingNpcTalk
 
 var pendingNpcSpawns []pendingNpcSpawn
 
-func OnObjInteract(objId uint16, fnc ObjInteractFunc) {
+func OnObjInteract(objId ObjConstant, fnc ObjInteractFunc) {
 	pendingObjInteracts = append(pendingObjInteracts, PendingObjInteract{
 		id: objId,
 		fn: fnc,
 	})
 }
 
-func OnTalkNpc(npcId uint16, fnc NpcTalkFunc) {
+func OnTalkNpc(npcId NpcConstant, fnc NpcTalkFunc) {
 	pendingNpcTalks = append(pendingNpcTalks, pendingNpcTalk{
 		id: npcId,
 		fn: fnc,
 	})
 }
 
-func SpawnNpc(npcId uint16, x uint32, y uint32) {
+func SpawnNpc(npcId NpcConstant, x uint32, y uint32) {
 	pendingNpcSpawns = append(pendingNpcSpawns, pendingNpcSpawn{
 		npcId: npcId,
 		x:     x,

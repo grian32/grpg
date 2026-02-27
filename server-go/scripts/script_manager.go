@@ -8,25 +8,14 @@ import (
 )
 
 type ScriptManager struct {
-	InteractScripts map[uint16]ObjInteractFunc
-	NpcTalkScripts  map[uint16]NpcTalkFunc
-	TimedScripts    map[uint32][]TimerFunc
-}
-
-func (s *ScriptManager) AddTimedScript(tick uint32, script TimerFunc) {
-	_, ok := s.TimedScripts[tick]
-	if !ok {
-		s.TimedScripts[tick] = []TimerFunc{script}
-	} else {
-		s.TimedScripts[tick] = append(s.TimedScripts[tick], script)
-	}
+	InteractScripts map[ObjConstant]ObjInteractFunc
+	NpcTalkScripts  map[NpcConstant]NpcTalkFunc
 }
 
 func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptManager {
 	s := &ScriptManager{
-		InteractScripts: make(map[uint16]ObjInteractFunc),
-		NpcTalkScripts:  make(map[uint16]NpcTalkFunc),
-		TimedScripts:    make(map[uint32][]TimerFunc),
+		InteractScripts: make(map[ObjConstant]ObjInteractFunc),
+		NpcTalkScripts:  make(map[NpcConstant]NpcTalkFunc),
 	}
 
 	for _, reg := range pendingObjInteracts {
@@ -38,7 +27,7 @@ func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptMa
 	}
 
 	for _, reg := range pendingNpcSpawns {
-		npcData, ok := npcs[reg.npcId]
+		npcData, ok := npcs[uint16(reg.npcId)]
 		if !ok {
 			log.Printf("unknown npc %d for npcSpawn", reg.npcId)
 			continue

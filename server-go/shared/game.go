@@ -18,6 +18,7 @@ type Game struct {
 	Mu           sync.RWMutex
 	CollisionMap map[util.Vector2I]struct{}
 	// currently practical duplicate of CollisionMap but CollisionMap will presumably have other sutff in the future, otherwise easy to remove
-	Objs        map[util.Vector2I]struct{}
-	CurrentTick uint32
+	Objs         map[util.Vector2I]struct{}
+	TimedScripts map[uint32][]func()
+	CurrentTick  uint32
 }

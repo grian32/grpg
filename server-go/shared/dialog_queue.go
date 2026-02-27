@@ -12,8 +12,9 @@ type Dialogue struct {
 	Content string
 }
 type DialogueQueue struct {
-	Index       uint16
-	MaxIndex    uint16
+	Index    uint16
+	MaxIndex uint16
+	// TODO: use NpcConstant
 	ActiveNpcId uint16
 	Dialogues   []Dialogue
 }

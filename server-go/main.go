@@ -1,6 +1,8 @@
 package main
 
 import (
+	_ "server/content"
+
 	"bufio"
 	"cmp"
 	"database/sql"
@@ -26,15 +28,16 @@ import (
 
 var (
 	g = &shared.Game{
-		Players:     map[*shared.Player]struct{}{},
-		Connections: make(map[net.Conn]*shared.Player),
-		TrackedObjs: make(map[util.Vector2I]*shared.GameObj),
-		Objs:        make(map[util.Vector2I]struct{}),
-		TrackedNpcs: make(map[util.Vector2I]*shared.GameNpc),
-		Mu:          sync.RWMutex{},
-		MaxX:        0,
-		MaxY:        0,
-		CurrentTick: 0,
+		Players:      map[*shared.Player]struct{}{},
+		Connections:  make(map[net.Conn]*shared.Player),
+		TrackedObjs:  make(map[util.Vector2I]*shared.GameObj),
+		Objs:         make(map[util.Vector2I]struct{}),
+		TrackedNpcs:  make(map[util.Vector2I]*shared.GameNpc),
+		TimedScripts: make(map[uint32][]func()),
+		Mu:           sync.RWMutex{},
+		MaxX:         0,
+		MaxY:         0,
+		CurrentTick:  0,
 	}
 	assetsDirectory = "../../grpg-assets/"
 	scriptManager   *scripts.ScriptManager
@@ -122,11 +125,10 @@ func cycle(packets chan ChanPacket) {
 			}
 		}
 
-		timed, ok := scriptManager.TimedScripts[g.CurrentTick]
+		timed, ok := g.TimedScripts[g.CurrentTick]
 		if ok {
 			for _, script := range timed {
-				eval := evaluator.NewEvaluator()
-				eval.Eval(script.Script, script.Env)
+				script()
 			}
 		}
 
