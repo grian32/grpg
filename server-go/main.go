@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	_ "server/content"
 
 	"bufio"
@@ -19,6 +20,8 @@ import (
 	"server/util"
 	"sync"
 	"time"
+
+	_ "net/http/pprof"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
@@ -50,6 +53,7 @@ type ChanPacket struct {
 }
 
 func main() {
+	go http.ListenAndServe("localhost:6060", nil)
 	db, err := sql.Open("sqlite3", "./players.db")
 	if err != nil {
 		log.Fatal("Failed to connect to DB: ", err)
