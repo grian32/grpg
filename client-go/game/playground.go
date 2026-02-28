@@ -17,14 +17,14 @@ import (
 )
 
 type Playground struct {
-	Font16          *gebitenui.GFont
-	Font18          *gebitenui.GFont
-	Font20          *gebitenui.GFont
-	Font24          *gebitenui.GFont
-	Game            *shared.Game
-	GameframeRight  *ebiten.Image
-	GameframeBottom *ebiten.Image
-	SkillIcons      map[shared.Skill]*gebitenui.GHoverTexture
+	Font16           *gebitenui.GFont
+	Font18           *gebitenui.GFont
+	Font20           *gebitenui.GFont
+	Font24           *gebitenui.GFont
+	Game             *shared.Game
+	GameframeRight   *ebiten.Image
+	GameframeBottom  *ebiten.Image
+	SkillIcons       map[shared.Skill]*gebitenui.GHoverTexture
 	InventoryButton  *gebitenui.GTextureButton
 	SkillsButton     *gebitenui.GTextureButton
 	PlayerTextures   map[shared.Direction]*ebiten.Image
@@ -32,6 +32,7 @@ type Playground struct {
 	Zones            map[util.Vector2I]grpgmap.Zone
 	CameraTarget     util.Vector2
 	PrevCameraTarget util.Vector2
+	WorldImage       *ebiten.Image
 	CurrActionString string
 }
 
@@ -95,6 +96,8 @@ func (p *Playground) Setup() {
 	p.SkillsButton = gebitenui.NewTextureButton(768+128+32, 0, otherTex["skills_button"], func() {
 		p.Game.GameframeContainerRenderType = shared.Skills
 	})
+
+	p.WorldImage = ebiten.NewImage(1024, 1024)
 }
 
 func (p *Playground) Cleanup() {
@@ -140,17 +143,17 @@ func (p *Playground) Update() error {
 }
 
 func (p *Playground) Draw(screen *ebiten.Image) {
-	worldImage := ebiten.NewImage(1024, 1024)
+	p.WorldImage.Clear()
 
-	drawWorld(p, worldImage)
-	drawOtherPlayers(p, worldImage)
-	drawPlayer(p, worldImage)
+	drawWorld(p, p.WorldImage)
+	drawOtherPlayers(p, p.WorldImage)
+	drawPlayer(p, p.WorldImage)
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-p.CameraTarget.X, -p.CameraTarget.Y)
 	op.Filter = ebiten.FilterNearest
 
-	screen.DrawImage(worldImage, op)
+	screen.DrawImage(p.WorldImage, op)
 
 	drawGameFrame(p, screen)
 }
