@@ -20,17 +20,17 @@ func (t *Talk) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, 
 	npcPos := util.Vector2I{X: x, Y: y}
 
 	if player.GetFacingCoord() != npcPos {
-		fmt.Printf("warn: player %s tried to talk with npc that he isn't facing %d, %d", player.Name, x, y)
+		fmt.Printf("warn: player %s, facing [%d, %d] tried to talk with npc that he isn't facing %d, %d\n", player.Name, player.GetFacingCoord().X, player.GetFacingCoord().Y, x, y)
 		return
 	}
 
 	if _, ok := game.TrackedNpcs[npcPos]; !ok {
-		fmt.Printf("warn: player %s tried to talk with npc that doesn't exist %d, %d", player.Name, x, y)
+		fmt.Printf("warn: player %s tried to talk with npc that doesn't exist %d, %d\n", player.Name, x, y)
 		return
 	}
 
 	if err := cmp.Or(err1, err2, err3); err != nil {
-		log.Printf("failed reading npc in talk packet")
+		log.Printf("failed reading npc in talk packet\n")
 		return
 	}
 
