@@ -41,6 +41,7 @@ func (n *NpcMoves) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		// thereotically shouldn't need any checks as TrackedNpcs is kept up solely by the server, which checks this already
 		npc, _ := game.TrackedNpcs[move.From]
 		game.TrackedNpcs[move.To] = npc
+		game.TrackedNpcs[move.To].Position = move.To
 		delete(game.TrackedNpcs, move.From)
 	}
 

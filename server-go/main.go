@@ -167,6 +167,7 @@ func cycle(packets chan ChanPacket) {
 						log.Printf("warning: npc already exists at location that move was attempted to")
 					}
 					g.TrackedNpcs[e.To] = npc
+					g.TrackedNpcs[e.To].Pos = e.To
 					delete(g.TrackedNpcs, e.From)
 					moves[idx] = newMove
 					newMoves = append(newMoves, newMove)
