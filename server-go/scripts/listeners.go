@@ -14,9 +14,10 @@ type pendingNpcTalk struct {
 }
 
 type pendingNpcSpawn struct {
-	npcId NpcConstant
-	x     uint32
-	y     uint32
+	npcId       NpcConstant
+	x           uint32
+	y           uint32
+	wanderRange uint8
 }
 
 var pendingObjInteracts []PendingObjInteract
@@ -39,10 +40,11 @@ func OnTalkNpc(npcId NpcConstant, fnc NpcTalkFunc) {
 	})
 }
 
-func SpawnNpc(npcId NpcConstant, x uint32, y uint32) {
+func SpawnNpc(npcId NpcConstant, x uint32, y uint32, wanderRange uint8) {
 	pendingNpcSpawns = append(pendingNpcSpawns, pendingNpcSpawn{
-		npcId: npcId,
-		x:     x,
-		y:     y,
+		npcId:       npcId,
+		x:           x,
+		y:           y,
+		wanderRange: wanderRange,
 	})
 }

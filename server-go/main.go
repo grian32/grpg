@@ -38,9 +38,19 @@ var (
 		TrackedNpcs:  make(map[util.Vector2I]*shared.GameNpc),
 		TimedScripts: make(map[uint32][]func()),
 		Mu:           sync.RWMutex{},
-		MaxX:         0,
-		MaxY:         0,
-		CurrentTick:  0,
+		NpcMoves: map[util.Vector2I][][]shared.NpcMove{
+			{X: 0, Y: 0}: {
+				{
+					{From: util.Vector2I{X: 2, Y: 1}, To: util.Vector2I{X: 1, Y: 1}},
+					{From: util.Vector2I{X: 2, Y: 2}, To: util.Vector2I{X: 2, Y: 1}},
+					{From: util.Vector2I{X: 3, Y: 2}, To: util.Vector2I{X: 2, Y: 2}},
+					{From: util.Vector2I{X: 3, Y: 3}, To: util.Vector2I{X: 3, Y: 2}},
+				},
+			},
+		},
+		MaxX:        0,
+		MaxY:        0,
+		CurrentTick: 0,
 	}
 	assetsDirectory = "../../grpg-assets/"
 	scriptManager   *scripts.ScriptManager
@@ -133,6 +143,45 @@ func cycle(packets chan ChanPacket) {
 		if ok {
 			for _, script := range timed {
 				script()
+			}
+		}
+		// TODO: refactor this out to a function
+		// TODO: change to something else tick wise, evidently
+		if g.CurrentTick >= 300 {
+			// TODO: add overlap checking, just discard the entire path if its overlapping
+			//fmt.Printf("%v\n", g.NpcMoves)
+			for chunk, moves := range g.NpcMoves {
+				newMoves := make([][]shared.NpcMove, 0, len(moves))
+				currMoves := make([]shared.NpcMove, 0, len(moves)) // roughly correct, since we'll pop one from every subarray and add it to the moves
+				for idx, move := range moves {
+					if len(move) == 0 {
+						continue
+					}
+					e, newMove := util.PopSlice(move)
+					currMoves = append(currMoves, e)
+					npc, ok := g.TrackedNpcs[e.From]
+					if !ok {
+						log.Printf("warning: tried to move npc that doesnt exist")
+					}
+					if _, ok := g.TrackedNpcs[e.To]; ok {
+						log.Printf("warning: npc already exists at location that move was attempted to")
+					}
+					g.TrackedNpcs[e.To] = npc
+					delete(g.TrackedNpcs, e.From)
+					moves[idx] = newMove
+					newMoves = append(newMoves, newMove)
+				}
+				if len(newMoves) == 0 {
+					delete(g.NpcMoves, chunk)
+					continue
+				} else {
+					g.NpcMoves[chunk] = moves
+				}
+				if len(currMoves) != 0 {
+					network.UpdatePlayersByChunk(chunk, g, &s2c.NpcMoves{
+						Moves: currMoves,
+					})
+				}
 			}
 		}
 

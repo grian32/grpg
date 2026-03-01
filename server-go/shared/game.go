@@ -20,5 +20,7 @@ type Game struct {
 	// currently practical duplicate of CollisionMap but CollisionMap will presumably have other sutff in the future, otherwise easy to remove
 	Objs         map[util.Vector2I]struct{}
 	TimedScripts map[uint32][]func()
-	CurrentTick  uint32
+	// so this is : chunk to path and then each path actually contains the moves themselves, so for each chunk itll pop one from each list and send it with the packet
+	NpcMoves    map[util.Vector2I][][]NpcMove
+	CurrentTick uint32
 }

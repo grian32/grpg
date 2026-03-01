@@ -37,9 +37,10 @@ func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptMa
 		chunkPos := util.Vector2I{X: pos.X / 16, Y: pos.Y / 16}
 
 		game.TrackedNpcs[pos] = &shared.GameNpc{
-			Pos:      pos,
-			NpcData:  npcData,
-			ChunkPos: chunkPos,
+			Pos:         pos,
+			NpcData:     npcData,
+			ChunkPos:    chunkPos,
+			WanderRange: reg.wanderRange,
 		}
 	}
 
