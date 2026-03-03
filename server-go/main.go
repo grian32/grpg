@@ -145,46 +145,7 @@ func cycle(packets chan ChanPacket) {
 				script()
 			}
 		}
-		// TODO: refactor this out to a function
-		// TODO: change to something else tick wise, evidently
-		if g.CurrentTick >= 300 {
-			// TODO: add overlap checking, just discard the entire path if its overlapping
-			//fmt.Printf("%v\n", g.NpcMoves)
-			for chunk, moves := range g.NpcMoves {
-				newMoves := make([][]shared.NpcMove, 0, len(moves))
-				currMoves := make([]shared.NpcMove, 0, len(moves)) // roughly correct, since we'll pop one from every subarray and add it to the moves
-				for idx, move := range moves {
-					if len(move) == 0 {
-						continue
-					}
-					e, newMove := util.PopSlice(move)
-					currMoves = append(currMoves, e)
-					npc, ok := g.TrackedNpcs[e.From]
-					if !ok {
-						log.Printf("warning: tried to move npc that doesnt exist")
-					}
-					if _, ok := g.TrackedNpcs[e.To]; ok {
-						log.Printf("warning: npc already exists at location that move was attempted to")
-					}
-					g.TrackedNpcs[e.To] = npc
-					g.TrackedNpcs[e.To].Pos = e.To
-					delete(g.TrackedNpcs, e.From)
-					moves[idx] = newMove
-					newMoves = append(newMoves, newMove)
-				}
-				if len(newMoves) == 0 {
-					delete(g.NpcMoves, chunk)
-					continue
-				} else {
-					g.NpcMoves[chunk] = moves
-				}
-				if len(currMoves) != 0 {
-					network.UpdatePlayersByChunk(chunk, g, &s2c.NpcMoves{
-						Moves: currMoves,
-					})
-				}
-			}
-		}
+		processNpcs()
 
 		g.CurrentTick++
 		diff := time.Until(expectedTime)
@@ -303,4 +264,48 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 	network.SendPacket(player.Conn, &s2c.NpcUpdate{ChunkPos: player.ChunkPos}, game)
 	network.SendPacket(player.Conn, &s2c.InventoryUpdate{Player: player}, game)
 	network.SendPacket(player.Conn, &s2c.SkillUpdate{Player: player, SkillIds: shared.ALL_SKILLS}, game)
+}
+
+func processNpcs() {
+	if len(g.NpcMoves) > 0 && g.CurrentTick%5 == 0 {
+		for chunk, moves := range g.NpcMoves {
+			newMoves := make([][]shared.NpcMove, 0, len(moves))
+			currMoves := make([]shared.NpcMove, 0, len(moves)) // roughly correct, since we'll pop one from every subarray and add it to the moves
+			for idx, move := range moves {
+				if len(move) == 0 {
+					continue
+				}
+				e, newMove := util.PopSlice(move)
+				npc, ok := g.TrackedNpcs[e.From]
+				if !ok {
+					log.Printf("warning: tried to move npc that doesnt exist")
+					moves[idx] = nil
+					continue
+				}
+				if _, ok := g.TrackedNpcs[e.To]; ok {
+					log.Printf("warning: npc already exists at location that move was attempted to")
+					moves[idx] = nil
+					continue
+				}
+				// TODO: mutex g.trackednpcs or something since a couple packets work it aswell
+				currMoves = append(currMoves, e)
+				g.TrackedNpcs[e.To] = npc
+				g.TrackedNpcs[e.To].Pos = e.To
+				delete(g.TrackedNpcs, e.From)
+				moves[idx] = newMove
+				newMoves = append(newMoves, newMove)
+			}
+			if len(newMoves) == 0 {
+				delete(g.NpcMoves, chunk)
+				continue
+			} else {
+				g.NpcMoves[chunk] = moves
+			}
+			if len(currMoves) != 0 {
+				network.UpdatePlayersByChunk(chunk, g, &s2c.NpcMoves{
+					Moves: currMoves,
+				})
+			}
+		}
+	}
 }
