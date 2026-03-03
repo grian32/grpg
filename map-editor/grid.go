@@ -77,8 +77,10 @@ func BuildGrid() g.Widget {
 				if eraserEnabled {
 					if gridObjTextures[currPos] != -1 {
 						gridObjTextures[currPos] = -1
+						gridObjs[currPos] = -1
 					} else if gridTileTextures[currPos] != -1 {
 						gridTileTextures[currPos] = -1
+						gridTiles[currPos] = -1
 					}
 				} else {
 					switch typeSelected {
