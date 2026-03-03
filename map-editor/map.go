@@ -40,12 +40,6 @@ func SaveMap() {
 		return
 	}
 
-	_, err = os.Stat(fileToSave)
-	if err == nil {
-		dialog.Message("File already exists.").Error()
-		return
-	}
-
 	file, err := os.Create(fileToSave)
 	if err != nil {
 		dialog.Message("Error creating file to save to").Error()
