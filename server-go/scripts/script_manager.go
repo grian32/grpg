@@ -10,12 +10,14 @@ import (
 type ScriptManager struct {
 	InteractScripts map[ObjConstant]ObjInteractFunc
 	NpcTalkScripts  map[NpcConstant]NpcTalkFunc
+	CommandScripts  map[string]CommandFunc
 }
 
 func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptManager {
 	s := &ScriptManager{
 		InteractScripts: make(map[ObjConstant]ObjInteractFunc),
 		NpcTalkScripts:  make(map[NpcConstant]NpcTalkFunc),
+		CommandScripts:  make(map[string]CommandFunc),
 	}
 
 	for _, reg := range pendingObjInteracts {
@@ -44,9 +46,14 @@ func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptMa
 		}
 	}
 
+	for _, reg := range pendingCmds {
+		s.CommandScripts[reg.name] = reg.fn
+	}
+
 	pendingObjInteracts = nil
 	pendingNpcTalks = nil
 	pendingNpcSpawns = nil
+	pendingCmds = nil
 
 	return s
 }

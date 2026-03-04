@@ -2,6 +2,7 @@ package scripts
 
 type ObjInteractFunc func(ctx *ObjInteractCtx)
 type NpcTalkFunc func(ctx *NpcTalkCtx)
+type CommandFunc func(ctx *CommandCtx)
 
 type PendingObjInteract struct {
 	id ObjConstant
@@ -20,11 +21,18 @@ type pendingNpcSpawn struct {
 	wanderRange uint8
 }
 
+type pendingCmd struct {
+	name string
+	fn   CommandFunc
+}
+
 var pendingObjInteracts []PendingObjInteract
 
 var pendingNpcTalks []pendingNpcTalk
 
 var pendingNpcSpawns []pendingNpcSpawn
+
+var pendingCmds []pendingCmd
 
 func OnObjInteract(objId ObjConstant, fnc ObjInteractFunc) {
 	pendingObjInteracts = append(pendingObjInteracts, PendingObjInteract{
@@ -46,5 +54,12 @@ func SpawnNpc(npcId NpcConstant, x uint32, y uint32, wanderRange uint8) {
 		x:           x,
 		y:           y,
 		wanderRange: wanderRange,
+	})
+}
+
+func OnCommand(name string, fnc CommandFunc) {
+	pendingCmds = append(pendingCmds, pendingCmd{
+		name: name,
+		fn:   fnc,
 	})
 }

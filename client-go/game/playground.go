@@ -34,6 +34,8 @@ type Playground struct {
 	PrevCameraTarget util.Vector2
 	WorldImage       *ebiten.Image
 	CurrActionString string
+	IsTypingCommand  bool
+	CommandString    string
 }
 
 func (p *Playground) Setup() {
@@ -108,18 +110,35 @@ func (p *Playground) Cleanup() {
 func (p *Playground) Update() error {
 	player := p.Game.Player
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
-		player.SendMovePacket(p.Game, player.X, player.Y-1, shared.UP)
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyS) {
-		player.SendMovePacket(p.Game, player.X, player.Y+1, shared.DOWN)
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyA) {
-		player.SendMovePacket(p.Game, player.X-1, player.Y, shared.LEFT)
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyD) {
-		player.SendMovePacket(p.Game, player.X+1, player.Y, shared.RIGHT)
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
-		player.SendInteractPacket(p.Game)
-	} else if p.Game.Talkbox.Active && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-		shared.SendPacket(p.Game.Conn, &c2s.Continue{})
+	if p.IsTypingCommand {
+		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+			p.IsTypingCommand = false
+			p.CommandString = ""
+		} else if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			p.IsTypingCommand = false
+			player.SendCmdPacket(p.Game, p.CommandString)
+			p.CommandString = ""
+		} else if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(p.CommandString) != 0 {
+			p.CommandString = p.CommandString[:len(p.CommandString)-1]
+		} else {
+			p.CommandString = string(ebiten.AppendInputChars([]rune(p.CommandString)))
+		}
+	} else {
+		if inpututil.IsKeyJustPressed(ebiten.KeyW) {
+			player.SendMovePacket(p.Game, player.X, player.Y-1, shared.UP)
+		} else if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+			player.SendMovePacket(p.Game, player.X, player.Y+1, shared.DOWN)
+		} else if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+			player.SendMovePacket(p.Game, player.X-1, player.Y, shared.LEFT)
+		} else if inpututil.IsKeyJustPressed(ebiten.KeyD) {
+			player.SendMovePacket(p.Game, player.X+1, player.Y, shared.RIGHT)
+		} else if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+			player.SendInteractPacket(p.Game)
+		} else if p.Game.Talkbox.Active && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+			shared.SendPacket(p.Game.Conn, &c2s.Continue{})
+		} else if inpututil.IsKeyJustPressed(ebiten.KeyC) {
+			p.IsTypingCommand = true
+		}
 	}
 
 	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
@@ -300,6 +319,9 @@ func drawOtherPlayers(p *Playground, screen *ebiten.Image) {
 func drawGameFrame(p *Playground, screen *ebiten.Image) {
 	player := p.Game.Player
 	util.DrawImage(screen, p.GameframeRight, 768, 0)
+	if p.IsTypingCommand {
+		p.Font16.Draw(screen, "Command: "+p.CommandString, 0, 740, color.White)
+	}
 
 	if p.Game.GameframeContainerRenderType == shared.Inventory {
 		var currItemRealPosX int32 = 768 + 64

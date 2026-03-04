@@ -52,6 +52,12 @@ func (lp *LocalPlayer) SendMovePacket(game *Game, x, y int32, facing Direction) 
 	})
 }
 
+func (lp *LocalPlayer) SendCmdPacket(game *Game, cmd string) {
+	SendPacket(game.Conn, &c2s.Command{
+		Msg: cmd,
+	})
+}
+
 // SendInteractPacket TODO: maybe bad place for this?
 func (lp *LocalPlayer) SendInteractPacket(game *Game) {
 	facing := lp.GetFacingCoord()

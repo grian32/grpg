@@ -131,3 +131,18 @@ func dqTypeToPacketType(t shared.DialogueType) s2c.TalkboxType {
 
 	return s2c.PLAYER
 }
+
+type CommandCtx struct {
+	args []string
+}
+
+func NewCommandCtx(args []string) *CommandCtx {
+	return &CommandCtx{
+		args: args,
+	}
+}
+
+// Args basically getter as i dont want users modifiying these, & i wanna add automatic parsing of some sort l8r
+func (c *CommandCtx) Args() []string {
+	return c.args
+}
