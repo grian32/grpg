@@ -31,29 +31,18 @@ import (
 
 var (
 	g = &shared.Game{
-		Players:      map[*shared.Player]struct{}{},
-		Connections:  make(map[net.Conn]*shared.Player),
-		TrackedObjs:  make(map[util.Vector2I]*shared.GameObj),
-		Objs:         make(map[util.Vector2I]struct{}),
-		TrackedNpcs:  make(map[util.Vector2I]*shared.GameNpc),
-		TimedScripts: make(map[uint32][]func()),
-		Mu:           sync.RWMutex{},
-		NpcMoves: map[util.Vector2I][]shared.NpcPath{
-			{X: 0, Y: 0}: {
-				shared.NpcPath{
-					NpcId: uint16(scripts.TEST),
-					Moves: []shared.NpcMove{
-						{From: util.Vector2I{X: 2, Y: 1}, To: util.Vector2I{X: 1, Y: 1}},
-						{From: util.Vector2I{X: 2, Y: 2}, To: util.Vector2I{X: 2, Y: 1}},
-						{From: util.Vector2I{X: 3, Y: 2}, To: util.Vector2I{X: 2, Y: 2}},
-						{From: util.Vector2I{X: 3, Y: 3}, To: util.Vector2I{X: 3, Y: 2}},
-					},
-				},
-			},
-		},
-		MaxX:        0,
-		MaxY:        0,
-		CurrentTick: 0,
+		Players:        map[*shared.Player]struct{}{},
+		Connections:    make(map[net.Conn]*shared.Player),
+		TrackedObjs:    make(map[util.Vector2I]*shared.GameObj),
+		Objs:           make(map[util.Vector2I]struct{}),
+		TrackedNpcs:    make(map[util.Vector2I]*shared.GameNpc),
+		WanderableNpcs: make([]*shared.GameNpc, 0),
+		TimedScripts:   make(map[uint32][]func()),
+		Mu:             sync.RWMutex{},
+		NpcMoves:       make(map[util.Vector2I][]shared.NpcPath),
+		MaxX:           0,
+		MaxY:           0,
+		CurrentTick:    0,
 	}
 	assetsDirectory = "../../grpg-assets/"
 	scriptManager   *scripts.ScriptManager
@@ -195,8 +184,21 @@ func handleClient(conn net.Conn, game *shared.Game, packets chan ChanPacket) {
 
 		packetData := c2s.Packets[opcode]
 
-		bytes := make([]byte, packetData.Length)
+		var bytes []byte
 
+		if packetData.Length == -1 {
+			lenBytes := make([]byte, 2)
+			_, err := io.ReadFull(reader, lenBytes)
+			if err != nil {
+				log.Printf("failed to read packet length for variable length packet with opcode %b, %v\n", opcode, err)
+				continue
+			}
+
+			packetLen := binary.BigEndian.Uint16(lenBytes)
+			bytes = make([]byte, packetLen)
+		} else {
+			bytes = make([]byte, packetData.Length)
+		}
 		_, err = io.ReadFull(reader, bytes)
 		if err != nil {
 			log.Printf("Failed to read bytes from opcode %b, %v\n", opcode, err)
@@ -281,7 +283,7 @@ func processNpcs() {
 				e, remaining := util.PopSlice(path.Moves)
 				npc, ok := g.TrackedNpcs[e.From]
 				if !ok {
-					log.Printf("warning: tried to move npc that doesnt exist")
+					log.Printf("warning: tried to move npc that doesnt exist %v\n", path)
 					continue
 				}
 				if _, ok := g.TrackedNpcs[e.To]; ok {

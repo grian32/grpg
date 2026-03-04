@@ -5,6 +5,7 @@ import (
 	"server/network/s2c"
 	"server/shared"
 	"server/util"
+	"strconv"
 )
 
 type TimerFunc func()
@@ -133,16 +134,31 @@ func dqTypeToPacketType(t shared.DialogueType) s2c.TalkboxType {
 }
 
 type CommandCtx struct {
-	args []string
+	args       []string
+	currArgIdx uint
+	game       *shared.Game
 }
 
-func NewCommandCtx(args []string) *CommandCtx {
+func NewCommandCtx(args []string, game *shared.Game) *CommandCtx {
 	return &CommandCtx{
-		args: args,
+		args:       args,
+		currArgIdx: 0,
+		game:       game,
 	}
 }
 
 // Args basically getter as i dont want users modifiying these, & i wanna add automatic parsing of some sort l8r
 func (c *CommandCtx) Args() []string {
 	return c.args
+}
+func (c *CommandCtx) Game() *shared.Game { return c.game }
+
+func (c *CommandCtx) GetIntArg() (int64, error) {
+	arg := c.args[c.currArgIdx]
+	p, err := strconv.ParseInt(arg, 0, 64)
+	if err != nil {
+		return -1, err
+	}
+	c.currArgIdx++
+	return p, nil
 }
