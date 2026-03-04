@@ -16,3 +16,8 @@ type NpcMove struct {
 	From util.Vector2I
 	To   util.Vector2I
 }
+
+type NpcPath struct {
+	NpcId uint16
+	Moves []NpcMove
+}

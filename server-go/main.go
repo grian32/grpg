@@ -38,13 +38,16 @@ var (
 		TrackedNpcs:  make(map[util.Vector2I]*shared.GameNpc),
 		TimedScripts: make(map[uint32][]func()),
 		Mu:           sync.RWMutex{},
-		NpcMoves: map[util.Vector2I][][]shared.NpcMove{
+		NpcMoves: map[util.Vector2I][]shared.NpcPath{
 			{X: 0, Y: 0}: {
-				{
-					{From: util.Vector2I{X: 2, Y: 1}, To: util.Vector2I{X: 1, Y: 1}},
-					{From: util.Vector2I{X: 2, Y: 2}, To: util.Vector2I{X: 2, Y: 1}},
-					{From: util.Vector2I{X: 3, Y: 2}, To: util.Vector2I{X: 2, Y: 2}},
-					{From: util.Vector2I{X: 3, Y: 3}, To: util.Vector2I{X: 3, Y: 2}},
+				shared.NpcPath{
+					NpcId: uint16(scripts.TEST),
+					Moves: []shared.NpcMove{
+						{From: util.Vector2I{X: 2, Y: 1}, To: util.Vector2I{X: 1, Y: 1}},
+						{From: util.Vector2I{X: 2, Y: 2}, To: util.Vector2I{X: 2, Y: 1}},
+						{From: util.Vector2I{X: 3, Y: 2}, To: util.Vector2I{X: 2, Y: 2}},
+						{From: util.Vector2I{X: 3, Y: 3}, To: util.Vector2I{X: 3, Y: 2}},
+					},
 				},
 			},
 		},
@@ -267,39 +270,40 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 }
 
 func processNpcs() {
-	if len(g.NpcMoves) > 0 && g.CurrentTick%5 == 0 {
-		for chunk, moves := range g.NpcMoves {
-			newMoves := make([][]shared.NpcMove, 0, len(moves))
-			currMoves := make([]shared.NpcMove, 0, len(moves)) // roughly correct, since we'll pop one from every subarray and add it to the moves
-			for idx, move := range moves {
-				if len(move) == 0 {
+	if len(g.NpcMoves) > 0 && g.CurrentTick%10 == 0 {
+		for chunk, paths := range g.NpcMoves {
+			currMoves := make([]shared.NpcMove, 0, len(paths)) // roughly correct, since we'll pop one from every path
+			newPaths := make([]shared.NpcPath, 0, len(paths))
+			for _, path := range paths {
+				if len(path.Moves) == 0 {
 					continue
 				}
-				e, newMove := util.PopSlice(move)
+				e, remaining := util.PopSlice(path.Moves)
 				npc, ok := g.TrackedNpcs[e.From]
 				if !ok {
 					log.Printf("warning: tried to move npc that doesnt exist")
-					moves[idx] = nil
 					continue
 				}
 				if _, ok := g.TrackedNpcs[e.To]; ok {
 					log.Printf("warning: npc already exists at location that move was attempted to")
-					moves[idx] = nil
 					continue
 				}
 				// TODO: mutex g.trackednpcs or something since a couple packets work it aswell
 				currMoves = append(currMoves, e)
 				g.TrackedNpcs[e.To] = npc
-				g.TrackedNpcs[e.To].Pos = e.To
+				npc.Pos = e.To
 				delete(g.TrackedNpcs, e.From)
-				moves[idx] = newMove
-				newMoves = append(newMoves, newMove)
+
+				path.Moves = remaining
+				if len(path.Moves) != 0 {
+					newPaths = append(newPaths, path)
+				}
 			}
-			if len(newMoves) == 0 {
+
+			if len(newPaths) == 0 {
 				delete(g.NpcMoves, chunk)
-				continue
 			} else {
-				g.NpcMoves[chunk] = moves
+				g.NpcMoves[chunk] = newPaths
 			}
 			if len(currMoves) != 0 {
 				network.UpdatePlayersByChunk(chunk, g, &s2c.NpcMoves{

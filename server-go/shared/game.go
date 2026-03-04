@@ -21,6 +21,6 @@ type Game struct {
 	Objs         map[util.Vector2I]struct{}
 	TimedScripts map[uint32][]func()
 	// so this is : chunk to path and then each path actually contains the moves themselves, so for each chunk itll pop one from each list and send it with the packet
-	NpcMoves    map[util.Vector2I][][]NpcMove
+	NpcMoves    map[util.Vector2I][]NpcPath
 	CurrentTick uint32
 }
