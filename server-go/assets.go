@@ -53,11 +53,12 @@ func LoadMaps(dir string, game *shared.Game, objs []grpgobj.Obj) {
 				if obj != 0 {
 					x := (idx % 16) + (int(header.ChunkX) * 16)
 					y := (idx / 16) + (int(header.ChunkY) * 16)
-
-					game.CollisionMap[util.Vector2I{X: uint32(x), Y: uint32(y)}] = struct{}{}
-					game.Objs[util.Vector2I{X: uint32(x), Y: uint32(y)}] = struct{}{}
-
 					data := objs[obj-1]
+
+					if !grpgobj.IsFlagSet(data.Flags, grpgobj.NOCOLLIDE) {
+						game.CollisionMap[util.Vector2I{X: uint32(x), Y: uint32(y)}] = struct{}{}
+					}
+					game.Objs[util.Vector2I{X: uint32(x), Y: uint32(y)}] = struct{}{}
 
 					if grpgobj.IsFlagSet(data.Flags, grpgobj.STATE) {
 						game.TrackedObjs[util.Vector2I{X: uint32(x), Y: uint32(y)}] = &shared.GameObj{

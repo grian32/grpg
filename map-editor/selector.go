@@ -137,5 +137,9 @@ func getFlagsName(flags grpgobj.ObjFlags) string {
 		str += "|i"
 	}
 
+	if grpgobj.IsFlagSet(flags, grpgobj.NOCOLLIDE) {
+		str += "|nc"
+	}
+
 	return str + ")"
 }

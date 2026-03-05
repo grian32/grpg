@@ -16,9 +16,9 @@ import (
 	"path/filepath"
 
 	"github.com/gen2brain/jpegxl"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/wav"
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func loadTextures(path string) map[uint16]*ebiten.Image {
@@ -107,7 +107,9 @@ func loadMaps(dirPath string, game *shared.Game) map[util.Vector2I]grpgmap.Zone 
 						game.ObjIdByLoc[vec] = data.ObjId
 					}
 
-					game.CollisionMap[vec] = struct{}{}
+					if !grpgobj.IsFlagSet(data.Flags, grpgobj.NOCOLLIDE) {
+						game.CollisionMap[vec] = struct{}{}
+					}
 				}
 			}
 
@@ -309,7 +311,7 @@ func loadTex(path string) map[string]*ebiten.Image {
 }
 
 func loadLoginMusic(path string) (*audio.Player, error) {
-	audioContext := audio.NewContext(44100);
+	audioContext := audio.NewContext(44100)
 
 	data, err := os.ReadFile(path + "music/grpgmenu.wav")
 	if err != nil {
@@ -321,7 +323,7 @@ func loadLoginMusic(path string) (*audio.Player, error) {
 		return nil, err
 	}
 
-	player, err := audioContext.NewPlayer(audio.NewInfiniteLoop(d, d.Length()));
+	player, err := audioContext.NewPlayer(audio.NewInfiniteLoop(d, d.Length()))
 	if err != nil {
 		return nil, err
 	}
