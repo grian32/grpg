@@ -263,13 +263,11 @@ func drawWorld(p *Playground, screen *ebiten.Image) {
 
 			objTex := p.Textures[objTexId]
 			util.DrawImage(screen, objTex, dx, dy)
-		} else {
+		}
+		if trackedNpc, ok := p.Game.TrackedNpcs[worldPos]; ok {
 			// TODO: maybe don't render if player is standing over?
-			trackedNpc, ok := p.Game.TrackedNpcs[worldPos]
-			if ok {
-				npcTexId := trackedNpc.NpcData.TextureId
-				util.DrawImage(screen, p.Textures[npcTexId], dx, dy)
-			}
+			npcTexId := trackedNpc.NpcData.TextureId
+			util.DrawImage(screen, p.Textures[npcTexId], dx, dy)
 		}
 	}
 }
