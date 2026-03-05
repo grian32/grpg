@@ -15,8 +15,9 @@ type ObjFlag byte
 type ObjFlags byte
 
 const (
-	STATE    ObjFlag = 1 << iota // bit 0
-	INTERACT                     // bit 1
+	STATE     ObjFlag = 1 << iota // bit 0
+	INTERACT                      // bit 1
+	NOCOLLIDE                     // bit 3
 )
 
 // way this is meant to work is that the idx of Textures serves as the state number, so state 0 = x texture, state 1 = y texture, etc, each state gotta have a texture.
