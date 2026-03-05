@@ -43,7 +43,7 @@ func TestReadWriteObjs(t *testing.T) {
 		{
 			Name:         "berry_bush",
 			ObjId:        4,
-			Flags:        ObjFlags(STATE | INTERACT),
+			Flags:        ObjFlags(STATE | INTERACT | NOCOLLIDE),
 			Textures:     []uint16{2, 3},
 			InteractText: "Harvest",
 		},
@@ -59,7 +59,7 @@ func TestReadWriteObjs(t *testing.T) {
 
 		0x00, 0x00, 0x00, 0x0A, 'b', 'e', 'r', 'r', 'y', '_', 'b', 'u', 's', 'h', // name
 		0x00, 0x04, // obj id
-		0x03,       // flag, 00 00 00 11
+		0x07,       // flag, 00 00 00 11
 		0x00, 0x02, // tex len
 		0x00, 0x02, 0x00, 0x03, // tex arr
 		0x00, 0x00, 0x00, 0x07, 'H', 'a', 'r', 'v', 'e', 's', 't', // interact text
@@ -95,5 +95,9 @@ func TestIsFlagSet(t *testing.T) {
 
 	if IsFlagSet(ObjFlags(0), STATE) {
 		t.Error("STATE flag is set in empty ObjFlags")
+	}
+
+	if !IsFlagSet(ObjFlags(NOCOLLIDE), NOCOLLIDE) {
+		t.Error("expected INTERACT flag to be set, but it was not")
 	}
 }
