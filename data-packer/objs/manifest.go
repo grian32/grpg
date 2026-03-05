@@ -64,6 +64,9 @@ func flagsFromStringSlice(flags []string) grpgobj.ObjFlags {
 			data |= grpgobj.ObjFlags(grpgobj.STATE)
 		case "INTERACT":
 			data |= grpgobj.ObjFlags(grpgobj.INTERACT)
+		case "NOCOLLIDE":
+			data |= grpgobj.ObjFlags(grpgobj.NOCOLLIDE)
+
 		}
 	}
 

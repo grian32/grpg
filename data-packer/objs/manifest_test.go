@@ -15,7 +15,7 @@ var manifest = []GRPGObjManifestEntry{
 	{
 		Name:     "i_water",
 		ObjId:    2,
-		Flags:    []string{"STATE", "INTERACT"},
+		Flags:    []string{"STATE", "INTERACT", "NOCOLLIDE"},
 		Textures: []string{"still_water", "grass_tex"},
 	},
 }
@@ -46,7 +46,7 @@ func TestBuildGRPGObjFromManifest(t *testing.T) {
 		{
 			Name:     "i_water",
 			ObjId:    2,
-			Flags:    grpgobj.ObjFlags(grpgobj.STATE | grpgobj.INTERACT),
+			Flags:    grpgobj.ObjFlags(grpgobj.STATE | grpgobj.INTERACT | grpgobj.NOCOLLIDE),
 			Textures: []uint16{6, 2},
 		},
 	}

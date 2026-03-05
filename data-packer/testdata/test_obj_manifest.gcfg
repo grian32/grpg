@@ -9,7 +9,7 @@
 [Obj] {
     name = "i_water"
     id = 2
-    flags = ["STATE", "INTERACT"]
+    flags = ["STATE", "INTERACT", "NOCOLLIDE"]
     textures = ["still_water", "grass_tex"]
     interact_text = "Interact"
 }
