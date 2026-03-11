@@ -5,6 +5,7 @@ import (
 	"client/util"
 	"grpg/data-go/gbuf"
 	"log"
+
 )
 
 type NpcMove struct {
@@ -47,8 +48,8 @@ func (n *NpcMoves) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	for _, move := range moves {
 		// thereotically shouldn't need any checks as TrackedNpcs is kept up solely by the server, which checks this already
 		npc, _ := game.TrackedNpcs[move.NpcUid]
-		game.TrackedNpcs[npc.Uid].Position = move.Move
 		delete(game.NpcsByPos, npc.Position)
+		game.TrackedNpcs[npc.Uid].Position = move.Move
 		game.NpcsByPos[move.Move] = npc
 	}
 }

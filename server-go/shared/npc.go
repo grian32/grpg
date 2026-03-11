@@ -58,6 +58,8 @@ func (g *GameNpc) Wander(game *Game) {
 		fmt.Printf("no valid wander positions for npc %d\n", g.Uid)
 		return
 	}
+
+	// TODO: check this is in a direction around current pos, i guess best way to do this is to pull the valid positions around the npcs current pos and roll for the amount of valid positions surrounding the npc currently
 	pos := rand.IntN(len(g.ValidWander))
 	var key util.Vector2I
 	i := 0
@@ -68,6 +70,7 @@ func (g *GameNpc) Wander(game *Game) {
 		}
 		i++
 	}
+
 	path := BFS(g.Pos, key, g.WanderMax, g.WanderMin, g.ValidWander)
 	// mby dubious extra access here? not toooo sure...
 	_, exists := game.NpcMoves[g.ChunkPos]

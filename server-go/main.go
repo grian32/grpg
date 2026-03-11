@@ -138,7 +138,7 @@ func cycle(packets chan ChanPacket) {
 				script()
 			}
 		}
-		// processNpcs()
+		processNpcs()
 
 		g.CurrentTick++
 		diff := time.Until(expectedTime)
@@ -289,7 +289,9 @@ func processNpcs() {
 				delete(g.NpcsByPos, npc.Pos)
 				g.NpcsByPos[move] = npc
 
-				newPaths = append(newPaths, shared.NpcPath{NpcId: path.NpcId, NpcUid: path.NpcUid, Moves: newPath})
+				if len(newPath) != 0 {
+					newPaths = append(newPaths, shared.NpcPath{NpcId: path.NpcId, NpcUid: path.NpcUid, Moves: newPath})
+				}
 				movesToTransfer = append(movesToTransfer, shared.NpcMove{NpcUid: path.NpcUid, Move: move})
 			}
 
