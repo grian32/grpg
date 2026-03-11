@@ -17,14 +17,17 @@ type GameNpc struct {
 	WanderRange uint8
 }
 
-type NpcMove struct {
-	From util.Vector2I
-	To   util.Vector2I
+type NpcPath struct {
+	// dont think id is actually used whatsoever, prob safe to remove
+	NpcId uint16
+	NpcUid uint32
+	Moves []util.Vector2I
 }
 
-type NpcPath struct {
-	NpcId uint16
-	Moves []NpcMove
+// NpcMove for packet purposes basically
+type NpcMove struct {
+	NpcUid uint32
+	Move  util.Vector2I
 }
 
 func (g *GameNpc) Wander(game *Game) {
@@ -64,16 +67,16 @@ func (g *GameNpc) Wander(game *Game) {
 	// mby dubious extra access here? not toooo sure...
 	_, exists := game.NpcMoves[g.ChunkPos]
 	if !exists {
-		game.NpcMoves[g.ChunkPos] = []NpcPath{{NpcId: g.NpcData.NpcId, Moves: path}}
+		game.NpcMoves[g.ChunkPos] = []NpcPath{{NpcId: g.NpcData.NpcId, NpcUid: g.Uid, Moves: path}}
 	} else {
 		game.NpcMoves[g.ChunkPos] = append(game.NpcMoves[g.ChunkPos],
-			NpcPath{NpcId: g.NpcData.NpcId, Moves: path},
+			NpcPath{NpcId: g.NpcData.NpcId, NpcUid: g.Uid, Moves: path},
 		)
 	}
 
 }
 
-func BFS(start, goal, max, min util.Vector2I, valid map[util.Vector2I]struct{}) []NpcMove {
+func BFS(start, goal, max, min util.Vector2I, valid map[util.Vector2I]struct{}) []util.Vector2I {
 	prev := map[util.Vector2I]util.Vector2I{
 		start: start,
 	}
@@ -85,12 +88,9 @@ func BFS(start, goal, max, min util.Vector2I, valid map[util.Vector2I]struct{}) 
 		curr := queue[0]
 		queue = queue[1:]
 		if curr == goal {
-			var path []NpcMove
+			var path []util.Vector2I
 			for p := goal; p != start; p = prev[p] {
-				path = append(path, NpcMove{
-					From: prev[p],
-					To:   p,
-				})
+				path = append(path, p)
 			}
 			return path
 		}

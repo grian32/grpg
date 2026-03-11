@@ -16,6 +16,8 @@ type Game struct {
 	TrackedObjs map[util.Vector2I]*GameObj
 	// uid to gamenpc
 	TrackedNpcs map[uint32]*GameNpc
+	// pos to gamenpc, might have junk data from pf
+	NpcsByPos map[util.Vector2I]*GameNpc
 	// this is basically a convenience so i dont have to loop over trackednpcs each time, low mem cost
 	WanderableNpcs []*GameNpc
 	Mu             sync.RWMutex

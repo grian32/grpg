@@ -77,7 +77,7 @@ func (lp *LocalPlayer) SendInteractPacket(game *Game) {
 		return
 	}
 
-	if npc, ok := game.TrackedNpcs[pos]; ok {
+	if npc, ok := game.NpcsByPos[pos]; ok {
 		SendPacket(game.Conn, &c2s.TalkPacket{
 			NpcId: npc.NpcData.NpcId,
 			Uid:   npc.Uid,

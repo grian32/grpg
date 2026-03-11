@@ -3,14 +3,13 @@ package s2c
 import (
 	"client/shared"
 	"client/util"
-	"cmp"
 	"grpg/data-go/gbuf"
 	"log"
 )
 
 type NpcMove struct {
-	From util.Vector2I
-	To   util.Vector2I
+	NpcUid uint32
+	Move util.Vector2I
 }
 
 type NpcMoves struct {
@@ -24,25 +23,32 @@ func (n *NpcMoves) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	// NOTE: it might be worth just doing the moves inline? :shrug:
 	moves := make([]NpcMove, 0, length)
 	for _ = range length {
-		fromX, err1 := buf.ReadUint32()
-		fromY, err2 := buf.ReadUint32()
-		toX, err3 := buf.ReadUint32()
-		toY, err4 := buf.ReadUint32()
-		if err := cmp.Or(err1, err2, err3, err4); err != nil {
-			log.Printf("warning: failed to read npc move in npc moves packet")
+		npcUid, err := buf.ReadUint32()
+		if err != nil {
+			log.Printf("warning: failed to read npc uid in npc moves packet\n")
+			continue
+		}
+		toX, err := buf.ReadUint32()
+		if err != nil {
+			log.Printf("warning: failed to read npc move x in npc moves packet\n")
+			continue
+		}
+		toY, err := buf.ReadUint32()
+		if err != nil {
+			log.Printf("warning: failed to read npc move y in npc moves packet\n")
+			continue
 		}
 		moves = append(moves, NpcMove{
-			From: util.Vector2I{X: int32(fromX), Y: int32(fromY)},
-			To:   util.Vector2I{X: int32(toX), Y: int32(toY)},
+			NpcUid: npcUid,
+			Move:   util.Vector2I{X: int32(toX), Y: int32(toY)},
 		})
 	}
 
 	for _, move := range moves {
 		// thereotically shouldn't need any checks as TrackedNpcs is kept up solely by the server, which checks this already
-		npc, _ := game.TrackedNpcs[move.From]
-		game.TrackedNpcs[move.To] = npc
-		game.TrackedNpcs[move.To].Position = move.To
-		delete(game.TrackedNpcs, move.From)
+		npc, _ := game.TrackedNpcs[move.NpcUid]
+		game.TrackedNpcs[npc.Uid].Position = move.Move
+		delete(game.NpcsByPos, npc.Position)
+		game.NpcsByPos[move.Move] = npc
 	}
-
 }

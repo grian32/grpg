@@ -22,7 +22,7 @@ var (
 		CollisionMap: make(map[util.Vector2I]struct{}),
 		ObjIdByLoc:   make(map[util.Vector2I]uint16),
 		TrackedObjs:  make(map[util.Vector2I]*shared.GameObj),
-		TrackedNpcs:  make(map[util.Vector2I]*shared.GameNpc),
+		TrackedNpcs: map[uint32]*shared.GameNpc{},
 		Skills: 		make(map[shared.Skill]*shared.SkillInfo),
 		SkillHoverMsgs: make(map[shared.Skill]*string),
 		SceneManager: &shared.GSceneManager{},

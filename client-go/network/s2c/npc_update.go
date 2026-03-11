@@ -17,7 +17,8 @@ func (n *NpcUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		log.Printf("failed to read uint16 npc len in npc update")
 		return
 	}
-	npcMap := make(map[util.Vector2I]*shared.GameNpc)
+	npcByPosMap := make(map[util.Vector2I]*shared.GameNpc)
+	npcMap := make(map[uint32]*shared.GameNpc)
 
 	for range npcLen {
 		x, err1 := buf.ReadUint32()
@@ -32,12 +33,15 @@ func (n *NpcUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 
 		pos := util.Vector2I{X: int32(x), Y: int32(y)}
 
-		npcMap[pos] = &shared.GameNpc{
+		npc := &shared.GameNpc{
 			Position: pos,
 			NpcData:  game.Npcs[id],
 			Uid:      uid,
 		}
+		npcMap[uid] = npc
+		npcByPosMap[pos] = npc
 	}
 
+	game.NpcsByPos = npcByPosMap
 	game.TrackedNpcs = npcMap
 }

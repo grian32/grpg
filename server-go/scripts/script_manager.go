@@ -49,7 +49,13 @@ func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptMa
 			WanderRange: reg.wanderRange,
 		}
 
+		if _, ok := game.NpcsByPos[pos]; ok {
+			log.Printf("npc already exists overlap at %v, skipping spawn of npc %d\n", pos, reg.npcId)
+			continue
+		}
+
 		game.TrackedNpcs[npcUid] = gNpc
+		game.NpcsByPos[pos] = gNpc
 		if reg.wanderRange > 0 {
 			game.WanderableNpcs = append(game.WanderableNpcs, gNpc)
 		}

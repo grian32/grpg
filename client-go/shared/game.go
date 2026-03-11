@@ -32,7 +32,9 @@ type Game struct {
 	Tiles                        map[uint16]*grpgtile.Tile
 	Items                        map[uint16]grpgitem.Item
 	TrackedObjs                  map[util.Vector2I]*GameObj
-	TrackedNpcs                  map[util.Vector2I]*GameNpc
+	NpcsByPos map[util.Vector2I]*GameNpc
+	// uid to gamenpc
+	TrackedNpcs map[uint32]*GameNpc
 	Skills						 map[Skill]*SkillInfo
 	SkillHoverMsgs 				 map[Skill]*string;
 	TileSize                     int32

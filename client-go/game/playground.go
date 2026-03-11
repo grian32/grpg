@@ -216,7 +216,7 @@ func updateCamera(p *Playground, crossedZone bool) {
 func updateCurrActionString(p *Playground) {
 	facingCoord := p.Game.Player.GetFacingCoord()
 	trackedObj, objExists := p.Game.TrackedObjs[facingCoord]
-	trackedNpc, npcExists := p.Game.TrackedNpcs[facingCoord]
+	trackedNpc, npcExists := p.Game.NpcsByPos[facingCoord]
 	if objExists {
 		p.CurrActionString = "Current Action: " + trackedObj.DataObj.InteractText
 	} else if npcExists {
@@ -264,7 +264,7 @@ func drawWorld(p *Playground, screen *ebiten.Image) {
 			objTex := p.Textures[objTexId]
 			util.DrawImage(screen, objTex, dx, dy)
 		}
-		if trackedNpc, ok := p.Game.TrackedNpcs[worldPos]; ok {
+		if trackedNpc, ok := p.Game.NpcsByPos[worldPos]; ok {
 			// TODO: maybe don't render if player is standing over?
 			npcTexId := trackedNpc.NpcData.TextureId
 			util.DrawImage(screen, p.Textures[npcTexId], dx, dy)

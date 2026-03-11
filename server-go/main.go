@@ -36,6 +36,7 @@ var (
 		TrackedObjs:    make(map[util.Vector2I]*shared.GameObj),
 		Objs:           make(map[util.Vector2I]struct{}),
 		TrackedNpcs:    make(map[uint32]*shared.GameNpc),
+		NpcsByPos: make(map[util.Vector2I]*shared.GameNpc),
 		WanderableNpcs: make([]*shared.GameNpc, 0),
 		TimedScripts:   make(map[uint32][]func()),
 		Mu:             sync.RWMutex{},
@@ -271,47 +272,38 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 	network.SendPacket(player.Conn, &s2c.SkillUpdate{Player: player, SkillIds: shared.ALL_SKILLS}, game)
 }
 
-// func processNpcs() {
-// 	if len(g.NpcMoves) > 0 && g.CurrentTick%10 == 0 {
-// 		for chunk, paths := range g.NpcMoves {
-// 			currMoves := make([]shared.NpcMove, 0, len(paths)) // roughly correct, since we'll pop one from every path
-// 			newPaths := make([]shared.NpcPath, 0, len(paths))
-// 			for _, path := range paths {
-// 				if len(path.Moves) == 0 {
-// 					continue
-// 				}
-// 				e, remaining := util.PopSlice(path.Moves)
-// 				npc, ok := g.TrackedNpcs[e.From]
-// 				if !ok {
-// 					log.Printf("warning: tried to move npc that doesnt exist %v\n", path)
-// 					continue
-// 				}
-// 				if _, ok := g.TrackedNpcs[e.To]; ok {
-// 					log.Printf("warning: npc already exists at location that move was attempted to")
-// 					continue
-// 				}
-// 				// TODO: mutex g.trackednpcs or something since a couple packets work it aswell
-// 				currMoves = append(currMoves, e)
-// 				g.TrackedNpcs[e.To] = npc
-// 				npc.Pos = e.To
-// 				delete(g.TrackedNpcs, e.From)
+func processNpcs() {
+	if len(g.NpcMoves) > 0 && g.CurrentTick%10 == 0 {
+		for chunk, paths := range g.NpcMoves {
+			newPaths := make([]shared.NpcPath, 0, len(paths));
+			movesToTransfer := make([]shared.NpcMove, 0);
 
-// 				path.Moves = remaining
-// 				if len(path.Moves) != 0 {
-// 					newPaths = append(newPaths, path)
-// 				}
-// 			}
+			for _, path := range paths {
+				npc, ok := g.TrackedNpcs[path.NpcUid];
+				if !ok {
+					log.Printf("warn: could not find npc with uid %d in tracked npcs, skipping path", path.NpcUid)
+					continue
+				}
+				move, newPath := util.PopSlice(path.Moves);
 
-// 			if len(newPaths) == 0 {
-// 				delete(g.NpcMoves, chunk)
-// 			} else {
-// 				g.NpcMoves[chunk] = newPaths
-// 			}
-// 			if len(currMoves) != 0 {
-// 				network.UpdatePlayersByChunk(chunk, g, &s2c.NpcMoves{
-// 					Moves: currMoves,
-// 				})
-// 			}
-// 		}
-// 	}
-// }
+				delete(g.NpcsByPos, npc.Pos)
+				g.NpcsByPos[move] = npc
+
+				newPaths = append(newPaths, shared.NpcPath{NpcId: path.NpcId, NpcUid: path.NpcUid, Moves: newPath})
+				movesToTransfer = append(movesToTransfer, shared.NpcMove{NpcUid: path.NpcUid, Move: move})
+			}
+
+			if len(newPaths) == 0 {
+				delete(g.NpcMoves, chunk)
+			} else {
+				g.NpcMoves[chunk] = newPaths
+			}
+
+			if len(movesToTransfer) != 0 {
+				network.UpdatePlayersByChunk(chunk, g, &s2c.NpcMoves{
+					Moves: movesToTransfer,
+				})
+			}
+		}
+	}
+}
