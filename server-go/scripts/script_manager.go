@@ -13,6 +13,8 @@ type ScriptManager struct {
 	CommandScripts  map[string]CommandFunc
 }
 
+var npcUid uint32 = 1
+
 func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptManager {
 	s := &ScriptManager{
 		InteractScripts: make(map[ObjConstant]ObjInteractFunc),
@@ -43,8 +45,12 @@ func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptMa
 			NpcData:     npcData,
 			ChunkPos:    chunkPos,
 			ValidWander: nil,
+			Uid: npcUid,
 			WanderRange: reg.wanderRange,
 		}
+
+		npcUid++
+
 		game.TrackedNpcs[pos] = gNpc
 		if reg.wanderRange > 0 {
 			game.WanderableNpcs = append(game.WanderableNpcs, gNpc)

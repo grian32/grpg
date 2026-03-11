@@ -268,6 +268,9 @@ func drawWorld(p *Playground, screen *ebiten.Image) {
 			// TODO: maybe don't render if player is standing over?
 			npcTexId := trackedNpc.NpcData.TextureId
 			util.DrawImage(screen, p.Textures[npcTexId], dx, dy)
+			if p.Game.DebugMode {
+				p.Font16.Draw(screen, fmt.Sprintf("%d", trackedNpc.Uid), float64(dx), float64(dy), color.White)
+			}
 		}
 	}
 }

@@ -7,5 +7,6 @@ import (
 
 type GameNpc struct {
 	Position util.Vector2I
+	Uid      uint32
 	NpcData  *grpgnpc.Npc
 }

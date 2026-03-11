@@ -8,6 +8,7 @@ import (
 
 type GameNpc struct {
 	Pos         util.Vector2I
+	Uid         uint32
 	NpcData     *grpgnpc.Npc
 	ChunkPos    util.Vector2I
 	ValidWander map[util.Vector2I]struct{}

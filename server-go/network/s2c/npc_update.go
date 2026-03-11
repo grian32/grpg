@@ -20,7 +20,7 @@ func (n *NpcUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 
 	for _, npc := range game.TrackedNpcs {
 		if npc.ChunkPos == n.ChunkPos {
-			packetLen += 4 + 4 + 2 // x y id
+			packetLen += 4 + 4 + 4 + 2 // x y uid id
 		}
 		npcLen++
 	}
@@ -32,6 +32,7 @@ func (n *NpcUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		if npc.ChunkPos == n.ChunkPos {
 			buf.WriteUint32(pos.X)
 			buf.WriteUint32(pos.Y)
+			buf.WriteUint32(npc.Uid)
 			buf.WriteUint16(npc.NpcData.NpcId)
 		}
 	}

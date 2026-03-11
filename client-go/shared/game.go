@@ -43,6 +43,7 @@ type Game struct {
 	Conn                         net.Conn
 	GameframeContainerRenderType RenderType
 	ShowFailedLogin              bool
+	DebugMode                    bool
 }
 
 // i think this would make sense as a function on game but er.. cyclical lol!

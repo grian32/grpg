@@ -53,6 +53,11 @@ func (lp *LocalPlayer) SendMovePacket(game *Game, x, y int32, facing Direction) 
 }
 
 func (lp *LocalPlayer) SendCmdPacket(game *Game, cmd string) {
+	if cmd == "debug" {
+		game.DebugMode = !game.DebugMode
+		return
+	}
+
 	SendPacket(game.Conn, &c2s.Command{
 		Msg: cmd,
 	})

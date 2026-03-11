@@ -22,9 +22,10 @@ func (n *NpcUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 	for range npcLen {
 		x, err1 := buf.ReadUint32()
 		y, err2 := buf.ReadUint32()
-		id, err3 := buf.ReadUint16()
+		uid, err3 := buf.ReadUint32()
+		id, err4 := buf.ReadUint16()
 
-		if err := cmp.Or(err1, err2, err3); err != nil {
+		if err := cmp.Or(err1, err2, err3, err4); err != nil {
 			log.Printf("failed to read npc in npc update %v\n", err)
 			return
 		}
@@ -34,6 +35,7 @@ func (n *NpcUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		npcMap[pos] = &shared.GameNpc{
 			Position: pos,
 			NpcData:  game.Npcs[id],
+			Uid:      uid,
 		}
 	}
 

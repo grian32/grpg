@@ -40,6 +40,7 @@ var (
 		Conn:                         network.StartConn(),
 		ShowFailedLogin:              false,
 		GameframeContainerRenderType: shared.Inventory,
+		DebugMode: false,
 	}
 )
 
