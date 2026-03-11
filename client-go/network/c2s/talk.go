@@ -4,8 +4,7 @@ import "grpg/data-go/gbuf"
 
 type TalkPacket struct {
 	NpcId uint16
-	X     uint32
-	Y     uint32
+	Uid   uint32
 }
 
 func (t *TalkPacket) Opcode() byte {
@@ -14,6 +13,5 @@ func (t *TalkPacket) Opcode() byte {
 
 func (t *TalkPacket) Handle(buf *gbuf.GBuf) {
 	buf.WriteUint16(t.NpcId)
-	buf.WriteUint32(t.X)
-	buf.WriteUint32(t.Y)
+	buf.WriteUint32(t.Uid)
 }

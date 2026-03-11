@@ -14,7 +14,8 @@ type Game struct {
 	MaxY        uint32
 	Database    *sql.DB
 	TrackedObjs map[util.Vector2I]*GameObj
-	TrackedNpcs map[util.Vector2I]*GameNpc
+	// uid to gamenpc
+	TrackedNpcs map[uint32]*GameNpc
 	// this is basically a convenience so i dont have to loop over trackednpcs each time, low mem cost
 	WanderableNpcs []*GameNpc
 	Mu             sync.RWMutex

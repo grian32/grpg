@@ -35,7 +35,7 @@ var (
 		Connections:    make(map[net.Conn]*shared.Player),
 		TrackedObjs:    make(map[util.Vector2I]*shared.GameObj),
 		Objs:           make(map[util.Vector2I]struct{}),
-		TrackedNpcs:    make(map[util.Vector2I]*shared.GameNpc),
+		TrackedNpcs:    make(map[uint32]*shared.GameNpc),
 		WanderableNpcs: make([]*shared.GameNpc, 0),
 		TimedScripts:   make(map[uint32][]func()),
 		Mu:             sync.RWMutex{},
@@ -137,7 +137,7 @@ func cycle(packets chan ChanPacket) {
 				script()
 			}
 		}
-		processNpcs()
+		// processNpcs()
 
 		g.CurrentTick++
 		diff := time.Until(expectedTime)
@@ -271,47 +271,47 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 	network.SendPacket(player.Conn, &s2c.SkillUpdate{Player: player, SkillIds: shared.ALL_SKILLS}, game)
 }
 
-func processNpcs() {
-	if len(g.NpcMoves) > 0 && g.CurrentTick%10 == 0 {
-		for chunk, paths := range g.NpcMoves {
-			currMoves := make([]shared.NpcMove, 0, len(paths)) // roughly correct, since we'll pop one from every path
-			newPaths := make([]shared.NpcPath, 0, len(paths))
-			for _, path := range paths {
-				if len(path.Moves) == 0 {
-					continue
-				}
-				e, remaining := util.PopSlice(path.Moves)
-				npc, ok := g.TrackedNpcs[e.From]
-				if !ok {
-					log.Printf("warning: tried to move npc that doesnt exist %v\n", path)
-					continue
-				}
-				if _, ok := g.TrackedNpcs[e.To]; ok {
-					log.Printf("warning: npc already exists at location that move was attempted to")
-					continue
-				}
-				// TODO: mutex g.trackednpcs or something since a couple packets work it aswell
-				currMoves = append(currMoves, e)
-				g.TrackedNpcs[e.To] = npc
-				npc.Pos = e.To
-				delete(g.TrackedNpcs, e.From)
+// func processNpcs() {
+// 	if len(g.NpcMoves) > 0 && g.CurrentTick%10 == 0 {
+// 		for chunk, paths := range g.NpcMoves {
+// 			currMoves := make([]shared.NpcMove, 0, len(paths)) // roughly correct, since we'll pop one from every path
+// 			newPaths := make([]shared.NpcPath, 0, len(paths))
+// 			for _, path := range paths {
+// 				if len(path.Moves) == 0 {
+// 					continue
+// 				}
+// 				e, remaining := util.PopSlice(path.Moves)
+// 				npc, ok := g.TrackedNpcs[e.From]
+// 				if !ok {
+// 					log.Printf("warning: tried to move npc that doesnt exist %v\n", path)
+// 					continue
+// 				}
+// 				if _, ok := g.TrackedNpcs[e.To]; ok {
+// 					log.Printf("warning: npc already exists at location that move was attempted to")
+// 					continue
+// 				}
+// 				// TODO: mutex g.trackednpcs or something since a couple packets work it aswell
+// 				currMoves = append(currMoves, e)
+// 				g.TrackedNpcs[e.To] = npc
+// 				npc.Pos = e.To
+// 				delete(g.TrackedNpcs, e.From)
 
-				path.Moves = remaining
-				if len(path.Moves) != 0 {
-					newPaths = append(newPaths, path)
-				}
-			}
+// 				path.Moves = remaining
+// 				if len(path.Moves) != 0 {
+// 					newPaths = append(newPaths, path)
+// 				}
+// 			}
 
-			if len(newPaths) == 0 {
-				delete(g.NpcMoves, chunk)
-			} else {
-				g.NpcMoves[chunk] = newPaths
-			}
-			if len(currMoves) != 0 {
-				network.UpdatePlayersByChunk(chunk, g, &s2c.NpcMoves{
-					Moves: currMoves,
-				})
-			}
-		}
-	}
-}
+// 			if len(newPaths) == 0 {
+// 				delete(g.NpcMoves, chunk)
+// 			} else {
+// 				g.NpcMoves[chunk] = newPaths
+// 			}
+// 			if len(currMoves) != 0 {
+// 				network.UpdatePlayersByChunk(chunk, g, &s2c.NpcMoves{
+// 					Moves: currMoves,
+// 				})
+// 			}
+// 		}
+// 	}
+// }

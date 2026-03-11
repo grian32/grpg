@@ -49,12 +49,12 @@ func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptMa
 			WanderRange: reg.wanderRange,
 		}
 
-		npcUid++
-
-		game.TrackedNpcs[pos] = gNpc
+		game.TrackedNpcs[npcUid] = gNpc
 		if reg.wanderRange > 0 {
 			game.WanderableNpcs = append(game.WanderableNpcs, gNpc)
 		}
+
+		npcUid++
 	}
 
 	for _, reg := range pendingCmds {

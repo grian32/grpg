@@ -20,7 +20,7 @@ var (
 	LoginData    = PacketData{Opcode: 0x01, Length: -1, Handler: nil}
 	MoveData     = PacketData{Opcode: 0x02, Length: 9, Handler: &Move{}}
 	InteractData = PacketData{Opcode: 0x03, Length: 10, Handler: &Interact{}}
-	TalkData     = PacketData{Opcode: 0x04, Length: 10, Handler: &Talk{}}
+	TalkData     = PacketData{Opcode: 0x04, Length: 6, Handler: &Talk{}}
 	ContinueData = PacketData{Opcode: 0x05, Length: 0, Handler: &Continue{}}
 	CommandData  = PacketData{Opcode: 0x06, Length: -1, Handler: &Command{}}
 )
