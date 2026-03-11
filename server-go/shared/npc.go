@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"fmt"
 	"grpg/data-go/grpgnpc"
 	"math/rand/v2"
 	"server/util"
@@ -33,8 +34,8 @@ type NpcMove struct {
 func (g *GameNpc) Wander(game *Game) {
 	if g.ValidWander == nil {
 		// i think safe assumption if they dont have a valid wander is that they have never wandered and as such the curr pos is still the initial position
-		startPosX := util.ClampMin(g.Pos.X-uint32(g.WanderRange), 0)
-		startPosY := util.ClampMin(g.Pos.Y-uint32(g.WanderRange), 0)
+		startPosX := util.ClampMax(g.Pos.X-uint32(g.WanderRange), 0)
+		startPosY := util.ClampMax(g.Pos.Y-uint32(g.WanderRange), 0)
 		endPosX := util.ClampMax(g.Pos.X+uint32(g.WanderRange), (g.ChunkPos.X+1)*16)
 		endPosY := util.ClampMax(g.Pos.Y+uint32(g.WanderRange), (g.ChunkPos.Y+1)*16)
 		validPos := make(map[util.Vector2I]struct{}, 0)
@@ -53,6 +54,10 @@ func (g *GameNpc) Wander(game *Game) {
 		g.WanderMax = util.Vector2I{X: endPosX, Y: endPosY}
 	}
 
+	if len(g.ValidWander) == 0 {
+		fmt.Printf("no valid wander positions for npc %d\n", g.Uid)
+		return
+	}
 	pos := rand.IntN(len(g.ValidWander))
 	var key util.Vector2I
 	i := 0
