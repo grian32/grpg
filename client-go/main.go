@@ -41,6 +41,7 @@ var (
 		ShowFailedLogin:              false,
 		GameframeContainerRenderType: shared.Inventory,
 		DebugMode: false,
+		RenderExclamOnGuide: true,
 	}
 )
 

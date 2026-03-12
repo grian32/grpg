@@ -25,6 +25,7 @@ type Playground struct {
 	Game             *shared.Game
 	GameframeRight   *ebiten.Image
 	GameframeBottom  *ebiten.Image
+	ExclamTexture    *ebiten.Image
 	SkillIcons       map[shared.Skill]*gebitenui.GHoverTexture
 	InventoryButton  *gebitenui.GTextureButton
 	SkillsButton     *gebitenui.GTextureButton
@@ -37,6 +38,8 @@ type Playground struct {
 	CurrActionString string
 	IsTypingCommand  bool
 	CommandString    string
+	ExclamYOffset    int32
+	Ticks            uint32
 }
 
 func (p *Playground) Setup() {
@@ -77,6 +80,8 @@ func (p *Playground) Setup() {
 
 	p.GameframeRight = otherTex["gameframe_right"]
 	p.GameframeBottom = otherTex["gameframe_bottom"]
+	p.ExclamTexture = otherTex["exclam"]
+	p.ExclamYOffset = 0
 
 	p.PlayerTextures = make(map[shared.Direction]*ebiten.Image)
 	p.PlayerTextures[shared.UP] = otherTex["player_up"]
@@ -155,10 +160,18 @@ func (p *Playground) Update() error {
 	updateCamera(p, crossedZone)
 	p.InventoryButton.Update()
 	p.SkillsButton.Update()
+	// TODO: inefficient?
+	if (p.Ticks / 20) % 2 == 0 {
+		p.ExclamYOffset = 0
+	} else {
+		p.ExclamYOffset = -4
+	}
 
 	for _, si := range p.SkillIcons {
 		si.Update()
 	}
+
+	p.Ticks++
 	return nil
 }
 
@@ -271,6 +284,10 @@ func drawWorld(p *Playground, screen *ebiten.Image) {
 			util.DrawImage(screen, p.Textures[npcTexId], dx, dy)
 			if p.Game.DebugMode {
 				p.Font16.Draw(screen, fmt.Sprintf("%d", trackedNpc.Uid), float64(dx), float64(dy), color.White)
+			}
+
+			if trackedNpc.NpcData.NpcId == 1 && p.Game.RenderExclamOnGuide {
+				util.DrawImage(screen, p.ExclamTexture, dx, dy - 64 + p.ExclamYOffset)
 			}
 		}
 	}
