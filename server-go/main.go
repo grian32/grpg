@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	_ "server/content"
+	"slices"
 
 	"bufio"
 	"cmp"
@@ -36,7 +37,7 @@ var (
 		TrackedObjs:    make(map[util.Vector2I]*shared.GameObj),
 		Objs:           make(map[util.Vector2I]struct{}),
 		TrackedNpcs:    make(map[uint32]*shared.GameNpc),
-		NpcsByPos: make(map[util.Vector2I]*shared.GameNpc),
+		NpcsByPos:      make(map[util.Vector2I]*shared.GameNpc),
 		WanderableNpcs: make([]*shared.GameNpc, 0),
 		TimedScripts:   make(map[uint32][]func()),
 		Mu:             sync.RWMutex{},
@@ -273,40 +274,57 @@ func handleLogin(reader *bufio.Reader, conn net.Conn, game *shared.Game) {
 }
 
 func processNpcs() {
-	if len(g.NpcMoves) > 0 && g.CurrentTick%10 == 0 {
-		for chunk, paths := range g.NpcMoves {
-			newPaths := make([]shared.NpcPath, 0, len(paths));
-			movesToTransfer := make([]shared.NpcMove, 0);
+	if g.CurrentTick%10 == 0 {
+		wanderingNpcs := []uint32{}
+		if len(g.NpcMoves) > 0 {
+			for chunk, paths := range g.NpcMoves {
+				newPaths := make([]shared.NpcPath, 0, len(paths))
+				movesToTransfer := make([]shared.NpcMove, 0)
 
-			for _, path := range paths {
-				npc, ok := g.TrackedNpcs[path.NpcUid];
-				if !ok {
-					log.Printf("warn: could not find npc with uid %d in tracked npcs, skipping path", path.NpcUid)
-					continue
+				for _, path := range paths {
+					npc, ok := g.TrackedNpcs[path.NpcUid]
+					if !ok {
+						log.Printf("warn: could not find npc with uid %d in tracked npcs, skipping path", path.NpcUid)
+						continue
+					}
+					if len(path.Moves) == 0 {
+						continue
+					}
+					move, newPath := util.PopSlice(path.Moves)
+					if _, exists := g.NpcsByPos[move]; exists {
+						continue
+					}
+
+					delete(g.NpcsByPos, npc.Pos)
+					npc.Pos = move
+					g.NpcsByPos[move] = npc
+					wanderingNpcs = append(wanderingNpcs, npc.Uid)
+
+					if len(newPath) != 0 {
+						newPaths = append(newPaths, shared.NpcPath{NpcId: path.NpcId, NpcUid: path.NpcUid, Moves: newPath})
+					}
+					movesToTransfer = append(movesToTransfer, shared.NpcMove{NpcUid: path.NpcUid, Move: move})
 				}
-				move, newPath := util.PopSlice(path.Moves);
 
-				delete(g.NpcsByPos, npc.Pos)
-				npc.Pos = move
-				g.NpcsByPos[move] = npc
-
-				if len(newPath) != 0 {
-					newPaths = append(newPaths, shared.NpcPath{NpcId: path.NpcId, NpcUid: path.NpcUid, Moves: newPath})
+				if len(newPaths) == 0 {
+					delete(g.NpcMoves, chunk)
+				} else {
+					g.NpcMoves[chunk] = newPaths
 				}
-				movesToTransfer = append(movesToTransfer, shared.NpcMove{NpcUid: path.NpcUid, Move: move})
-			}
 
-			if len(newPaths) == 0 {
-				delete(g.NpcMoves, chunk)
-			} else {
-				g.NpcMoves[chunk] = newPaths
-			}
-
-			if len(movesToTransfer) != 0 {
-				network.UpdatePlayersByChunk(chunk, g, &s2c.NpcMoves{
-					Moves: movesToTransfer,
-				})
+				if len(movesToTransfer) != 0 {
+					network.UpdatePlayersByChunk(chunk, g, &s2c.NpcMoves{
+						Moves: movesToTransfer,
+					})
+				}
 			}
 		}
+
+		// TODO: this has them real weirdly in sync lool and should wait longer, but code is functional, commenting out for testing
+		// for _, npc := range g.WanderableNpcs {
+		// 	if !slices.Contains(wanderingNpcs, npc.Uid) {
+		// 		npc.Wander(g)
+		// 	}
+		// }
 	}
 }

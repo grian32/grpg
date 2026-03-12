@@ -44,8 +44,7 @@ func (g *GameNpc) Wander(game *Game) {
 			for y := startPosY; y <= endPosY; y++ {
 				pos := util.Vector2I{X: x, Y: y}
 				_, exists := game.CollisionMap[pos]
-				_, npcExists := game.NpcsByPos[pos]
-				if !exists && !npcExists {
+				if !exists {
 					validPos[pos] = struct{}{}
 				}
 			}
