@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 	_ "server/content"
-	"slices"
 
 	"bufio"
 	"cmp"

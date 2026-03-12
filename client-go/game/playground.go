@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"strings"
 
 	"client/shared"
 
@@ -362,7 +363,12 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 	p.Font20.Draw(screen, p.CurrActionString, 110, 768+28+3, color.White)
 	if talkbox.Active {
 		p.Font24.Draw(screen, talkbox.CurrentName, 110+332, 768+28+3, color.White)
-		p.Font24.Draw(screen, talkbox.CurrentMessage, 90, 840, color.White)
+		strings := strings.Split(talkbox.CurrentMessage, "\n")
+		var currY float64 = 840
+		for _, s := range strings {
+			p.Font24.Draw(screen, s, 90, currY, color.White)
+			currY += 30
+		}
 	}
 	p.InventoryButton.Draw(screen)
 	p.SkillsButton.Draw(screen)

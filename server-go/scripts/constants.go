@@ -13,7 +13,7 @@ const (
 
 const (
 	_ NpcConstant = iota
-	TEST
+	GRPG_GUIDE
 )
 
 const (
