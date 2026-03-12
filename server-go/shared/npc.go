@@ -43,7 +43,9 @@ func (g *GameNpc) Wander(game *Game) {
 		for x := startPosX; x <= endPosX; x++ {
 			for y := startPosY; y <= endPosY; y++ {
 				pos := util.Vector2I{X: x, Y: y}
-				if _, exists := game.CollisionMap[pos]; !exists {
+				_, exists := game.CollisionMap[pos]
+				_, npcExists := game.NpcsByPos[pos]
+				if !exists && !npcExists {
 					validPos[pos] = struct{}{}
 				}
 			}
@@ -59,7 +61,6 @@ func (g *GameNpc) Wander(game *Game) {
 		return
 	}
 
-	// TODO: check this is in a direction around current pos, i guess best way to do this is to pull the valid positions around the npcs current pos and roll for the amount of valid positions surrounding the npc currently
 	pos := rand.IntN(len(g.ValidWander))
 	var key util.Vector2I
 	i := 0

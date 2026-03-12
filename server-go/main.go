@@ -287,6 +287,7 @@ func processNpcs() {
 				move, newPath := util.PopSlice(path.Moves);
 
 				delete(g.NpcsByPos, npc.Pos)
+				npc.Pos = move
 				g.NpcsByPos[move] = npc
 
 				if len(newPath) != 0 {
