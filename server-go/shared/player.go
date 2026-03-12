@@ -29,6 +29,7 @@ func (p *Player) LoadFromDB(db *sql.DB) error {
 	err := row.Scan(&loadedX, &loadedY, &invBlob, &skillsBlob)
 
 	if err == sql.ErrNoRows {
+		p.InitDefaults()
 		return nil
 	}
 
@@ -53,6 +54,16 @@ func (p *Player) LoadFromDB(db *sql.DB) error {
 	p.Skills = skills;
 
 	return nil
+}
+
+func (p *Player) InitDefaults() {
+	p.Skills = make(map[Skill]*SkillInfo)
+	for i := Foraging; i <= Foraging; i++ {
+		p.Skills[i] = &SkillInfo{
+			Level: 1,
+			XP:    0,
+		}
+	}
 }
 
 func (p *Player) SaveToDB(db *sql.DB) error {
