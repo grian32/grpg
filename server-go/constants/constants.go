@@ -1,4 +1,4 @@
-package scripts
+package constants
 
 // TODO: auto gen this from .gcfg file, include as part of data-packer?
 

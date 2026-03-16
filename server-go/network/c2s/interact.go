@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"grpg/data-go/gbuf"
 	"log"
+	"server/constants"
 	"server/scripts"
 	"server/shared"
 	"server/util"
@@ -38,6 +39,6 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 		log.Printf("failed to read interact packet: %v\n", err)
 	}
 
-	script := scriptManager.InteractScripts[scripts.ObjConstant(objId)]
+	script := scriptManager.InteractScripts[constants.ObjConstant(objId)]
 	script(scripts.NewObjInteractCtx(game, player, objPos))
 }

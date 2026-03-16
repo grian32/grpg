@@ -3,13 +3,14 @@ package scripts
 import (
 	"grpg/data-go/grpgnpc"
 	"log"
+	"server/constants"
 	"server/shared"
 	"server/util"
 )
 
 type ScriptManager struct {
-	InteractScripts map[ObjConstant]ObjInteractFunc
-	NpcTalkScripts  map[NpcConstant]NpcTalkFunc
+	InteractScripts map[constants.ObjConstant]ObjInteractFunc
+	NpcTalkScripts  map[constants.NpcConstant]NpcTalkFunc
 	CommandScripts  map[string]CommandFunc
 }
 
@@ -17,8 +18,8 @@ var npcUid uint32 = 1
 
 func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptManager {
 	s := &ScriptManager{
-		InteractScripts: make(map[ObjConstant]ObjInteractFunc),
-		NpcTalkScripts:  make(map[NpcConstant]NpcTalkFunc),
+		InteractScripts: make(map[constants.ObjConstant]ObjInteractFunc),
+		NpcTalkScripts:  make(map[constants.NpcConstant]NpcTalkFunc),
 		CommandScripts:  make(map[string]CommandFunc),
 	}
 
@@ -45,7 +46,7 @@ func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptMa
 			NpcData:     npcData,
 			ChunkPos:    chunkPos,
 			ValidWander: nil,
-			Uid: npcUid,
+			Uid:         npcUid,
 			WanderRange: reg.wanderRange,
 		}
 

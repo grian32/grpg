@@ -1,6 +1,7 @@
 package scripts
 
 import (
+	"server/constants"
 	"server/network"
 	"server/network/s2c"
 	"server/shared"
@@ -39,7 +40,7 @@ func (o *ObjInteractCtx) SetObjState(new uint8) {
 }
 
 // TODO: move this out to player along with add xp
-func (o *ObjInteractCtx) PlayerInvAdd(itemId ItemConstant) {
+func (o *ObjInteractCtx) PlayerInvAdd(itemId constants.ItemConstant) {
 	o.player.Inventory.AddItem(uint16(itemId))
 	network.SendPacket(o.player.Conn, &s2c.InventoryUpdate{
 		Player: o.player,
@@ -67,10 +68,10 @@ func (o *ObjInteractCtx) AddTimer(ticks uint32, fn TimerFunc) {
 type NpcTalkCtx struct {
 	player *shared.Player
 	game   *shared.Game
-	npcId  NpcConstant
+	npcId  constants.NpcConstant
 }
 
-func NewNpcTalkCtx(player *shared.Player, game *shared.Game, npcId NpcConstant) *NpcTalkCtx {
+func NewNpcTalkCtx(player *shared.Player, game *shared.Game, npcId constants.NpcConstant) *NpcTalkCtx {
 	return &NpcTalkCtx{
 		player: player,
 		game:   game,

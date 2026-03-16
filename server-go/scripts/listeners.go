@@ -1,21 +1,23 @@
 package scripts
 
+import "server/constants"
+
 type ObjInteractFunc func(ctx *ObjInteractCtx)
 type NpcTalkFunc func(ctx *NpcTalkCtx)
 type CommandFunc func(ctx *CommandCtx)
 
 type PendingObjInteract struct {
-	id ObjConstant
+	id constants.ObjConstant
 	fn ObjInteractFunc
 }
 
 type pendingNpcTalk struct {
-	id NpcConstant
+	id constants.NpcConstant
 	fn NpcTalkFunc
 }
 
 type pendingNpcSpawn struct {
-	npcId       NpcConstant
+	npcId       constants.NpcConstant
 	x           uint32
 	y           uint32
 	wanderRange uint8
@@ -34,21 +36,21 @@ var pendingNpcSpawns []pendingNpcSpawn
 
 var pendingCmds []pendingCmd
 
-func OnObjInteract(objId ObjConstant, fnc ObjInteractFunc) {
+func OnObjInteract(objId constants.ObjConstant, fnc ObjInteractFunc) {
 	pendingObjInteracts = append(pendingObjInteracts, PendingObjInteract{
 		id: objId,
 		fn: fnc,
 	})
 }
 
-func OnTalkNpc(npcId NpcConstant, fnc NpcTalkFunc) {
+func OnTalkNpc(npcId constants.NpcConstant, fnc NpcTalkFunc) {
 	pendingNpcTalks = append(pendingNpcTalks, pendingNpcTalk{
 		id: npcId,
 		fn: fnc,
 	})
 }
 
-func SpawnNpc(npcId NpcConstant, x uint32, y uint32, wanderRange uint8) {
+func SpawnNpc(npcId constants.NpcConstant, x uint32, y uint32, wanderRange uint8) {
 	pendingNpcSpawns = append(pendingNpcSpawns, pendingNpcSpawn{
 		npcId:       npcId,
 		x:           x,

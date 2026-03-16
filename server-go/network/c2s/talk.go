@@ -4,6 +4,7 @@ import (
 	"grpg/data-go/gbuf"
 	"log"
 	"server/scripts"
+	"server/constants"
 	"server/shared"
 )
 
@@ -34,6 +35,6 @@ func (t *Talk) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Player, 
 		return
 	}
 
-	script := scriptManager.NpcTalkScripts[scripts.NpcConstant(npcId)]
-	script(scripts.NewNpcTalkCtx(player, game, scripts.NpcConstant(npcId)))
+	script := scriptManager.NpcTalkScripts[constants.NpcConstant(npcId)]
+	script(scripts.NewNpcTalkCtx(player, game, constants.NpcConstant(npcId)))
 }
