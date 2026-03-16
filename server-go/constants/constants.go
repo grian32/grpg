@@ -5,6 +5,7 @@ package constants
 type ObjConstant uint16
 type NpcConstant uint16
 type ItemConstant uint16
+type PlayerVarId uint16
 
 const (
 	_ ObjConstant = iota
@@ -19,4 +20,10 @@ const (
 const (
 	_ ItemConstant = iota
 	BERRIES
+)
+
+const (
+	_ PlayerVarId = iota
+	SHOULD_SHOW_TUTORIAL_INDICATOR
+	LAST_PV = SHOULD_SHOW_TUTORIAL_INDICATOR
 )

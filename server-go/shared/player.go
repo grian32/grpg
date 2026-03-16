@@ -2,8 +2,10 @@ package shared
 
 import (
 	"database/sql"
+	"grpg/data-go/gbuf"
 	"log"
 	"net"
+	"server/constants"
 	"server/util"
 )
 
@@ -15,7 +17,8 @@ type Player struct {
 	Inventory     Inventory
 	Name          string
 	DialogueQueue DialogueQueue
-	Skills		  map[Skill]*SkillInfo
+	Skills        map[Skill]*SkillInfo
+	PlayerVars    map[constants.PlayerVarId]uint16
 	Conn          net.Conn
 }
 
@@ -26,7 +29,8 @@ func (p *Player) LoadFromDB(db *sql.DB) error {
 	var loadedY int
 	var invBlob []byte
 	var skillsBlob []byte
-	err := row.Scan(&loadedX, &loadedY, &invBlob, &skillsBlob)
+	var pvBlob []byte
+	err := row.Scan(&loadedX, &loadedY, &invBlob, &skillsBlob, &pvBlob)
 
 	if err == sql.ErrNoRows {
 		p.InitDefaults()
@@ -43,7 +47,11 @@ func (p *Player) LoadFromDB(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	skills, err := DecodeSkillsFromBlob(skillsBlob);
+	skills, err := DecodeSkillsFromBlob(skillsBlob)
+	if err != nil {
+		return err
+	}
+	err = p.DecodePlayerVarsFromBlob(pvBlob)
 	if err != nil {
 		return err
 	}
@@ -51,7 +59,7 @@ func (p *Player) LoadFromDB(db *sql.DB) error {
 	p.Pos = pos
 	p.ChunkPos = chunkPos
 	p.Inventory = inv
-	p.Skills = skills;
+	p.Skills = skills
 
 	return nil
 }
@@ -63,6 +71,10 @@ func (p *Player) InitDefaults() {
 			Level: 1,
 			XP:    0,
 		}
+	}
+	p.PlayerVars = make(map[constants.PlayerVarId]uint16)
+	for i := constants.SHOULD_SHOW_TUTORIAL_INDICATOR; i <= constants.LAST_PV; i++ {
+		p.PlayerVars[i] = 0
 	}
 }
 
@@ -81,24 +93,24 @@ func (p *Player) SaveToDB(db *sql.DB) error {
 	}
 
 	if err == sql.ErrNoRows {
-		stmt, err := tx.Prepare("INSERT INTO players(player_id, name, x, y, inventory, skills) VALUES (NULL, ?, ?, ?, ?)")
+		stmt, err := tx.Prepare("INSERT INTO players(player_id, name, x, y, inventory, skills, playervar) VALUES (NULL, ?, ?, ?, ?, ?)")
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills))
+		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), p.EncodePlayerVarsToBlob())
 		if err != nil {
 			return err
 		}
 	} else {
-		stmt, err := tx.Prepare("UPDATE players SET x=?, y=?, inventory=?, skills=? WHERE player_id=?")
+		stmt, err := tx.Prepare("UPDATE players SET x=?, y=?, inventory=?, skills=?, playervar=? WHERE player_id=?")
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), existingId)
+		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), p.EncodePlayerVarsToBlob(), existingId)
 		if err != nil {
 			return err
 		}
@@ -134,8 +146,8 @@ func (p *Player) AddXp(skill Skill, xpAmount uint32) {
 		return
 	}
 
-	if xp + xpAmount >= util.MAX_XP {
-		p.Skills[skill].XP = util.MAX_XP;
+	if xp+xpAmount >= util.MAX_XP {
+		p.Skills[skill].XP = util.MAX_XP
 		return
 	}
 
@@ -146,9 +158,43 @@ func (p *Player) AddXp(skill Skill, xpAmount uint32) {
 	if p.Skills[skill].Level < 75 {
 		for i := p.Skills[skill].Level; i < 74; i++ {
 			if newXp > util.LEVEL_XP[i] {
-				p.Skills[skill].Level = uint8(i + 1);
-				break;
+				p.Skills[skill].Level = uint8(i + 1)
+				break
 			}
 		}
 	}
+}
+
+func (p *Player) EncodePlayerVarsToBlob() []byte {
+	buf := gbuf.NewEmptyGBuf()
+	buf.WriteUint32(uint32(len(p.PlayerVars)))
+	for _, val := range p.PlayerVars {
+		buf.WriteUint16(val)
+	}
+
+	return buf.Bytes()
+}
+
+func (p *Player) DecodePlayerVarsFromBlob(blob []byte) error {
+	buf := gbuf.NewGBuf(blob)
+	len, err := buf.ReadUint32()
+	if err != nil {
+		return err
+	}
+
+	for i := range len {
+		pv, err := buf.ReadUint16()
+		if err != nil {
+			return err
+		}
+		p.PlayerVars[constants.PlayerVarId(uint16(i+1))] = pv
+	}
+
+	if len-1 < uint32(constants.LAST_PV) {
+		for i := len - 1; i <= uint32(constants.LAST_PV); i++ {
+			p.PlayerVars[constants.PlayerVarId(i)] = 0
+		}
+	}
+
+	return nil
 }
