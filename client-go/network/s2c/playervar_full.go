@@ -27,7 +27,6 @@ func (p *PlayerVarFull) Handle(buf *gbuf.GBuf, game *shared.Game) {
 			log.Printf("warn: no handler for playervar %d\n", i)
 			continue
 		}
-		log.Printf("pvfull: %d=%d", i, value)
 		handler(game, value)
 	}
 }
