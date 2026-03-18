@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"client/constants"
 	"client/network/c2s"
 	"client/util"
 	"grpg/data-go/gbuf"
@@ -42,6 +43,7 @@ type Game struct {
 	Player                       *LocalPlayer
 	Talkbox                      Talkbox
 	OtherPlayers                 map[string]*RemotePlayer
+	PlayerVars                   map[constants.PlayerVarId]uint16
 	Conn                         net.Conn
 	GameframeContainerRenderType RenderType
 	ShowFailedLogin              bool

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"client/constants"
 	"client/game"
 	"client/network"
 	"client/shared"
@@ -37,6 +38,7 @@ var (
 		},
 		Talkbox:                      shared.Talkbox{},
 		OtherPlayers:                 map[string]*shared.RemotePlayer{},
+		PlayerVars:                   make(map[constants.PlayerVarId]uint16),
 		Conn:                         network.StartConn(),
 		ShowFailedLogin:              false,
 		GameframeContainerRenderType: shared.Inventory,

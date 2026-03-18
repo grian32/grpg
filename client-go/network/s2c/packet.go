@@ -25,6 +25,8 @@ var (
 	TalkboxData         = PacketData{Opcode: 0x07, Length: -1, Handler: &Talkbox{}}
 	SkillUpdateData     = PacketData{Opcode: 0x08, Length: 7, Handler: &SkillUpdate{}}
 	NpcMovesData        = PacketData{Opcode: 0x09, Length: -1, Handler: &NpcMoves{}}
+	PlayerVarFullData   = PacketData{Opcode: 0x0A, Length: -1, Handler: &PlayerVarFull{}}
+	PlayerVarIndivData   = PacketData{Opcode: 0x0B, Length: 4, Handler: &PlayerVarIndiv{}}
 )
 
 var Packets = map[byte]PacketData{
@@ -37,4 +39,6 @@ var Packets = map[byte]PacketData{
 	0x07: TalkboxData,
 	0x08: SkillUpdateData,
 	0x09: NpcMovesData,
+	0x0A: PlayerVarFullData,
+	0x0B: PlayerVarIndivData,
 }
