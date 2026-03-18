@@ -11,10 +11,42 @@ import (
 
 type TimerFunc func()
 
+// GenericCtx possibly bad name but this consists of functions that should be on every context
+type GenericCtx struct {
+	game *shared.Game
+	player *shared.Player
+}
+
+func (g *GenericCtx) PlayerInvAdd(itemId constants.ItemConstant) {
+	g.player.Inventory.AddItem(uint16(itemId))
+	network.SendPacket(g.player.Conn, &s2c.InventoryUpdate{
+		Player: g.player,
+	}, g.game)
+}
+
+func (g *ObjInteractCtx) PlayerAddXp(skill shared.Skill, xpAmount uint32) {
+	g.player.AddXp(skill, xpAmount)
+	network.SendPacket(g.player.Conn, &s2c.SkillUpdate{
+		SkillIds: []shared.Skill{skill},
+		Player:   g.player,
+	}, g.game)
+}
+
+func (g *ObjInteractCtx) AddTimer(ticks uint32, fn TimerFunc) {
+	endTick := g.game.CurrentTick + ticks
+	_, ok := g.game.TimedScripts[endTick]
+	if !ok {
+		g.game.TimedScripts[endTick] = []func(){fn}
+	} else {
+		g.game.TimedScripts[endTick] = append(g.game.TimedScripts[endTick], fn)
+	}
+}
+
 type ObjInteractCtx struct {
 	game   *shared.Game
 	player *shared.Player
 	objPos util.Vector2I
+	GenericCtx
 }
 
 func NewObjInteractCtx(game *shared.Game, player *shared.Player, objPos util.Vector2I) *ObjInteractCtx {
@@ -22,6 +54,10 @@ func NewObjInteractCtx(game *shared.Game, player *shared.Player, objPos util.Vec
 		game:   game,
 		player: player,
 		objPos: objPos,
+		GenericCtx: GenericCtx{
+			game: game,
+			player: player,
+		},
 	}
 }
 
@@ -37,32 +73,6 @@ func (o *ObjInteractCtx) SetObjState(new uint8) {
 		ChunkPos: trackedObj.ChunkPos,
 		Rebuild:  false,
 	})
-}
-
-// TODO: move this out to player along with add xp
-func (o *ObjInteractCtx) PlayerInvAdd(itemId constants.ItemConstant) {
-	o.player.Inventory.AddItem(uint16(itemId))
-	network.SendPacket(o.player.Conn, &s2c.InventoryUpdate{
-		Player: o.player,
-	}, o.game)
-}
-
-func (o *ObjInteractCtx) PlayerAddXp(skill shared.Skill, xpAmount uint32) {
-	o.player.AddXp(skill, xpAmount)
-	network.SendPacket(o.player.Conn, &s2c.SkillUpdate{
-		SkillIds: []shared.Skill{skill},
-		Player:   o.player,
-	}, o.game)
-}
-
-func (o *ObjInteractCtx) AddTimer(ticks uint32, fn TimerFunc) {
-	endTick := o.game.CurrentTick + ticks
-	_, ok := o.game.TimedScripts[endTick]
-	if !ok {
-		o.game.TimedScripts[endTick] = []func(){fn}
-	} else {
-		o.game.TimedScripts[endTick] = append(o.game.TimedScripts[endTick], fn)
-	}
 }
 
 type NpcTalkCtx struct {

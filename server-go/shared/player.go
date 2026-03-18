@@ -173,11 +173,9 @@ func (p *Player) AddXp(skill Skill, xpAmount uint32) {
 func (p *Player) EncodePlayerVarsToBlob() []byte {
 	buf := gbuf.NewEmptyGBuf()
 	buf.WriteUint32(uint32(len(p.PlayerVars)))
-	fmt.Printf("pv: %v", p.PlayerVars)
 	for _, val := range p.PlayerVars {
 		buf.WriteUint16(val)
 	}
-	fmt.Printf("pv: %v", buf.Bytes())
 
 	return buf.Bytes()
 }
