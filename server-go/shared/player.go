@@ -2,7 +2,6 @@ package shared
 
 import (
 	"database/sql"
-	"fmt"
 	"grpg/data-go/gbuf"
 	"log"
 	"net"
