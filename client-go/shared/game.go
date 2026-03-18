@@ -44,6 +44,7 @@ type Game struct {
 	Talkbox                      Talkbox
 	OtherPlayers                 map[string]*RemotePlayer
 	PlayerVars                   map[constants.PlayerVarId]uint16
+	PlayerVarHandlers            map[constants.PlayerVarId]PlayerVarHandlerFunc
 	Conn                         net.Conn
 	GameframeContainerRenderType RenderType
 	ShowFailedLogin              bool

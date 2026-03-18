@@ -42,6 +42,18 @@ func (g *GenericCtx) AddTimer(ticks uint32, fn TimerFunc) {
 	}
 }
 
+func (g *GenericCtx) GetPlayerVar(varId constants.PlayerVarId) uint16{
+	return g.player.PlayerVars[varId]
+}
+
+func (g *GenericCtx) SetPlayerVar(varId constants.PlayerVarId, newValue uint16) {
+	g.player.PlayerVars[varId] = newValue;
+	network.SendPacket(g.player.Conn, &s2c.PlayerVarIndiv{
+		VarId:   uint16(varId),
+		VarValue: newValue,
+	}, g.game)
+}
+
 type ObjInteractCtx struct {
 	game   *shared.Game
 	player *shared.Player
@@ -79,6 +91,7 @@ type NpcTalkCtx struct {
 	player *shared.Player
 	game   *shared.Game
 	npcId  constants.NpcConstant
+	GenericCtx
 }
 
 func NewNpcTalkCtx(player *shared.Player, game *shared.Game, npcId constants.NpcConstant) *NpcTalkCtx {
@@ -86,6 +99,10 @@ func NewNpcTalkCtx(player *shared.Player, game *shared.Game, npcId constants.Npc
 		player: player,
 		game:   game,
 		npcId:  npcId,
+		GenericCtx: GenericCtx{
+			game: game,
+			player: player,
+		},
 	}
 }
 

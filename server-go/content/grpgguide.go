@@ -15,5 +15,9 @@ func init() {
 		ctx.TalkNpc("You can move around with WASD,\nand interact with Objects & NPCs by pressing Q.")
 
 		ctx.StartDialogue()
+
+		if (ctx.GetPlayerVar(constants.SHOULD_SHOW_TUTORIAL_INDICATOR) == 0) {
+			ctx.SetPlayerVar(constants.SHOULD_SHOW_TUTORIAL_INDICATOR, 1)
+		}
 	})
 }

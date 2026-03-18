@@ -21,5 +21,10 @@ func (p *PlayerVarIndiv) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		return
 	}
 	game.PlayerVars[constants.PlayerVarId(id)] = val
-	fmt.Printf("pv(indiv): %v", game.PlayerVars)
+	handler, ok := game.PlayerVarHandlers[constants.PlayerVarId(id)]
+	if !ok {
+		fmt.Printf("warn: no handler for playervar %d\n", id)
+		return
+	}
+	handler(game, val)
 }

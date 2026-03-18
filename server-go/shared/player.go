@@ -77,7 +77,7 @@ func (p *Player) InitDefaults() {
 
 func (p *Player) InitDefaultPlayerVars() {
 	p.PlayerVars = make(map[constants.PlayerVarId]uint16)
-	for i := constants.SHOULD_SHOW_TUTORIAL_INDICATOR; i <= constants.LAST_PV; i++ {
+	for i := constants.SHOULD_SHOW_TUTORIAL_INDICATOR; i < constants.LAST_PV; i++ {
 		p.PlayerVars[i] = 0
 	}
 }
@@ -200,7 +200,7 @@ func (p *Player) DecodePlayerVarsFromBlob(blob []byte) error {
 	}
 
 	if len-1 < uint32(constants.LAST_PV) {
-		for i := len - 1; i <= uint32(constants.LAST_PV); i++ {
+		for i := len - 1; i < uint32(constants.LAST_PV); i++ {
 			p.PlayerVars[constants.PlayerVarId(i)] = 0
 		}
 	}
