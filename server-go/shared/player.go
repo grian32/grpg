@@ -2,6 +2,7 @@ package shared
 
 import (
 	"database/sql"
+	"fmt"
 	"grpg/data-go/gbuf"
 	"log"
 	"net"
@@ -23,7 +24,7 @@ type Player struct {
 }
 
 func (p *Player) LoadFromDB(db *sql.DB) error {
-	row := db.QueryRow("SELECT x, y, inventory, skills FROM players WHERE name = ?", p.Name)
+	row := db.QueryRow("SELECT x, y, inventory, skills, playervar FROM players WHERE name = ?", p.Name)
 
 	var loadedX int
 	var loadedY int
@@ -72,6 +73,10 @@ func (p *Player) InitDefaults() {
 			XP:    0,
 		}
 	}
+	p.InitDefaultPlayerVars()
+}
+
+func (p *Player) InitDefaultPlayerVars() {
 	p.PlayerVars = make(map[constants.PlayerVarId]uint16)
 	for i := constants.SHOULD_SHOW_TUTORIAL_INDICATOR; i <= constants.LAST_PV; i++ {
 		p.PlayerVars[i] = 0
@@ -168,20 +173,27 @@ func (p *Player) AddXp(skill Skill, xpAmount uint32) {
 func (p *Player) EncodePlayerVarsToBlob() []byte {
 	buf := gbuf.NewEmptyGBuf()
 	buf.WriteUint32(uint32(len(p.PlayerVars)))
+	fmt.Printf("pv: %v", p.PlayerVars)
 	for _, val := range p.PlayerVars {
 		buf.WriteUint16(val)
 	}
+	fmt.Printf("pv: %v", buf.Bytes())
 
 	return buf.Bytes()
 }
 
 func (p *Player) DecodePlayerVarsFromBlob(blob []byte) error {
+	if len(blob) == 0 {
+		p.InitDefaultPlayerVars()
+		return nil
+	}
 	buf := gbuf.NewGBuf(blob)
 	len, err := buf.ReadUint32()
 	if err != nil {
 		return err
 	}
 
+	p.PlayerVars = make(map[constants.PlayerVarId]uint16)
 	for i := range len {
 		pv, err := buf.ReadUint16()
 		if err != nil {
