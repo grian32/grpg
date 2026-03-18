@@ -24,7 +24,7 @@ func (g *GenericCtx) PlayerInvAdd(itemId constants.ItemConstant) {
 	}, g.game)
 }
 
-func (g *ObjInteractCtx) PlayerAddXp(skill shared.Skill, xpAmount uint32) {
+func (g *GenericCtx) PlayerAddXp(skill shared.Skill, xpAmount uint32) {
 	g.player.AddXp(skill, xpAmount)
 	network.SendPacket(g.player.Conn, &s2c.SkillUpdate{
 		SkillIds: []shared.Skill{skill},
@@ -32,7 +32,7 @@ func (g *ObjInteractCtx) PlayerAddXp(skill shared.Skill, xpAmount uint32) {
 	}, g.game)
 }
 
-func (g *ObjInteractCtx) AddTimer(ticks uint32, fn TimerFunc) {
+func (g *GenericCtx) AddTimer(ticks uint32, fn TimerFunc) {
 	endTick := g.game.CurrentTick + ticks
 	_, ok := g.game.TimedScripts[endTick]
 	if !ok {
