@@ -5,6 +5,7 @@ import (
 	"log"
 	"server/scripts"
 	"server/shared"
+	"slices"
 	"strings"
 )
 
@@ -17,6 +18,11 @@ func (c *Command) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Playe
 		log.Printf("failed to read string in command packet\n")
 		return
 	}
+	if !slices.Contains(game.OperatorUsernames, player.Name) {
+		log.Printf("warn: command used by non-operator user %s", player.Name)
+		return
+	}
+
 	split := strings.Split(cmd, " ")
 	name := split[0]
 	args := split[1:]

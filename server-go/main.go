@@ -2,7 +2,9 @@ package main
 
 import (
 	"net/http"
+	"os"
 	_ "server/content"
+	"strings"
 
 	"bufio"
 	"cmp"
@@ -31,19 +33,20 @@ import (
 
 var (
 	g = &shared.Game{
-		Players:        map[*shared.Player]struct{}{},
-		Connections:    make(map[net.Conn]*shared.Player),
-		TrackedObjs:    make(map[util.Vector2I]*shared.GameObj),
-		Objs:           make(map[util.Vector2I]struct{}),
-		TrackedNpcs:    make(map[uint32]*shared.GameNpc),
-		NpcsByPos:      make(map[util.Vector2I]*shared.GameNpc),
-		WanderableNpcs: make([]*shared.GameNpc, 0),
-		TimedScripts:   make(map[uint32][]func()),
-		Mu:             sync.RWMutex{},
-		NpcMoves:       make(map[util.Vector2I][]shared.NpcPath),
-		MaxX:           0,
-		MaxY:           0,
-		CurrentTick:    0,
+		Players:           map[*shared.Player]struct{}{},
+		Connections:       make(map[net.Conn]*shared.Player),
+		TrackedObjs:       make(map[util.Vector2I]*shared.GameObj),
+		Objs:              make(map[util.Vector2I]struct{}),
+		TrackedNpcs:       make(map[uint32]*shared.GameNpc),
+		NpcsByPos:         make(map[util.Vector2I]*shared.GameNpc),
+		WanderableNpcs:    make([]*shared.GameNpc, 0),
+		TimedScripts:      make(map[uint32][]func()),
+		Mu:                sync.RWMutex{},
+		NpcMoves:          make(map[util.Vector2I][]shared.NpcPath),
+		OperatorUsernames: make([]string, 0),
+		MaxX:              0,
+		MaxY:              0,
+		CurrentTick:       0,
 	}
 	assetsDirectory = "../../grpg-assets/"
 	scriptManager   *scripts.ScriptManager
@@ -97,6 +100,12 @@ func main() {
 	LoadMaps(assetsDirectory+"maps/", g, objs)
 
 	scriptManager = scripts.NewScriptManager(g, npcs)
+
+	opNames, err := os.ReadFile("./operators.txt")
+	if err != nil {
+		log.Fatal("failed to read operator names: ", err)
+	}
+	g.OperatorUsernames = strings.Split(string(opNames), "\n")
 
 	packets := make(chan ChanPacket, 1000)
 

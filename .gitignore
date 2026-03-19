@@ -1,4 +1,5 @@
 server-go/players.db
+server-go/operators.txt
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
