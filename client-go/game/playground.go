@@ -8,7 +8,6 @@ import (
 	"image"
 	"image/color"
 	"log"
-	"strings"
 
 	"client/shared"
 
@@ -161,7 +160,7 @@ func (p *Playground) Update() error {
 	p.InventoryButton.Update()
 	p.SkillsButton.Update()
 	// TODO: inefficient?
-	if (p.Ticks / 20) % 2 == 0 {
+	if (p.Ticks/20)%2 == 0 {
 		p.ExclamYOffset = 0
 	} else {
 		p.ExclamYOffset = -4
@@ -287,7 +286,7 @@ func drawWorld(p *Playground, screen *ebiten.Image) {
 			}
 
 			if trackedNpc.NpcData.NpcId == 1 && p.Game.RenderExclamOnGuide {
-				util.DrawImage(screen, p.ExclamTexture, dx, dy - 64 + p.ExclamYOffset)
+				util.DrawImage(screen, p.ExclamTexture, dx, dy-64+p.ExclamYOffset)
 			}
 		}
 	}
@@ -380,9 +379,8 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 	p.Font20.Draw(screen, p.CurrActionString, 110, 768+28+3, color.White)
 	if talkbox.Active {
 		p.Font24.Draw(screen, talkbox.CurrentName, 110+332, 768+28+3, color.White)
-		strings := strings.Split(talkbox.CurrentMessage, "\n")
 		var currY float64 = 840
-		for _, s := range strings {
+		for _, s := range talkbox.CurrentMessage {
 			p.Font24.Draw(screen, s, 90, currY, color.White)
 			currY += 30
 		}

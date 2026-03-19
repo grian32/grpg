@@ -5,6 +5,7 @@ import (
 	"cmp"
 	"grpg/data-go/gbuf"
 	"log"
+	"strings"
 )
 
 type TalkboxType byte
@@ -46,12 +47,12 @@ func (t *Talkbox) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		name = game.Npcs[npcId].Name
 	case CLEAR:
 		game.Talkbox.CurrentName = ""
-		game.Talkbox.CurrentMessage = ""
+		game.Talkbox.CurrentMessage = []string{""}
 		game.Talkbox.Active = false
 		return
 	}
 
 	game.Talkbox.CurrentName = name
-	game.Talkbox.CurrentMessage = msg
+	game.Talkbox.CurrentMessage = strings.Split(msg, "\n")
 	game.Talkbox.Active = true
 }

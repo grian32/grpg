@@ -2,6 +2,6 @@ package shared
 
 type Talkbox struct {
 	CurrentName    string
-	CurrentMessage string
+	CurrentMessage []string
 	Active         bool
 }
