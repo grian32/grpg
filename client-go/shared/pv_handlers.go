@@ -1,7 +1,5 @@
 package shared
 
-import "fmt"
-
 type PlayerVarHandlerFunc func(g *Game, newVal uint16)
 
 func HandleShowTutorial(g *Game, val uint16) {
