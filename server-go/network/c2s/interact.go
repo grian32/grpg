@@ -2,7 +2,6 @@ package c2s
 
 import (
 	"cmp"
-	"fmt"
 	"grpg/data-go/gbuf"
 	"log"
 	"server/constants"
@@ -22,7 +21,7 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 
 	playerFacingCooord := player.GetFacingCoord()
 	if player.GetFacingCoord() != objPos {
-		fmt.Printf("warn: player %s @ facing %d, %d, %s tried to interact with obj @ %d, %d that he isn't facing\n",
+		log.Printf("warn: player %s @ facing %d, %d, %s tried to interact with obj @ %d, %d that he isn't facing\n",
 			player.Name,
 			playerFacingCooord.X, playerFacingCooord.Y,
 			shared.DirectionString(player.Facing),
@@ -31,7 +30,7 @@ func (i *Interact) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Play
 	}
 
 	if _, ok := game.Objs[objPos]; !ok {
-		fmt.Printf("warn: player %s tried to interact with obj that doesn't exist %d, %d\n", player.Name, x, y)
+		log.Printf("warn: player %s tried to interact with obj that doesn't exist %d, %d\n", player.Name, x, y)
 		return
 	}
 

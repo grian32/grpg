@@ -1,8 +1,8 @@
 package shared
 
 import (
-	"fmt"
 	"grpg/data-go/grpgnpc"
+	"log"
 	"math/rand/v2"
 	"server/util"
 )
@@ -20,15 +20,15 @@ type GameNpc struct {
 
 type NpcPath struct {
 	// dont think id is actually used whatsoever, prob safe to remove
-	NpcId uint16
+	NpcId  uint16
 	NpcUid uint32
-	Moves []util.Vector2I
+	Moves  []util.Vector2I
 }
 
 // NpcMove for packet purposes basically
 type NpcMove struct {
 	NpcUid uint32
-	Move  util.Vector2I
+	Move   util.Vector2I
 }
 
 func (g *GameNpc) Wander(game *Game) {
@@ -56,7 +56,7 @@ func (g *GameNpc) Wander(game *Game) {
 	}
 
 	if len(g.ValidWander) == 0 {
-		fmt.Printf("no valid wander positions for npc %d\n", g.Uid)
+		log.Printf("no valid wander positions for npc %d\n", g.Uid)
 		return
 	}
 
