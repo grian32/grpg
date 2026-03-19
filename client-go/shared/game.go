@@ -29,15 +29,15 @@ type Game struct {
 	Objs         map[uint16]*grpgobj.Obj
 	Npcs         map[uint16]*grpgnpc.Npc
 	// this is literally only needed to send the right obj id with the interact packet, only stores stateful packets
-	ObjIdByLoc                   map[util.Vector2I]uint16
-	Tiles                        map[uint16]*grpgtile.Tile
-	Items                        map[uint16]grpgitem.Item
-	TrackedObjs                  map[util.Vector2I]*GameObj
-	NpcsByPos map[util.Vector2I]*GameNpc
+	ObjIdByLoc  map[util.Vector2I]uint16
+	Tiles       map[uint16]*grpgtile.Tile
+	Items       map[uint16]grpgitem.Item
+	TrackedObjs map[util.Vector2I]*GameObj
+	NpcsByPos   map[util.Vector2I]*GameNpc
 	// uid to gamenpc
-	TrackedNpcs map[uint32]*GameNpc
-	Skills						 map[Skill]*SkillInfo
-	SkillHoverMsgs 				 map[Skill]*string;
+	TrackedNpcs                  map[uint32]*GameNpc
+	Skills                       map[Skill]*SkillInfo
+	SkillHoverMsgs               map[Skill]*string
 	TileSize                     int32
 	SceneManager                 *GSceneManager
 	Player                       *LocalPlayer
@@ -47,6 +47,7 @@ type Game struct {
 	PlayerVarHandlers            map[constants.PlayerVarId]PlayerVarHandlerFunc
 	Conn                         net.Conn
 	GameframeContainerRenderType RenderType
+	OutlineInvSpot               int
 	ShowFailedLogin              bool
 	DebugMode                    bool
 	RenderExclamOnGuide          bool

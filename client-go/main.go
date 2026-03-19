@@ -14,19 +14,19 @@ import (
 
 var (
 	g = &shared.Game{
-		ScreenWidth:  1152,
-		ScreenHeight: 960,
-		ScreenRatio:  1152.0/960.0,
-		TileSize:     64,
-		MaxX:         0,
-		MaxY:         0,
-		CollisionMap: make(map[util.Vector2I]struct{}),
-		ObjIdByLoc:   make(map[util.Vector2I]uint16),
-		TrackedObjs:  make(map[util.Vector2I]*shared.GameObj),
-		TrackedNpcs: map[uint32]*shared.GameNpc{},
-		Skills: 		make(map[shared.Skill]*shared.SkillInfo),
+		ScreenWidth:    1152,
+		ScreenHeight:   960,
+		ScreenRatio:    1152.0 / 960.0,
+		TileSize:       64,
+		MaxX:           0,
+		MaxY:           0,
+		CollisionMap:   make(map[util.Vector2I]struct{}),
+		ObjIdByLoc:     make(map[util.Vector2I]uint16),
+		TrackedObjs:    make(map[util.Vector2I]*shared.GameObj),
+		TrackedNpcs:    map[uint32]*shared.GameNpc{},
+		Skills:         make(map[shared.Skill]*shared.SkillInfo),
 		SkillHoverMsgs: make(map[shared.Skill]*string),
-		SceneManager: &shared.GSceneManager{},
+		SceneManager:   &shared.GSceneManager{},
 		Player: &shared.LocalPlayer{
 			X:         0,
 			Y:         0,
@@ -36,17 +36,18 @@ var (
 			Inventory: [24]shared.InventoryItem{},
 			Name:      "",
 		},
-		Talkbox:                      shared.Talkbox{},
-		OtherPlayers:                 map[string]*shared.RemotePlayer{},
-		PlayerVars:                   make(map[constants.PlayerVarId]uint16),
-		PlayerVarHandlers:            map[constants.PlayerVarId]shared.PlayerVarHandlerFunc{
-			constants.SHOULD_SHOW_TUTORIAL_INDICATOR : shared.HandleShowTutorial,
+		Talkbox:      shared.Talkbox{},
+		OtherPlayers: map[string]*shared.RemotePlayer{},
+		PlayerVars:   make(map[constants.PlayerVarId]uint16),
+		PlayerVarHandlers: map[constants.PlayerVarId]shared.PlayerVarHandlerFunc{
+			constants.SHOULD_SHOW_TUTORIAL_INDICATOR: shared.HandleShowTutorial,
 		},
 		Conn:                         network.StartConn(),
 		ShowFailedLogin:              false,
 		GameframeContainerRenderType: shared.Inventory,
-		DebugMode: false,
-		RenderExclamOnGuide: true,
+		OutlineInvSpot:               0,
+		DebugMode:                    false,
+		RenderExclamOnGuide:          true,
 	}
 )
 
@@ -58,13 +59,13 @@ type GameWrapper struct {
 
 func (g *GameWrapper) Update() error {
 	processPackets(g.packets, g.game)
-	ww, wh := ebiten.WindowSize();
-	currRatio := float64(ww) / float64(wh);
+	ww, wh := ebiten.WindowSize()
+	currRatio := float64(ww) / float64(wh)
 
 	if currRatio > g.game.ScreenRatio {
-		ebiten.SetWindowSize(int(float64(wh) * g.game.ScreenRatio), wh)
+		ebiten.SetWindowSize(int(float64(wh)*g.game.ScreenRatio), wh)
 	} else {
-		ebiten.SetWindowSize(ww, int(float64(ww) / g.game.ScreenRatio))
+		ebiten.SetWindowSize(ww, int(float64(ww)/g.game.ScreenRatio))
 	}
 
 	return g.gsm.CurrentScene.Update()
@@ -82,9 +83,9 @@ func main() {
 	for i := shared.Foraging; i <= shared.Foraging; i++ {
 		g.Skills[i] = &shared.SkillInfo{
 			Level: 1,
-			XP: 0,
+			XP:    0,
 		}
-		g.SkillHoverMsgs[i] = util.StringPtr("0 XP");
+		g.SkillHoverMsgs[i] = util.StringPtr("0 XP")
 	}
 	windowTitle := flag.String("title", "GRPG Client", "the window title")
 
@@ -93,7 +94,7 @@ func main() {
 	ebiten.SetWindowSize(int(g.ScreenWidth), int(g.ScreenHeight))
 	ebiten.SetWindowTitle(*windowTitle)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-	ebiten.SetWindowSizeLimits(int(g.ScreenWidth / 2), int(g.ScreenHeight / 2), int(g.ScreenWidth), int(g.ScreenHeight))
+	ebiten.SetWindowSizeLimits(int(g.ScreenWidth/2), int(g.ScreenHeight/2), int(g.ScreenWidth), int(g.ScreenHeight))
 	ebiten.SetTPS(60)
 
 	g.SceneManager.SwitchTo(&game.LoginScreen{

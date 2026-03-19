@@ -17,28 +17,29 @@ import (
 )
 
 type Playground struct {
-	Font16           *gebitenui.GFont
-	Font18           *gebitenui.GFont
-	Font20           *gebitenui.GFont
-	Font24           *gebitenui.GFont
-	Game             *shared.Game
-	GameframeRight   *ebiten.Image
-	GameframeBottom  *ebiten.Image
-	ExclamTexture    *ebiten.Image
-	SkillIcons       map[shared.Skill]*gebitenui.GHoverTexture
-	InventoryButton  *gebitenui.GTextureButton
-	SkillsButton     *gebitenui.GTextureButton
-	PlayerTextures   map[shared.Direction]*ebiten.Image
-	Textures         map[uint16]*ebiten.Image
-	Zones            map[util.Vector2I]grpgmap.Zone
-	CameraTarget     util.Vector2
-	PrevCameraTarget util.Vector2
-	WorldImage       *ebiten.Image
-	CurrActionString string
-	IsTypingCommand  bool
-	CommandString    string
-	ExclamYOffset    int32
-	Ticks            uint32
+	Font16             *gebitenui.GFont
+	Font18             *gebitenui.GFont
+	Font20             *gebitenui.GFont
+	Font24             *gebitenui.GFont
+	Game               *shared.Game
+	GameframeRight     *ebiten.Image
+	GameframeBottom    *ebiten.Image
+	ExclamTexture      *ebiten.Image
+	SkillIcons         map[shared.Skill]*gebitenui.GHoverTexture
+	InventoryButton    *gebitenui.GTextureButton
+	SkillsButton       *gebitenui.GTextureButton
+	PlayerTextures     map[shared.Direction]*ebiten.Image
+	Textures           map[uint16]*ebiten.Image
+	Zones              map[util.Vector2I]grpgmap.Zone
+	CameraTarget       util.Vector2
+	PrevCameraTarget   util.Vector2
+	WorldImage         *ebiten.Image
+	ItemOutlineTexture *ebiten.Image
+	CurrActionString   string
+	IsTypingCommand    bool
+	CommandString      string
+	ExclamYOffset      int32
+	Ticks              uint32
 }
 
 func (p *Playground) Setup() {
@@ -105,6 +106,7 @@ func (p *Playground) Setup() {
 	})
 
 	p.WorldImage = ebiten.NewImage(1024, 1024)
+	p.ItemOutlineTexture = NewOutlineTexture(util.Yellow)
 }
 
 func (p *Playground) Cleanup() {
@@ -355,6 +357,10 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 			util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
 
 			p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+16), float64(currItemRealPosY), color.White)
+
+			if idx == p.Game.OutlineInvSpot {
+				util.DrawImage(screen, p.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)
+			}
 
 			currItemRealPosX += 64
 			if (idx+1)%4 == 0 {

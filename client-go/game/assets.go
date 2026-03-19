@@ -11,6 +11,7 @@ import (
 	"grpg/data-go/grpgobj"
 	"grpg/data-go/grpgtex"
 	"grpg/data-go/grpgtile"
+	"image/color"
 	"log"
 	"os"
 	"path/filepath"
@@ -329,4 +330,22 @@ func loadLoginMusic(path string) (*audio.Player, error) {
 	}
 
 	return player, nil
+}
+
+// From CLAUDE, TODO: swap this out for an actual texture, I didn't have asset making tools on hand when implementing this
+func NewOutlineTexture(color color.RGBA) *ebiten.Image {
+	img := ebiten.NewImage(64, 64)
+	for x := 0; x < 64; x++ {
+		for y := 0; y < 4; y++ {
+			img.Set(x, y, color)    // top
+			img.Set(x, 63-y, color) // bottom
+		}
+	}
+	for y := 4; y < 60; y++ {
+		for x := 0; x < 4; x++ {
+			img.Set(x, y, color)    // left
+			img.Set(63-x, y, color) // right
+		}
+	}
+	return img
 }
