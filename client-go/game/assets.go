@@ -336,16 +336,16 @@ func loadLoginMusic(path string) (*audio.Player, error) {
 func NewOutlineTexture(color color.RGBA) *ebiten.Image {
 	img := ebiten.NewImage(64, 64)
 	for x := 0; x < 64; x++ {
-		for y := 0; y < 4; y++ {
-			img.Set(x, y, color)    // top
-			img.Set(x, 63-y, color) // bottom
-		}
+		img.Set(x, 0, color)  // top
+		img.Set(x, 1, color)
+		img.Set(x, 63, color) // bottom
+		img.Set(x, 62, color)
 	}
-	for y := 4; y < 60; y++ {
-		for x := 0; x < 4; x++ {
-			img.Set(x, y, color)    // left
-			img.Set(63-x, y, color) // right
-		}
+	for y := 2; y < 62; y++ {
+		img.Set(0, y, color)  // left
+		img.Set(1, y, color)
+		img.Set(63, y, color) // right
+		img.Set(62, y, color)
 	}
 	return img
 }

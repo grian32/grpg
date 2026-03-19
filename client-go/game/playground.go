@@ -356,7 +356,7 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 			tex := p.Textures[data.Texture]
 			util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
 
-			p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+16), float64(currItemRealPosY), color.White)
+			p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+2), float64(currItemRealPosY), color.White)
 
 			if idx == p.Game.OutlineInvSpot {
 				util.DrawImage(screen, p.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)
