@@ -94,6 +94,7 @@ func (p *Playground) Setup() {
 	// TODO: refactor this into its own function at some point when i add more skills, it'll probably end up being rather manual unfortunately, don't think there's much i can do
 	hoverTex := otherTex["hover_tex"]
 	foragingIconTex := otherTex["foraging_icon"]
+	p.ItemOutlineTexture = otherTex["item_outline"]
 
 	p.SkillIcons[shared.Foraging] = gebitenui.NewHoverTexture(768+64, 64, 768+(64*5), foragingIconTex, p.Game.SkillHoverMsgs[shared.Foraging], hoverTex, font16, color.White)
 
@@ -106,7 +107,6 @@ func (p *Playground) Setup() {
 	})
 
 	p.WorldImage = ebiten.NewImage(1024, 1024)
-	p.ItemOutlineTexture = NewOutlineTexture(util.Yellow)
 }
 
 func (p *Playground) Cleanup() {
@@ -356,7 +356,7 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 			tex := p.Textures[data.Texture]
 			util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
 
-			p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+2), float64(currItemRealPosY), color.White)
+			p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+6), float64(currItemRealPosY + 4), color.White)
 
 			if idx == p.Game.OutlineInvSpot {
 				util.DrawImage(screen, p.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)
