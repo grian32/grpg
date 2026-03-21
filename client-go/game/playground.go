@@ -1,11 +1,9 @@
 package game
 
 import (
-	"client/constants"
 	"client/network/c2s"
 	"client/util"
 	"fmt"
-	"grpg/data-go/grpgmap"
 	"image"
 	"image/color"
 	"log"
@@ -18,84 +16,83 @@ import (
 )
 
 const (
-	WorldImageSize = 1024
+	WorldImageSize  = 1024
 	RightGameframeX = 768
 
-	ChunkSize = 16
+	ChunkSize     = 16
 	TilesPerChunk = 256
-	TileSize = 64 // pixels per tile, this is used in both ui and actual world stuff
+	TileSize      = 64 // pixels per tile, this is used in both ui and actual world stuff
 
 	ExclamAnimTickInterval = 20
-	ExclamAnimFrameCount = 2
-	ExclamBobOffset = -4
+	ExclamAnimFrameCount   = 2
+	ExclamBobOffset        = -4
 
-	InvButtonXOffset = TileSize + 16
-	SkillsButtonXOffset = TileSize * 2 + 32
+	InvButtonXOffset    = TileSize + 16
+	SkillsButtonXOffset = TileSize*2 + 32
 
-	CameraOffsetTiles = 4
-	CameraBoundaryTiles = 12
+	CameraOffsetTiles    = 4
+	CameraBoundaryTiles  = 12
 	CameraMinOffsetTiles = 9
-	CameraPanSpeed = 16.0
+	CameraPanSpeed       = 16.0
 
 	CommandY = 740
 
 	ItemCountXOffset = 6
 	ItemCountYOffset = 4
-	ItemsPerRow = 4
+	ItemsPerRow      = 4
 
-	CurrActionX = 110
+	CurrActionX           = 110
 	CurrNameActionYOffset = 28 + 3
-	CurrNameX = CurrActionX+332
-	CurrMessageX = 90
-	CurrMessageY = 840
+	CurrNameX             = CurrActionX + 332
+	CurrMessageX          = 90
+	CurrMessageY          = 840
 
 	DebugCoordsY = 800
+
+	AssetsDir = "../../grpg-assets/"
 )
 
 type Playground struct {
-	Font16             *gebitenui.GFont
-	Font18             *gebitenui.GFont
-	Font20             *gebitenui.GFont
-	Font24             *gebitenui.GFont
+	Font16   *gebitenui.GFont
+	Font18   *gebitenui.GFont
+	Font20   *gebitenui.GFont
+	Font24   *gebitenui.GFont
+	Textures map[uint16]*ebiten.Image
+	Game     *shared.Game
 
-	Camera             *PgCamera
+	Camera *PgCamera
+	World  *PgWorld
 
-	Game               *shared.Game
 	GameframeRight     *ebiten.Image
 	GameframeBottom    *ebiten.Image
-	ExclamTexture      *ebiten.Image
 	SkillIcons         map[shared.Skill]*gebitenui.GHoverTexture
 	InventoryButton    *gebitenui.GTextureButton
 	SkillsButton       *gebitenui.GTextureButton
 	PlayerTextures     map[shared.Direction]*ebiten.Image
-	Textures           map[uint16]*ebiten.Image
-	Zones              map[util.Vector2I]grpgmap.Zone
 	WorldImage         *ebiten.Image
 	ItemOutlineTexture *ebiten.Image
 	CurrActionString   string
 	IsTypingCommand    bool
 	CommandString      string
-	ExclamYOffset      int32
-	Ticks              uint32
+
+	Ticks uint32
 }
 
 func (p *Playground) Setup() {
-	var assetsDirectory = "../../grpg-assets/"
-
 	// need to update this to independent sizes when the time comes
-	font16, err := gebitenui.NewGFont(assetsDirectory+"font.ttf", 16)
+	font16, err := gebitenui.NewGFont(AssetsDir+"font.ttf", 16)
 	if err != nil {
 		log.Fatalf("failed loading font: %v\n\n", err)
 	}
-	font18, err := gebitenui.NewGFont(assetsDirectory+"font.ttf", 18)
+	font18, err := gebitenui.NewGFont(AssetsDir+"font.ttf", 18)
 	if err != nil {
 		log.Fatalf("failed loading font: %v\n\n", err)
 	}
-	font20, err := gebitenui.NewGFont(assetsDirectory+"font.ttf", 20)
+	font20, err := gebitenui.NewGFont(AssetsDir+"font.ttf", 20)
 	if err != nil {
 		log.Fatalf("failed loading font: %v\n\n", err)
 	}
-	font24, err := gebitenui.NewGFont(assetsDirectory+"font.ttf", 24)
+	font24, err := gebitenui.NewGFont(AssetsDir+"font.ttf", 24)
 	if err != nil {
 		log.Fatalf("failed loading font: %v\n\n", err)
 	}
@@ -104,22 +101,21 @@ func (p *Playground) Setup() {
 	p.Font20 = font20
 	p.Font24 = font24
 
+	otherTex := loadTex(AssetsDir + "assets/other.grpgtex")
+	p.Textures = loadTextures(AssetsDir + "assets/textures.grpgtex")
+	p.Game.Objs = loadObjs(AssetsDir + "assets/objs.grpgobj")
+	p.Game.Tiles = loadTiles(AssetsDir + "assets/tiles.grpgtile")
+	p.Game.Items = loadItems(AssetsDir + "assets/items.grpgitem")
+	p.Game.Npcs = loadNpcs(AssetsDir + "assets/npcs.grpgnpc")
+
+	p.WorldImage = ebiten.NewImage(WorldImageSize, WorldImageSize)
+
 	p.CurrActionString = "Current Action: None :("
 	p.Camera = NewPgCamera(p.Game.Player)
-
-	p.Textures = loadTextures(assetsDirectory + "assets/textures.grpgtex")
-	p.Game.Objs = loadObjs(assetsDirectory + "assets/objs.grpgobj")
-	p.Game.Tiles = loadTiles(assetsDirectory + "assets/tiles.grpgtile")
-	p.Game.Items = loadItems(assetsDirectory + "assets/items.grpgitem")
-	p.Game.Npcs = loadNpcs(assetsDirectory + "assets/npcs.grpgnpc")
-	p.Zones = loadMaps(assetsDirectory+"maps/", p.Game)
-
-	otherTex := loadTex(assetsDirectory + "assets/other.grpgtex")
+	p.World = NewPgWorld(p.Game, p.WorldImage, p.Textures, otherTex["exclam"], p.Font16)
 
 	p.GameframeRight = otherTex["gameframe_right"]
 	p.GameframeBottom = otherTex["gameframe_bottom"]
-	p.ExclamTexture = otherTex["exclam"]
-	p.ExclamYOffset = 0
 
 	p.PlayerTextures = make(map[shared.Direction]*ebiten.Image)
 	p.PlayerTextures[shared.UP] = otherTex["player_up"]
@@ -144,7 +140,6 @@ func (p *Playground) Setup() {
 		p.Game.GameframeContainerRenderType = shared.Skills
 	})
 
-	p.WorldImage = ebiten.NewImage(WorldImageSize, WorldImageSize)
 }
 
 func (p *Playground) Cleanup() {
@@ -200,11 +195,7 @@ func (p *Playground) Update() error {
 	p.InventoryButton.Update()
 	p.SkillsButton.Update()
 	// TODO: inefficient?
-	if (p.Ticks/ExclamAnimTickInterval)%ExclamAnimFrameCount == 0 {
-		p.ExclamYOffset = 0
-	} else {
-		p.ExclamYOffset = ExclamBobOffset
-	}
+	p.World.Update(p.Ticks)
 
 	for _, si := range p.SkillIcons {
 		si.Update()
@@ -217,7 +208,7 @@ func (p *Playground) Update() error {
 func (p *Playground) Draw(screen *ebiten.Image) {
 	p.WorldImage.Clear()
 
-	drawWorld(p, p.WorldImage)
+	p.World.Draw()
 	drawOtherPlayers(p, p.WorldImage)
 	drawPlayer(p, p.WorldImage)
 
@@ -240,59 +231,6 @@ func updateCurrActionString(p *Playground) {
 		p.CurrActionString = "Talk to " + trackedNpc.NpcData.Name
 	} else {
 		p.CurrActionString = "Current Action: None :("
-	}
-}
-
-func drawWorld(p *Playground, screen *ebiten.Image) {
-	player := p.Game.Player
-
-	mapTiles := p.Zones[util.Vector2I{X: p.Game.Player.ChunkX, Y: p.Game.Player.ChunkY}]
-
-	for i := range TilesPerChunk {
-		localX := int32(i % ChunkSize)
-		localY := int32(i / ChunkSize)
-
-		dx := localX * p.Game.TileSize
-		dy := localY * p.Game.TileSize
-
-		texId := p.Game.Tiles[uint16(mapTiles.Tiles[i])].TexId
-
-		tex := p.Textures[texId]
-
-		util.DrawImage(screen, tex, dx, dy)
-
-		worldPos := util.Vector2I{
-			X: localX + (player.ChunkX * ChunkSize),
-			Y: localY + (player.ChunkY * ChunkSize),
-		}
-
-		obj := mapTiles.Objs[i]
-		if obj != 0 {
-			trackedObj, ok := p.Game.TrackedObjs[worldPos]
-
-			// fallback pretty much, might not be necessary in the future
-			var state uint16 = 0
-			if ok {
-				state = uint16(trackedObj.State)
-			}
-
-			objTexId := p.Game.Objs[uint16(mapTiles.Objs[i])].Textures[state]
-
-			objTex := p.Textures[objTexId]
-			util.DrawImage(screen, objTex, dx, dy)
-		}
-		if trackedNpc, ok := p.Game.NpcsByPos[worldPos]; ok {
-			// TODO: maybe don't render if player is standing over?
-			npcTexId := trackedNpc.NpcData.TextureId
-			util.DrawImage(screen, p.Textures[npcTexId], dx, dy)
-			if p.Game.DebugMode {
-				p.Font16.Draw(screen, fmt.Sprintf("%d", trackedNpc.Uid), float64(dx), float64(dy), color.White)
-			}
-
-			if trackedNpc.NpcData.NpcId == uint16(constants.GRPG_GUIDE) && p.Game.RenderExclamOnGuide {
-				util.DrawImage(screen, p.ExclamTexture, dx, dy-TileSize+p.ExclamYOffset)
-			}
-		}
 	}
 }
 
@@ -356,7 +294,7 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 			tex := p.Textures[data.Texture]
 			util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
 
-			p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY + ItemCountYOffset), color.White)
+			p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY+ItemCountYOffset), color.White)
 
 			if idx == p.Game.OutlineInvSpot {
 				util.DrawImage(screen, p.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)
