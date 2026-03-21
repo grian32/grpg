@@ -57,6 +57,9 @@ type Playground struct {
 	Font18             *gebitenui.GFont
 	Font20             *gebitenui.GFont
 	Font24             *gebitenui.GFont
+
+	Camera             *PgCamera
+
 	Game               *shared.Game
 	GameframeRight     *ebiten.Image
 	GameframeBottom    *ebiten.Image
@@ -67,8 +70,6 @@ type Playground struct {
 	PlayerTextures     map[shared.Direction]*ebiten.Image
 	Textures           map[uint16]*ebiten.Image
 	Zones              map[util.Vector2I]grpgmap.Zone
-	CameraTarget       util.Vector2
-	PrevCameraTarget   util.Vector2
 	WorldImage         *ebiten.Image
 	ItemOutlineTexture *ebiten.Image
 	CurrActionString   string
@@ -104,6 +105,7 @@ func (p *Playground) Setup() {
 	p.Font24 = font24
 
 	p.CurrActionString = "Current Action: None :("
+	p.Camera = NewPgCamera(p.Game.Player)
 
 	p.Textures = loadTextures(assetsDirectory + "assets/textures.grpgtex")
 	p.Game.Objs = loadObjs(assetsDirectory + "assets/objs.grpgobj")
@@ -194,7 +196,7 @@ func (p *Playground) Update() error {
 	}
 
 	updateCurrActionString(p)
-	updateCamera(p, crossedZone)
+	p.Camera.Update(crossedZone)
 	p.InventoryButton.Update()
 	p.SkillsButton.Update()
 	// TODO: inefficient?
@@ -220,46 +222,12 @@ func (p *Playground) Draw(screen *ebiten.Image) {
 	drawPlayer(p, p.WorldImage)
 
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-p.CameraTarget.X, -p.CameraTarget.Y)
+	op.GeoM.Translate(-p.Camera.CameraTarget.X, -p.Camera.CameraTarget.Y)
 	op.Filter = ebiten.FilterNearest
 
 	screen.DrawImage(p.WorldImage, op)
 
 	drawGameFrame(p, screen)
-}
-
-func updateCamera(p *Playground, crossedZone bool) {
-	player := p.Game.Player
-
-	var cameraX = CameraOffsetTiles * p.Game.TileSize
-	var cameraY = CameraOffsetTiles * p.Game.TileSize
-
-	if player.RealX <= CameraBoundaryTiles*p.Game.TileSize {
-		cameraX = util.MinI(player.RealX-(CameraMinOffsetTiles*p.Game.TileSize), 0)
-	}
-
-	if player.RealY <= CameraBoundaryTiles*p.Game.TileSize {
-		cameraY = util.MinI(player.RealY-(CameraMinOffsetTiles*p.Game.TileSize), 0)
-	}
-
-	if crossedZone {
-		p.CameraTarget.X = float64(cameraX)
-		p.CameraTarget.Y = float64(cameraY)
-	} else {
-		if p.CameraTarget.X < float64(cameraX) {
-			p.CameraTarget.X += CameraPanSpeed
-		} else if p.CameraTarget.X > float64(cameraX) {
-			p.CameraTarget.X -= CameraPanSpeed
-		}
-
-		if p.CameraTarget.Y < float64(cameraY) {
-			p.CameraTarget.Y += CameraPanSpeed
-		} else if p.CameraTarget.Y > float64(cameraY) {
-			p.CameraTarget.Y -= CameraPanSpeed
-		}
-	}
-
-	p.PrevCameraTarget = p.CameraTarget
 }
 
 func updateCurrActionString(p *Playground) {
