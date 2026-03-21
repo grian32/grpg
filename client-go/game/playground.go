@@ -1,6 +1,7 @@
 package game
 
 import (
+	"client/constants"
 	"client/network/c2s"
 	"client/util"
 	"fmt"
@@ -14,6 +15,41 @@ import (
 	gebitenui "github.com/grian32/gebiten-ui"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+)
+
+const (
+	WorldImageSize = 1024
+	RightGameframeX = 768
+
+	ChunkSize = 16
+	TilesPerChunk = 256
+	TileSize = 64 // pixels per tile, this is used in both ui and actual world stuff
+
+	ExclamAnimTickInterval = 20
+	ExclamAnimFrameCount = 2
+	ExclamBobOffset = -4
+
+	InvButtonXOffset = TileSize + 16
+	SkillsButtonXOffset = TileSize * 2 + 32
+
+	CameraOffsetTiles = 4
+	CameraBoundaryTiles = 12
+	CameraMinOffsetTiles = 9
+	CameraPanSpeed = 16.0
+
+	CommandY = 740
+
+	ItemCountXOffset = 6
+	ItemCountYOffset = 4
+	ItemsPerRow = 4
+
+	CurrActionX = 110
+	CurrNameActionYOffset = 28 + 3
+	CurrNameX = CurrActionX+332
+	CurrMessageX = 90
+	CurrMessageY = 840
+
+	DebugCoordsY = 800
 )
 
 type Playground struct {
@@ -96,17 +132,17 @@ func (p *Playground) Setup() {
 	foragingIconTex := otherTex["foraging_icon"]
 	p.ItemOutlineTexture = otherTex["item_outline"]
 
-	p.SkillIcons[shared.Foraging] = gebitenui.NewHoverTexture(768+64, 64, 768+(64*5), foragingIconTex, p.Game.SkillHoverMsgs[shared.Foraging], hoverTex, font16, color.White)
+	p.SkillIcons[shared.Foraging] = gebitenui.NewHoverTexture(RightGameframeX+TileSize, TileSize, RightGameframeX+(TileSize*5), foragingIconTex, p.Game.SkillHoverMsgs[shared.Foraging], hoverTex, font16, color.White)
 
-	p.InventoryButton = gebitenui.NewTextureButton(768+64+16, 0, otherTex["inv_button"], func() {
+	p.InventoryButton = gebitenui.NewTextureButton(RightGameframeX+InvButtonXOffset, 0, otherTex["inv_button"], func() {
 		p.Game.GameframeContainerRenderType = shared.Inventory
 	})
 
-	p.SkillsButton = gebitenui.NewTextureButton(768+128+32, 0, otherTex["skills_button"], func() {
+	p.SkillsButton = gebitenui.NewTextureButton(RightGameframeX+SkillsButtonXOffset, 0, otherTex["skills_button"], func() {
 		p.Game.GameframeContainerRenderType = shared.Skills
 	})
 
-	p.WorldImage = ebiten.NewImage(1024, 1024)
+	p.WorldImage = ebiten.NewImage(WorldImageSize, WorldImageSize)
 }
 
 func (p *Playground) Cleanup() {
@@ -148,7 +184,7 @@ func (p *Playground) Update() error {
 		}
 	}
 
-	crossedZone := player.PrevX/16 != player.ChunkX || player.PrevY/16 != player.ChunkY
+	crossedZone := player.PrevX/ChunkSize != player.ChunkX || player.PrevY/ChunkSize != player.ChunkY
 
 	//pass crossed zone here as im already computing it for camera
 	player.Update(p.Game, crossedZone)
@@ -162,10 +198,10 @@ func (p *Playground) Update() error {
 	p.InventoryButton.Update()
 	p.SkillsButton.Update()
 	// TODO: inefficient?
-	if (p.Ticks/20)%2 == 0 {
+	if (p.Ticks/ExclamAnimTickInterval)%ExclamAnimFrameCount == 0 {
 		p.ExclamYOffset = 0
 	} else {
-		p.ExclamYOffset = -4
+		p.ExclamYOffset = ExclamBobOffset
 	}
 
 	for _, si := range p.SkillIcons {
@@ -195,33 +231,31 @@ func (p *Playground) Draw(screen *ebiten.Image) {
 func updateCamera(p *Playground, crossedZone bool) {
 	player := p.Game.Player
 
-	var cameraX = 4 * p.Game.TileSize
-	var cameraY = 4 * p.Game.TileSize
+	var cameraX = CameraOffsetTiles * p.Game.TileSize
+	var cameraY = CameraOffsetTiles * p.Game.TileSize
 
-	if player.RealX <= 12*p.Game.TileSize {
-		cameraX = util.MinI(player.RealX-(9*p.Game.TileSize), 0)
+	if player.RealX <= CameraBoundaryTiles*p.Game.TileSize {
+		cameraX = util.MinI(player.RealX-(CameraMinOffsetTiles*p.Game.TileSize), 0)
 	}
 
-	if player.RealY <= 12*p.Game.TileSize {
-		cameraY = util.MinI(player.RealY-(9*p.Game.TileSize), 0)
+	if player.RealY <= CameraBoundaryTiles*p.Game.TileSize {
+		cameraY = util.MinI(player.RealY-(CameraMinOffsetTiles*p.Game.TileSize), 0)
 	}
-
-	const speed = 16.0
 
 	if crossedZone {
 		p.CameraTarget.X = float64(cameraX)
 		p.CameraTarget.Y = float64(cameraY)
 	} else {
 		if p.CameraTarget.X < float64(cameraX) {
-			p.CameraTarget.X += speed
+			p.CameraTarget.X += CameraPanSpeed
 		} else if p.CameraTarget.X > float64(cameraX) {
-			p.CameraTarget.X -= speed
+			p.CameraTarget.X -= CameraPanSpeed
 		}
 
 		if p.CameraTarget.Y < float64(cameraY) {
-			p.CameraTarget.Y += speed
+			p.CameraTarget.Y += CameraPanSpeed
 		} else if p.CameraTarget.Y > float64(cameraY) {
-			p.CameraTarget.Y -= speed
+			p.CameraTarget.Y -= CameraPanSpeed
 		}
 	}
 
@@ -237,7 +271,7 @@ func updateCurrActionString(p *Playground) {
 	} else if npcExists {
 		p.CurrActionString = "Talk to " + trackedNpc.NpcData.Name
 	} else {
-		p.CurrActionString = "Curret Action: None :("
+		p.CurrActionString = "Current Action: None :("
 	}
 }
 
@@ -246,9 +280,9 @@ func drawWorld(p *Playground, screen *ebiten.Image) {
 
 	mapTiles := p.Zones[util.Vector2I{X: p.Game.Player.ChunkX, Y: p.Game.Player.ChunkY}]
 
-	for i := range 256 {
-		localX := int32(i % 16)
-		localY := int32(i / 16)
+	for i := range TilesPerChunk {
+		localX := int32(i % ChunkSize)
+		localY := int32(i / ChunkSize)
 
 		dx := localX * p.Game.TileSize
 		dy := localY * p.Game.TileSize
@@ -260,8 +294,8 @@ func drawWorld(p *Playground, screen *ebiten.Image) {
 		util.DrawImage(screen, tex, dx, dy)
 
 		worldPos := util.Vector2I{
-			X: localX + (player.ChunkX * 16),
-			Y: localY + (player.ChunkY * 16),
+			X: localX + (player.ChunkX * ChunkSize),
+			Y: localY + (player.ChunkY * ChunkSize),
 		}
 
 		obj := mapTiles.Objs[i]
@@ -287,8 +321,8 @@ func drawWorld(p *Playground, screen *ebiten.Image) {
 				p.Font16.Draw(screen, fmt.Sprintf("%d", trackedNpc.Uid), float64(dx), float64(dy), color.White)
 			}
 
-			if trackedNpc.NpcData.NpcId == 1 && p.Game.RenderExclamOnGuide {
-				util.DrawImage(screen, p.ExclamTexture, dx, dy-64+p.ExclamYOffset)
+			if trackedNpc.NpcData.NpcId == uint16(constants.GRPG_GUIDE) && p.Game.RenderExclamOnGuide {
+				util.DrawImage(screen, p.ExclamTexture, dx, dy-TileSize+p.ExclamYOffset)
 			}
 		}
 	}
@@ -297,16 +331,15 @@ func drawWorld(p *Playground, screen *ebiten.Image) {
 func drawPlayer(p *Playground, screen *ebiten.Image) {
 	player := p.Game.Player
 
-	const frameSize = 64
-	srcX := int(player.CurrFrame) * frameSize
+	srcX := int(player.CurrFrame) * TileSize
 	sourceRec := image.Rectangle{
 		Min: image.Point{
 			X: srcX,
 			Y: 0,
 		},
 		Max: image.Point{
-			X: srcX + frameSize,
-			Y: frameSize,
+			X: srcX + TileSize,
+			Y: TileSize,
 		},
 	}
 	sub := util.SubImage(p.PlayerTextures[player.Facing], sourceRec)
@@ -317,16 +350,15 @@ func drawPlayer(p *Playground, screen *ebiten.Image) {
 
 func drawOtherPlayers(p *Playground, screen *ebiten.Image) {
 	for _, player := range p.Game.OtherPlayers {
-		const frameSize = 64
-		srcX := int(player.CurrFrame) * frameSize
+		srcX := int(player.CurrFrame) * TileSize
 		sourceRec := image.Rectangle{
 			Min: image.Point{
 				X: srcX,
 				Y: 0,
 			},
 			Max: image.Point{
-				X: srcX + frameSize,
-				Y: frameSize,
+				X: srcX + TileSize,
+				Y: TileSize,
 			},
 		}
 		sub := util.SubImage(p.PlayerTextures[player.Facing], sourceRec)
@@ -338,14 +370,14 @@ func drawOtherPlayers(p *Playground, screen *ebiten.Image) {
 
 func drawGameFrame(p *Playground, screen *ebiten.Image) {
 	player := p.Game.Player
-	util.DrawImage(screen, p.GameframeRight, 768, 0)
+	util.DrawImage(screen, p.GameframeRight, RightGameframeX, 0)
 	if p.IsTypingCommand {
-		p.Font16.Draw(screen, "Command: "+p.CommandString, 0, 740, color.White)
+		p.Font16.Draw(screen, "Command: "+p.CommandString, 0, CommandY, color.White)
 	}
 
 	if p.Game.GameframeContainerRenderType == shared.Inventory {
-		var currItemRealPosX int32 = 768 + 64
-		var currItemRealPosY int32 = 64
+		var currItemRealPosX int32 = RightGameframeX + TileSize
+		var currItemRealPosY int32 = TileSize
 
 		for idx, item := range p.Game.Player.Inventory {
 			if item.ItemId == 0 {
@@ -356,16 +388,17 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 			tex := p.Textures[data.Texture]
 			util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
 
-			p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+6), float64(currItemRealPosY + 4), color.White)
+			p.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY + ItemCountYOffset), color.White)
 
 			if idx == p.Game.OutlineInvSpot {
 				util.DrawImage(screen, p.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)
 			}
 
-			currItemRealPosX += 64
-			if (idx+1)%4 == 0 {
-				currItemRealPosY += 64
-				currItemRealPosX = 768 + 64
+			currItemRealPosX += TileSize
+
+			if (idx+1)%ItemsPerRow == 0 {
+				currItemRealPosY += TileSize
+				currItemRealPosX = RightGameframeX + TileSize
 			}
 		}
 	} else if p.Game.GameframeContainerRenderType == shared.Skills {
@@ -374,20 +407,21 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 		}
 		for i := shared.Foraging; i <= shared.Foraging; i++ {
 			// TODO: maybe string can be pre computed by packet here?
-			p.Font16.Draw(screen, fmt.Sprintf("%d", p.Game.Skills[i].Level), 768+64+32, 64+48, util.Yellow)
+			// TODO: magic constants when i do this det
+			p.Font16.Draw(screen, fmt.Sprintf("%d", p.Game.Skills[i].Level), RightGameframeX+64+32, 64+48, util.Yellow)
 		}
 	}
 
-	util.DrawImage(screen, p.GameframeBottom, 0, 768)
+	util.DrawImage(screen, p.GameframeBottom, 0, RightGameframeX)
 
 	talkbox := p.Game.Talkbox
 	// x is offset from 0, y has offset added, to be placed in the right spot
-	p.Font20.Draw(screen, p.CurrActionString, 110, 768+28+3, color.White)
+	p.Font20.Draw(screen, p.CurrActionString, CurrActionX, RightGameframeX+CurrNameActionYOffset, color.White)
 	if talkbox.Active {
-		p.Font24.Draw(screen, talkbox.CurrentName, 110+332, 768+28+3, color.White)
-		var currY float64 = 840
+		p.Font24.Draw(screen, talkbox.CurrentName, CurrNameX, RightGameframeX+CurrNameActionYOffset, color.White)
+		var currY float64 = CurrMessageY
 		for _, s := range talkbox.CurrentMessage {
-			p.Font24.Draw(screen, s, 90, currY, color.White)
+			p.Font24.Draw(screen, s, CurrMessageX, currY, color.White)
 			currY += 30
 		}
 	}
@@ -395,5 +429,5 @@ func drawGameFrame(p *Playground, screen *ebiten.Image) {
 	p.SkillsButton.Draw(screen)
 
 	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", player.X, player.Y, player.Facing.String())
-	p.Font24.Draw(screen, playerCoords, 768, 800, color.White)
+	p.Font24.Draw(screen, playerCoords, RightGameframeX, DebugCoordsY, color.White)
 }
