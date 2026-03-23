@@ -3,7 +3,6 @@ package game
 import (
 	"client/util"
 	"fmt"
-	"image"
 	"image/color"
 	"log"
 
@@ -58,16 +57,16 @@ type Playground struct {
 	Textures map[uint16]*ebiten.Image
 	Game     *shared.Game
 
-	Camera       *PgCamera
-	World        *PgWorld
-	InputHandler *PgInputHandler
+	Camera         *PgCamera
+	World          *PgWorld
+	InputHandler   *PgInputHandler
+	PlayerRenderer *PgPlayerRenderer
 
 	GameframeRight     *ebiten.Image
 	GameframeBottom    *ebiten.Image
 	SkillIcons         map[shared.Skill]*gebitenui.GHoverTexture
 	InventoryButton    *gebitenui.GTextureButton
 	SkillsButton       *gebitenui.GTextureButton
-	PlayerTextures     map[shared.Direction]*ebiten.Image
 	WorldImage         *ebiten.Image
 	ItemOutlineTexture *ebiten.Image
 	CurrActionString   string
@@ -111,15 +110,10 @@ func (p *Playground) Setup() {
 	p.Camera = NewPgCamera(p.Game.Player)
 	p.World = NewPgWorld(p.Game, p.WorldImage, p.Textures, otherTex["exclam"], p.Font16)
 	p.InputHandler = NewPgInputHandler(p.Game)
+	p.PlayerRenderer = NewPgPlayerRenderer(p.WorldImage, otherTex, p.Game, p.Font16)
 
 	p.GameframeRight = otherTex["gameframe_right"]
 	p.GameframeBottom = otherTex["gameframe_bottom"]
-
-	p.PlayerTextures = make(map[shared.Direction]*ebiten.Image)
-	p.PlayerTextures[shared.UP] = otherTex["player_up"]
-	p.PlayerTextures[shared.DOWN] = otherTex["player_down"]
-	p.PlayerTextures[shared.LEFT] = otherTex["player_left"]
-	p.PlayerTextures[shared.RIGHT] = otherTex["player_right"]
 
 	p.SkillIcons = make(map[shared.Skill]*gebitenui.GHoverTexture)
 
@@ -176,8 +170,7 @@ func (p *Playground) Draw(screen *ebiten.Image) {
 	p.WorldImage.Clear()
 
 	p.World.Draw()
-	drawOtherPlayers(p, p.WorldImage)
-	drawPlayer(p, p.WorldImage)
+	p.PlayerRenderer.Draw()
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-p.Camera.CameraTarget.X, -p.Camera.CameraTarget.Y)
@@ -198,46 +191,6 @@ func updateCurrActionString(p *Playground) {
 		p.CurrActionString = "Talk to " + trackedNpc.NpcData.Name
 	} else {
 		p.CurrActionString = "Current Action: None :("
-	}
-}
-
-func drawPlayer(p *Playground, screen *ebiten.Image) {
-	player := p.Game.Player
-
-	srcX := int(player.CurrFrame) * TileSize
-	sourceRec := image.Rectangle{
-		Min: image.Point{
-			X: srcX,
-			Y: 0,
-		},
-		Max: image.Point{
-			X: srcX + TileSize,
-			Y: TileSize,
-		},
-	}
-	sub := util.SubImage(p.PlayerTextures[player.Facing], sourceRec)
-	util.DrawImage(screen, sub, player.RealX, player.RealY)
-
-	p.Font16.Draw(screen, player.Name, float64(player.RealX), float64(player.RealY), color.White)
-}
-
-func drawOtherPlayers(p *Playground, screen *ebiten.Image) {
-	for _, player := range p.Game.OtherPlayers {
-		srcX := int(player.CurrFrame) * TileSize
-		sourceRec := image.Rectangle{
-			Min: image.Point{
-				X: srcX,
-				Y: 0,
-			},
-			Max: image.Point{
-				X: srcX + TileSize,
-				Y: TileSize,
-			},
-		}
-		sub := util.SubImage(p.PlayerTextures[player.Facing], sourceRec)
-		util.DrawImage(screen, sub, player.RealX, player.RealY)
-
-		p.Font16.Draw(screen, player.Name, float64(player.RealX), float64(player.RealY), util.Red)
 	}
 }
 
