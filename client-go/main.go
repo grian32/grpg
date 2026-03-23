@@ -45,7 +45,7 @@ var (
 		Conn:                         network.StartConn(),
 		ShowFailedLogin:              false,
 		GameframeContainerRenderType: shared.Inventory,
-		OutlineInvSpot:               0,
+		OutlineInvSpot:               1,
 		DebugMode:                    false,
 		RenderExclamOnGuide:          true,
 	}

@@ -1,7 +1,6 @@
 package game
 
 import (
-	"client/network/c2s"
 	"client/util"
 	"fmt"
 	"image"
@@ -12,7 +11,6 @@ import (
 
 	gebitenui "github.com/grian32/gebiten-ui"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const (
@@ -60,8 +58,9 @@ type Playground struct {
 	Textures map[uint16]*ebiten.Image
 	Game     *shared.Game
 
-	Camera *PgCamera
-	World  *PgWorld
+	Camera       *PgCamera
+	World        *PgWorld
+	InputHandler *PgInputHandler
 
 	GameframeRight     *ebiten.Image
 	GameframeBottom    *ebiten.Image
@@ -72,8 +71,6 @@ type Playground struct {
 	WorldImage         *ebiten.Image
 	ItemOutlineTexture *ebiten.Image
 	CurrActionString   string
-	IsTypingCommand    bool
-	CommandString      string
 
 	Ticks uint32
 }
@@ -113,6 +110,7 @@ func (p *Playground) Setup() {
 	p.CurrActionString = "Current Action: None :("
 	p.Camera = NewPgCamera(p.Game.Player)
 	p.World = NewPgWorld(p.Game, p.WorldImage, p.Textures, otherTex["exclam"], p.Font16)
+	p.InputHandler = NewPgInputHandler(p.Game)
 
 	p.GameframeRight = otherTex["gameframe_right"]
 	p.GameframeBottom = otherTex["gameframe_bottom"]
@@ -139,7 +137,6 @@ func (p *Playground) Setup() {
 	p.SkillsButton = gebitenui.NewTextureButton(RightGameframeX+SkillsButtonXOffset, 0, otherTex["skills_button"], func() {
 		p.Game.GameframeContainerRenderType = shared.Skills
 	})
-
 }
 
 func (p *Playground) Cleanup() {
@@ -149,37 +146,7 @@ func (p *Playground) Cleanup() {
 
 func (p *Playground) Update() error {
 	player := p.Game.Player
-
-	if p.IsTypingCommand {
-		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-			p.IsTypingCommand = false
-			p.CommandString = ""
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			p.IsTypingCommand = false
-			player.SendCmdPacket(p.Game, p.CommandString)
-			p.CommandString = ""
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(p.CommandString) != 0 {
-			p.CommandString = p.CommandString[:len(p.CommandString)-1]
-		} else {
-			p.CommandString = string(ebiten.AppendInputChars([]rune(p.CommandString)))
-		}
-	} else {
-		if inpututil.IsKeyJustPressed(ebiten.KeyW) {
-			player.SendMovePacket(p.Game, player.X, player.Y-1, shared.UP)
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyS) {
-			player.SendMovePacket(p.Game, player.X, player.Y+1, shared.DOWN)
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyA) {
-			player.SendMovePacket(p.Game, player.X-1, player.Y, shared.LEFT)
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyD) {
-			player.SendMovePacket(p.Game, player.X+1, player.Y, shared.RIGHT)
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
-			player.SendInteractPacket(p.Game)
-		} else if p.Game.Talkbox.Active && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-			shared.SendPacket(p.Game.Conn, &c2s.Continue{})
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyC) {
-			p.IsTypingCommand = true
-		}
-	}
+	p.InputHandler.Update()
 
 	crossedZone := player.PrevX/ChunkSize != player.ChunkX || player.PrevY/ChunkSize != player.ChunkY
 
@@ -277,8 +244,8 @@ func drawOtherPlayers(p *Playground, screen *ebiten.Image) {
 func drawGameFrame(p *Playground, screen *ebiten.Image) {
 	player := p.Game.Player
 	util.DrawImage(screen, p.GameframeRight, RightGameframeX, 0)
-	if p.IsTypingCommand {
-		p.Font16.Draw(screen, "Command: "+p.CommandString, 0, CommandY, color.White)
+	if p.InputHandler.IsTypingCommand {
+		p.Font16.Draw(screen, "Command: "+p.InputHandler.CommandString, 0, CommandY, color.White)
 	}
 
 	if p.Game.GameframeContainerRenderType == shared.Inventory {
