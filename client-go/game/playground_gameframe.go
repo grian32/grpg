@@ -10,6 +10,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+type RenderType byte
+
+const (
+	Inventory RenderType = iota
+	Skills
+)
+
 type PgGameframe struct {
 	Font16 *gebiten_ui.GFont
 	Font20 *gebiten_ui.GFont
@@ -28,6 +35,8 @@ type PgGameframe struct {
 	Player       *shared.LocalPlayer
 	Game         *shared.Game
 	InputHandler *PgInputHandler
+
+	ContainerRenderType RenderType
 }
 
 func NewPgGameframe(
@@ -60,12 +69,14 @@ func NewPgGameframe(
 	g.GameframeBottom = otherTex["gameframe_bottom"]
 
 	g.InventoryButton = gebiten_ui.NewTextureButton(RightGameframeX+InvButtonXOffset, 0, otherTex["inv_button"], func() {
-		g.Game.GameframeContainerRenderType = shared.Inventory
+		g.ContainerRenderType = Inventory
 	})
 
 	g.SkillsButton = gebiten_ui.NewTextureButton(RightGameframeX+SkillsButtonXOffset, 0, otherTex["skills_button"], func() {
-		g.Game.GameframeContainerRenderType = shared.Skills
+		g.ContainerRenderType = Skills
 	})
+	g.ContainerRenderType = Inventory
+
 	return g
 }
 
@@ -96,7 +107,7 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 	}
 
 	// TODO: i think i can move render type out of game?
-	if g.Game.GameframeContainerRenderType == shared.Inventory {
+	if g.ContainerRenderType == Inventory {
 		var currItemRealPosX int32 = RightGameframeX + TileSize
 		var currItemRealPosY int32 = TileSize
 
@@ -122,7 +133,7 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 				currItemRealPosX = RightGameframeX + TileSize
 			}
 		}
-	} else if g.Game.GameframeContainerRenderType == shared.Skills {
+	} else if g.ContainerRenderType == Skills {
 		for _, si := range g.SkillIcons {
 			si.Draw(screen)
 		}

@@ -42,12 +42,11 @@ var (
 		PlayerVarHandlers: map[constants.PlayerVarId]shared.PlayerVarHandlerFunc{
 			constants.SHOULD_SHOW_TUTORIAL_INDICATOR: shared.HandleShowTutorial,
 		},
-		Conn:                         network.StartConn(),
-		ShowFailedLogin:              false,
-		GameframeContainerRenderType: shared.Inventory,
-		OutlineInvSpot:               1,
-		DebugMode:                    false,
-		RenderExclamOnGuide:          true,
+		Conn:                network.StartConn(),
+		ShowFailedLogin:     false,
+		OutlineInvSpot:      0,
+		DebugMode:           false,
+		RenderExclamOnGuide: true,
 	}
 )
 

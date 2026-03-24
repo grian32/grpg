@@ -12,13 +12,6 @@ import (
 	"net"
 )
 
-type RenderType byte
-
-const (
-	Inventory RenderType = iota
-	Skills
-)
-
 type Game struct {
 	ScreenWidth  int32
 	ScreenHeight int32
@@ -35,22 +28,21 @@ type Game struct {
 	TrackedObjs map[util.Vector2I]*GameObj
 	NpcsByPos   map[util.Vector2I]*GameNpc
 	// uid to gamenpc
-	TrackedNpcs                  map[uint32]*GameNpc
-	Skills                       map[Skill]*SkillInfo
-	SkillHoverMsgs               map[Skill]*string
-	TileSize                     int32
-	SceneManager                 *GSceneManager
-	Player                       *LocalPlayer
-	Talkbox                      Talkbox
-	OtherPlayers                 map[string]*RemotePlayer
-	PlayerVars                   map[constants.PlayerVarId]uint16
-	PlayerVarHandlers            map[constants.PlayerVarId]PlayerVarHandlerFunc
-	Conn                         net.Conn
-	GameframeContainerRenderType RenderType
-	OutlineInvSpot               int
-	ShowFailedLogin              bool
-	DebugMode                    bool
-	RenderExclamOnGuide          bool
+	TrackedNpcs         map[uint32]*GameNpc
+	Skills              map[Skill]*SkillInfo
+	SkillHoverMsgs      map[Skill]*string
+	TileSize            int32
+	SceneManager        *GSceneManager
+	Player              *LocalPlayer
+	Talkbox             Talkbox
+	OtherPlayers        map[string]*RemotePlayer
+	PlayerVars          map[constants.PlayerVarId]uint16
+	PlayerVarHandlers   map[constants.PlayerVarId]PlayerVarHandlerFunc
+	Conn                net.Conn
+	OutlineInvSpot      int
+	ShowFailedLogin     bool
+	DebugMode           bool
+	RenderExclamOnGuide bool
 }
 
 // i think this would make sense as a function on game but er.. cyclical lol!
