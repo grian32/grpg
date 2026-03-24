@@ -102,7 +102,6 @@ func (p *Playground) Setup() {
 	p.InputHandler = NewPgInputHandler(p.Game)
 	p.PlayerRenderer = NewPgPlayerRenderer(p.WorldImage, otherTex, p.Game, p.Font16)
 	p.Gameframe = NewPgGameframe(
-		p.WorldImage,
 		p.Game,
 		p.InputHandler,
 		p.Font16,
@@ -134,6 +133,7 @@ func (p *Playground) Update() error {
 
 	p.Camera.Update(crossedZone)
 	p.World.Update(p.Ticks)
+	p.Gameframe.Update()
 
 	p.Ticks++
 	return nil
@@ -151,5 +151,5 @@ func (p *Playground) Draw(screen *ebiten.Image) {
 
 	screen.DrawImage(p.WorldImage, op)
 
-	p.Gameframe.Draw()
+	p.Gameframe.Draw(screen)
 }

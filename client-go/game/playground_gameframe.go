@@ -11,10 +11,9 @@ import (
 )
 
 type PgGameframe struct {
-	WorldImage *ebiten.Image
-	Font16     *gebiten_ui.GFont
-	Font20     *gebiten_ui.GFont
-	Font24     *gebiten_ui.GFont
+	Font16 *gebiten_ui.GFont
+	Font20 *gebiten_ui.GFont
+	Font24 *gebiten_ui.GFont
 
 	Textures           map[uint16]*ebiten.Image
 	ItemOutlineTexture *ebiten.Image
@@ -32,7 +31,6 @@ type PgGameframe struct {
 }
 
 func NewPgGameframe(
-	worldImage *ebiten.Image,
 	game *shared.Game,
 	inputHandler *PgInputHandler,
 	font16 *gebiten_ui.GFont,
@@ -42,7 +40,6 @@ func NewPgGameframe(
 	otherTex map[string]*ebiten.Image,
 ) *PgGameframe {
 	g := &PgGameframe{
-		WorldImage:         worldImage,
 		Game:               game,
 		Player:             game.Player,
 		InputHandler:       inputHandler,
@@ -92,10 +89,10 @@ func (g *PgGameframe) Update() {
 	g.SkillsButton.Update()
 }
 
-func (g *PgGameframe) Draw() {
-	util.DrawImage(g.WorldImage, g.GameframeRight, RightGameframeX, 0)
+func (g *PgGameframe) Draw(screen *ebiten.Image) {
+	util.DrawImage(screen, g.GameframeRight, RightGameframeX, 0)
 	if g.InputHandler.IsTypingCommand {
-		g.Font16.Draw(g.WorldImage, "Command: "+g.InputHandler.CommandString, 0, CommandY, color.White)
+		g.Font16.Draw(screen, "Command: "+g.InputHandler.CommandString, 0, CommandY, color.White)
 	}
 
 	// TODO: i think i can move render type out of game?
@@ -110,12 +107,12 @@ func (g *PgGameframe) Draw() {
 
 			data := g.Game.Items[item.ItemId]
 			tex := g.Textures[data.Texture]
-			util.DrawImage(g.WorldImage, tex, currItemRealPosX, currItemRealPosY)
+			util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
 
-			g.Font16.Draw(g.WorldImage, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY+ItemCountYOffset), color.White)
+			g.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY+ItemCountYOffset), color.White)
 
 			if idx == g.Game.OutlineInvSpot {
-				util.DrawImage(g.WorldImage, g.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)
+				util.DrawImage(screen, g.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)
 			}
 
 			currItemRealPosX += TileSize
@@ -127,31 +124,31 @@ func (g *PgGameframe) Draw() {
 		}
 	} else if g.Game.GameframeContainerRenderType == shared.Skills {
 		for _, si := range g.SkillIcons {
-			si.Draw(g.WorldImage)
+			si.Draw(screen)
 		}
 		for i := shared.Foraging; i <= shared.Foraging; i++ {
 			// TODO: maybe string can be pre computed by packet here?
 			// TODO: magic constants when i do this det
-			g.Font16.Draw(g.WorldImage, fmt.Sprintf("%d", g.Game.Skills[i].Level), RightGameframeX+64+32, 64+48, util.Yellow)
+			g.Font16.Draw(screen, fmt.Sprintf("%d", g.Game.Skills[i].Level), RightGameframeX+64+32, 64+48, util.Yellow)
 		}
 	}
 
-	util.DrawImage(g.WorldImage, g.GameframeBottom, 0, RightGameframeX)
+	util.DrawImage(screen, g.GameframeBottom, 0, RightGameframeX)
 
 	talkbox := g.Game.Talkbox
 	// x is offset from 0, y has offset added, to be placed in the right spot
-	g.Font20.Draw(g.WorldImage, g.CurrActionString, CurrActionX, RightGameframeX+CurrNameActionYOffset, color.White)
+	g.Font20.Draw(screen, g.CurrActionString, CurrActionX, RightGameframeX+CurrNameActionYOffset, color.White)
 	if talkbox.Active {
-		g.Font24.Draw(g.WorldImage, talkbox.CurrentName, CurrNameX, RightGameframeX+CurrNameActionYOffset, color.White)
+		g.Font24.Draw(screen, talkbox.CurrentName, CurrNameX, RightGameframeX+CurrNameActionYOffset, color.White)
 		var currY float64 = CurrMessageY
 		for _, s := range talkbox.CurrentMessage {
-			g.Font24.Draw(g.WorldImage, s, CurrMessageX, currY, color.White)
+			g.Font24.Draw(screen, s, CurrMessageX, currY, color.White)
 			currY += 30
 		}
 	}
-	g.InventoryButton.Draw(g.WorldImage)
-	g.SkillsButton.Draw(g.WorldImage)
+	g.InventoryButton.Draw(screen)
+	g.SkillsButton.Draw(screen)
 
 	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", g.Player.X, g.Player.Y, g.Player.Facing.String())
-	g.Font24.Draw(g.WorldImage, playerCoords, RightGameframeX, DebugCoordsY, color.White)
+	g.Font24.Draw(screen, playerCoords, RightGameframeX, DebugCoordsY, color.White)
 }
