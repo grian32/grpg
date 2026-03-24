@@ -10,26 +10,26 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type PgPlayerRenderer struct {
+type PgPlayerSystem struct {
 	WorldImage     *ebiten.Image
 	PlayerTextures map[shared.Direction]*ebiten.Image
 	Game           *shared.Game
 	Font16         *gebiten_ui.GFont
 }
 
-func NewPgPlayerRenderer(
+func NewPgPlayerSystem(
 	worldImage *ebiten.Image,
 	otherTex map[string]*ebiten.Image,
 	game *shared.Game,
 	font16 *gebiten_ui.GFont,
-) *PgPlayerRenderer {
+) *PgPlayerSystem {
 	playerTextures := make(map[shared.Direction]*ebiten.Image)
 	playerTextures[shared.UP] = otherTex["player_up"]
 	playerTextures[shared.DOWN] = otherTex["player_down"]
 	playerTextures[shared.LEFT] = otherTex["player_left"]
 	playerTextures[shared.RIGHT] = otherTex["player_right"]
 
-	return &PgPlayerRenderer{
+	return &PgPlayerSystem{
 		WorldImage:     worldImage,
 		PlayerTextures: playerTextures,
 		Game:           game,
@@ -37,7 +37,15 @@ func NewPgPlayerRenderer(
 	}
 }
 
-func (r *PgPlayerRenderer) Draw() {
+func (r *PgPlayerSystem) Update(crossedZone bool) {
+	r.Game.Player.Update(r.Game, crossedZone)
+
+	for _, rp := range r.Game.OtherPlayers {
+		rp.Update(r.Game)
+	}
+}
+
+func (r *PgPlayerSystem) Draw() {
 	lp := r.Game.Player
 	r.drawPlayer(lp.CurrFrame, lp.Facing, lp.RealX, lp.RealY, lp.Name, color.White)
 
@@ -46,7 +54,7 @@ func (r *PgPlayerRenderer) Draw() {
 	}
 }
 
-func (r *PgPlayerRenderer) drawPlayer(currFrame uint8, facing shared.Direction, realX int32, realY int32, name string, textColor color.Color) {
+func (r *PgPlayerSystem) drawPlayer(currFrame uint8, facing shared.Direction, realX int32, realY int32, name string, textColor color.Color) {
 	srcX := int(currFrame) * TileSize
 	sourceRec := image.Rectangle{
 		Min: image.Point{

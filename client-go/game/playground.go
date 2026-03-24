@@ -54,11 +54,11 @@ type Playground struct {
 	Textures map[uint16]*ebiten.Image
 	Game     *shared.Game
 
-	Camera         *PgCamera
-	World          *PgWorld
-	InputHandler   *PgInputHandler
-	PlayerRenderer *PgPlayerRenderer
-	Gameframe      *PgGameframe
+	Camera       *PgCamera
+	World        *PgWorld
+	InputHandler *PgInputHandler
+	PlayerSystem *PgPlayerSystem
+	Gameframe    *PgGameframe
 
 	WorldImage *ebiten.Image
 
@@ -100,7 +100,7 @@ func (p *Playground) Setup() {
 	p.Camera = NewPgCamera(p.Game.Player)
 	p.World = NewPgWorld(p.Game, p.WorldImage, p.Textures, otherTex["exclam"], p.Font16)
 	p.InputHandler = NewPgInputHandler(p.Game)
-	p.PlayerRenderer = NewPgPlayerRenderer(p.WorldImage, otherTex, p.Game, p.Font16)
+	p.PlayerSystem = NewPgPlayerSystem(p.WorldImage, otherTex, p.Game, p.Font16)
 	p.Gameframe = NewPgGameframe(
 		p.Game,
 		p.InputHandler,
@@ -123,14 +123,7 @@ func (p *Playground) Update() error {
 
 	crossedZone := player.PrevX/ChunkSize != player.ChunkX || player.PrevY/ChunkSize != player.ChunkY
 
-	// TODO: move this to player renderer and rename it to pg_players or something
-	//pass crossed zone here as im already computing it for camera
-	player.Update(p.Game, crossedZone)
-
-	for _, rp := range p.Game.OtherPlayers {
-		rp.Update(p.Game)
-	}
-
+	p.PlayerSystem.Update(crossedZone)
 	p.Camera.Update(crossedZone)
 	p.World.Update(p.Ticks)
 	p.Gameframe.Update()
@@ -143,7 +136,7 @@ func (p *Playground) Draw(screen *ebiten.Image) {
 	p.WorldImage.Clear()
 
 	p.World.Draw()
-	p.PlayerRenderer.Draw()
+	p.PlayerSystem.Draw()
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-p.Camera.CameraTarget.X, -p.Camera.CameraTarget.Y)
