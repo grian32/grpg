@@ -39,8 +39,7 @@ func (i *InvSwap) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Playe
 		log.Printf("attempted to swap into non-empty inventory slot: from=%d to=%d\n", from, to)
 		return
 	}
-	player.Inventory.Items[from] = shared.InventoryItem{}
-	player.Inventory.Items[from].Dirty = true
+	player.Inventory.Items[from] = shared.InventoryItem{Dirty: true}
 	player.Inventory.Items[to] = item
 	player.Inventory.Items[to].Dirty = true
 

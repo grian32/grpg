@@ -108,7 +108,7 @@ func (g *PgGameframe) Update() {
 	maxInvY := minInvY + TileSize*6
 	if g.ContainerRenderType == Inventory && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		mouseX, mouseY := ebiten.CursorPosition()
-		if mouseX >= minInvX && mouseX <= maxInvX && mouseY >= minInvY && mouseY <= maxInvY {
+		if mouseX >= minInvX && mouseX < maxInvX && mouseY >= minInvY && mouseY < maxInvY {
 			col := (mouseX - minInvX) / TileSize
 			row := (mouseY - minInvY) / TileSize
 			idx := row*ItemsPerRow + col
@@ -130,7 +130,9 @@ func (g *PgGameframe) Update() {
 				return
 			}
 
-			g.Game.OutlineInvSpot = idx
+			if g.Player.Inventory[idx].ItemId != 0 {
+				g.Game.OutlineInvSpot = idx
+			}
 		}
 	}
 }
