@@ -1,6 +1,7 @@
 package game
 
 import (
+	"client/network/c2s"
 	"client/shared"
 	"client/util"
 	"fmt"
@@ -111,6 +112,24 @@ func (g *PgGameframe) Update() {
 			col := (mouseX - minInvX) / TileSize
 			row := (mouseY - minInvY) / TileSize
 			idx := row*ItemsPerRow + col
+
+			// TODO: i wager i can move outlineinvspot to be local to this?
+			if g.Game.OutlineInvSpot != -1 {
+				if g.Game.OutlineInvSpot == idx || g.Player.Inventory[idx].ItemId != 0 {
+					// deselect behaviour, basically
+					g.Game.OutlineInvSpot = -1
+					return
+				}
+
+				shared.SendPacket(g.Game.Conn, &c2s.InvSwap{
+					From: byte(g.Game.OutlineInvSpot),
+					To:   byte(idx),
+				})
+				g.Game.OutlineInvSpot = -1
+
+				return
+			}
+
 			g.Game.OutlineInvSpot = idx
 		}
 	}
@@ -122,7 +141,6 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 		g.Font16.Draw(screen, "Command: "+g.InputHandler.CommandString, 0, CommandY, color.White)
 	}
 
-	// TODO: i think i can move render type out of game?
 	if g.ContainerRenderType == Inventory {
 		var currItemRealPosX int32 = RightGameframeX + TileSize
 		var currItemRealPosY int32 = TileSize

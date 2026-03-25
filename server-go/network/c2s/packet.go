@@ -23,6 +23,7 @@ var (
 	TalkData     = PacketData{Opcode: 0x04, Length: 6, Handler: &Talk{}}
 	ContinueData = PacketData{Opcode: 0x05, Length: 0, Handler: &Continue{}}
 	CommandData  = PacketData{Opcode: 0x06, Length: -1, Handler: &Command{}}
+	InvSwapData  = PacketData{Opcode: 0x07, Length: 2, Handler: &InvSwap{}}
 )
 
 var Packets = map[byte]PacketData{
@@ -32,4 +33,5 @@ var Packets = map[byte]PacketData{
 	0x04: TalkData,
 	0x05: ContinueData,
 	0x06: CommandData,
+	0x07: InvSwapData,
 }
