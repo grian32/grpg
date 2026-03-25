@@ -8,6 +8,7 @@ import (
 
 	gebiten_ui "github.com/grian32/gebiten-ui"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type RenderType byte
@@ -98,6 +99,21 @@ func (g *PgGameframe) Update() {
 
 	g.InventoryButton.Update()
 	g.SkillsButton.Update()
+
+	// off sets could be simplified but more readable this way imo since the multiplier actually lines up to num rows/cols
+	minInvX := RightGameframeX + TileSize
+	maxInvX := minInvX + TileSize*4
+	minInvY := TileSize
+	maxInvY := minInvY + TileSize*6
+	if g.ContainerRenderType == Inventory && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		mouseX, mouseY := ebiten.CursorPosition()
+		if mouseX >= minInvX && mouseX <= maxInvX && mouseY >= minInvY && mouseY <= maxInvY {
+			col := (mouseX - minInvX) / TileSize
+			row := (mouseY - minInvY) / TileSize
+			idx := row*ItemsPerRow + col
+			g.Game.OutlineInvSpot = idx
+		}
+	}
 }
 
 func (g *PgGameframe) Draw(screen *ebiten.Image) {
@@ -112,22 +128,20 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 		var currItemRealPosY int32 = TileSize
 
 		for idx, item := range g.Player.Inventory {
-			if item.ItemId == 0 {
-				continue
-			}
+			// you still want to advance the rendering pos since after inv moving is implemented you'll have empty spots and it'll render wrongly
+			if item.ItemId != 0 {
+				data := g.Game.Items[item.ItemId]
+				tex := g.Textures[data.Texture]
+				util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
 
-			data := g.Game.Items[item.ItemId]
-			tex := g.Textures[data.Texture]
-			util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
+				g.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY+ItemCountYOffset), color.White)
 
-			g.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY+ItemCountYOffset), color.White)
-
-			if idx == g.Game.OutlineInvSpot {
-				util.DrawImage(screen, g.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)
+				if idx == g.Game.OutlineInvSpot {
+					util.DrawImage(screen, g.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)
+				}
 			}
 
 			currItemRealPosX += TileSize
-
 			if (idx+1)%ItemsPerRow == 0 {
 				currItemRealPosY += TileSize
 				currItemRealPosX = RightGameframeX + TileSize
