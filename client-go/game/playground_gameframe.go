@@ -194,6 +194,8 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 	g.InventoryButton.Draw(screen)
 	g.SkillsButton.Draw(screen)
 
-	playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", g.Player.X, g.Player.Y, g.Player.Facing.String())
-	g.Font24.Draw(screen, playerCoords, RightGameframeX, DebugCoordsY, color.White)
+	if g.Game.DebugMode {
+		playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", g.Player.X, g.Player.Y, g.Player.Facing.String())
+		g.Font24.Draw(screen, playerCoords, RightGameframeX, DebugCoordsY, color.White)
+	}
 }
