@@ -17,6 +17,7 @@ type RenderType byte
 const (
 	Inventory RenderType = iota
 	Skills
+	Equipment
 )
 
 type PgGameframe struct {
@@ -29,8 +30,10 @@ type PgGameframe struct {
 	SkillIcons         map[shared.Skill]*gebiten_ui.GHoverTexture
 	GameframeRight     *ebiten.Image
 	GameframeBottom    *ebiten.Image
-	SkillsButton       *gebiten_ui.GTextureButton
-	InventoryButton    *gebiten_ui.GTextureButton
+
+	SkillsButton    *gebiten_ui.GTextureButton
+	InventoryButton *gebiten_ui.GTextureButton
+	EquipmentButton *gebiten_ui.GTextureButton
 
 	CurrActionString string
 
@@ -77,6 +80,11 @@ func NewPgGameframe(
 	g.SkillsButton = gebiten_ui.NewTextureButton(RightGameframeX+SkillsButtonXOffset, 0, otherTex["skills_button"], func() {
 		g.ContainerRenderType = Skills
 	})
+
+	g.EquipmentButton = gebiten_ui.NewTextureButton(RightGameframeX+EquipmentButtonXOffset, 0, otherTex["equipment_button"], func() {
+		g.ContainerRenderType = Equipment
+	})
+
 	g.ContainerRenderType = Inventory
 
 	return g
@@ -100,7 +108,9 @@ func (g *PgGameframe) Update() {
 
 	g.InventoryButton.Update()
 	g.SkillsButton.Update()
+	g.EquipmentButton.Update()
 
+	// TODO: possibly move this to input processor? doesnt really have anything to do with gameframe other than outlineinvspot and rendertype
 	// off sets could be simplified but more readable this way imo since the multiplier actually lines up to num rows/cols
 	minInvX := RightGameframeX + TileSize
 	maxInvX := minInvX + TileSize*4
@@ -176,6 +186,8 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 			// TODO: magic constants when i do this det
 			g.Font16.Draw(screen, fmt.Sprintf("%d", g.Game.Skills[i].Level), RightGameframeX+64+32, 64+48, util.Yellow)
 		}
+	} else if g.ContainerRenderType == Equipment {
+		// TODO
 	}
 
 	util.DrawImage(screen, g.GameframeBottom, 0, RightGameframeX)
@@ -193,6 +205,7 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 	}
 	g.InventoryButton.Draw(screen)
 	g.SkillsButton.Draw(screen)
+	g.EquipmentButton.Draw(screen)
 
 	if g.Game.DebugMode {
 		playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", g.Player.X, g.Player.Y, g.Player.Facing.String())

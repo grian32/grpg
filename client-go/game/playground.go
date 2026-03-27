@@ -21,8 +21,9 @@ const (
 	ExclamAnimFrameCount   = 2
 	ExclamBobOffset        = -4
 
-	InvButtonXOffset    = TileSize + 16
-	SkillsButtonXOffset = TileSize*2 + 32
+	InvButtonXOffset       = TileSize + 16
+	SkillsButtonXOffset    = TileSize*2 + 32 + 4
+	EquipmentButtonXOffset = TileSize*3 + 32 + 24
 
 	CameraOffsetTiles    = 4
 	CameraBoundaryTiles  = 12
