@@ -31,6 +31,14 @@ type PgGameframe struct {
 	GameframeRight     *ebiten.Image
 	GameframeBottom    *ebiten.Image
 
+	// TODO: maybe move helmet etc into an array based on an  enum somewhere when i get further into the implementation of this..
+	EquipmentFrame  *ebiten.Image
+	HelmetFrame     *ebiten.Image
+	ChestplateFrame *ebiten.Image
+	LeggingsFrame   *ebiten.Image
+	RingFrame       *ebiten.Image
+	WeaponFrame     *ebiten.Image
+
 	SkillsButton    *gebiten_ui.GTextureButton
 	InventoryButton *gebiten_ui.GTextureButton
 	EquipmentButton *gebiten_ui.GTextureButton
@@ -86,6 +94,13 @@ func NewPgGameframe(
 	})
 
 	g.ContainerRenderType = Inventory
+
+	g.EquipmentFrame = otherTex["equipment_outline"]
+	g.HelmetFrame = otherTex["helmet_outline"]
+	g.ChestplateFrame = otherTex["chestplate_outline"]
+	g.LeggingsFrame = otherTex["legs_outline"]
+	g.RingFrame = otherTex["ring_outline"]
+	g.WeaponFrame = otherTex["wep_outline"]
 
 	return g
 }
@@ -187,7 +202,12 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 			g.Font16.Draw(screen, fmt.Sprintf("%d", g.Game.Skills[i].Level), RightGameframeX+64+32, 64+48, util.Yellow)
 		}
 	} else if g.ContainerRenderType == Equipment {
-		// TODO
+		util.DrawImage(screen, g.EquipmentFrame, RightGameframeX, 0)
+		util.DrawImage(screen, g.HelmetFrame, RightGameframeX+EquipmentMidOffsetX, HelmetOffsetY)
+		util.DrawImage(screen, g.ChestplateFrame, RightGameframeX+EquipmentMidOffsetX, EquipmentMidOffsetY)
+		util.DrawImage(screen, g.LeggingsFrame, RightGameframeX+EquipmentMidOffsetX, LeggingsOffsetY)
+		util.DrawImage(screen, g.WeaponFrame, RightGameframeX+WeaponOffsetX, EquipmentMidOffsetY)
+		util.DrawImage(screen, g.RingFrame, RightGameframeX+RingOffsetX, EquipmentMidOffsetY)
 	}
 
 	util.DrawImage(screen, g.GameframeBottom, 0, RightGameframeX)

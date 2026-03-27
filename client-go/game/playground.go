@@ -25,6 +25,13 @@ const (
 	SkillsButtonXOffset    = TileSize*2 + 32 + 4
 	EquipmentButtonXOffset = TileSize*3 + 32 + 24
 
+	EquipmentMidOffsetX = TileSize*2 + 32
+	EquipmentMidOffsetY = TileSize*2 + 32
+	HelmetOffsetY       = TileSize + 12
+	LeggingsOffsetY     = TileSize*3 + 52
+	WeaponOffsetX       = TileSize + 12
+	RingOffsetX         = TileSize*3 + 52
+
 	CameraOffsetTiles    = 4
 	CameraBoundaryTiles  = 12
 	CameraMinOffsetTiles = 9
