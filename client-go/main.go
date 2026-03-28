@@ -44,7 +44,6 @@ var (
 		},
 		Conn:                network.StartConn(),
 		ShowFailedLogin:     false,
-		OutlineInvSpot:      -1,
 		DebugMode:           false,
 		RenderExclamOnGuide: true,
 	}

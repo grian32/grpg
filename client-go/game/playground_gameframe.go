@@ -1,7 +1,6 @@
 package game
 
 import (
-	"client/network/c2s"
 	"client/shared"
 	"client/util"
 	"fmt"
@@ -9,7 +8,6 @@ import (
 
 	gebiten_ui "github.com/grian32/gebiten-ui"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type RenderType byte
@@ -73,6 +71,7 @@ func NewPgGameframe(
 		ItemOutlineTexture: otherTex["item_outline"],
 		SkillIcons:         make(map[shared.Skill]*gebiten_ui.GHoverTexture),
 		CurrActionString:   "Current Action: None :(",
+		OutlineInvSpot:     -1,
 	}
 
 	hoverTex := otherTex["hover_tex"]
@@ -126,41 +125,7 @@ func (g *PgGameframe) Update() {
 	g.SkillsButton.Update()
 	g.EquipmentButton.Update()
 
-	// TODO: possibly move this to input processor? doesnt really have anything to do with gameframe other than outlineinvspot and rendertype
-	// off sets could be simplified but more readable this way imo since the multiplier actually lines up to num rows/cols
-	minInvX := RightGameframeX + TileSize
-	maxInvX := minInvX + TileSize*4
-	minInvY := TileSize
-	maxInvY := minInvY + TileSize*6
-	if g.ContainerRenderType == Inventory && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		mouseX, mouseY := ebiten.CursorPosition()
-		if mouseX >= minInvX && mouseX < maxInvX && mouseY >= minInvY && mouseY < maxInvY {
-			col := (mouseX - minInvX) / TileSize
-			row := (mouseY - minInvY) / TileSize
-			idx := row*ItemsPerRow + col
-
-			// TODO: i wager i can move outlineinvspot to be local to this?
-			if g.OutlineInvSpot != -1 {
-				if g.OutlineInvSpot == idx || g.Player.Inventory[idx].ItemId != 0 {
-					// deselect behaviour, basically
-					g.OutlineInvSpot = -1
-					return
-				}
-
-				shared.SendPacket(g.Game.Conn, &c2s.InvSwap{
-					From: byte(g.OutlineInvSpot),
-					To:   byte(idx),
-				})
-				g.OutlineInvSpot = -1
-
-				return
-			}
-
-			if g.Player.Inventory[idx].ItemId != 0 {
-				g.OutlineInvSpot = idx
-			}
-		}
-	}
+	g.InputHandler.UpdateItemMove(g.ContainerRenderType, &g.OutlineInvSpot)
 }
 
 func (g *PgGameframe) Draw(screen *ebiten.Image) {

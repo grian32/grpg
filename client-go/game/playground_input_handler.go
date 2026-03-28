@@ -14,6 +14,8 @@ type PgInputHandler struct {
 
 	IsTypingCommand bool
 	CommandString   string
+
+	minInvX, maxInvX, minInvY, maxInvY int
 }
 
 func NewPgInputHandler(g *shared.Game) *PgInputHandler {
@@ -49,6 +51,41 @@ func (h *PgInputHandler) Update() {
 			shared.SendPacket(h.Game.Conn, &c2s.Continue{})
 		} else if inpututil.IsKeyJustPressed(ebiten.KeyC) {
 			h.IsTypingCommand = true
+		}
+	}
+	h.minInvX = RightGameframeX + TileSize
+	h.maxInvX = h.minInvX + TileSize*4
+	h.minInvY = TileSize
+	h.maxInvY = h.minInvY + TileSize*6
+}
+
+func (h *PgInputHandler) UpdateItemMove(renderType RenderType, outlineInvSpot *int) {
+	if renderType == Inventory && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		mouseX, mouseY := ebiten.CursorPosition()
+		if mouseX >= h.minInvX && mouseX < h.maxInvX && mouseY >= h.minInvY && mouseY < h.maxInvY {
+			col := (mouseX - h.minInvX) / TileSize
+			row := (mouseY - h.minInvY) / TileSize
+			idx := row*ItemsPerRow + col
+
+			if *outlineInvSpot != -1 {
+				if *outlineInvSpot == idx || h.Player.Inventory[idx].ItemId != 0 {
+					// deselect behaviour, basically
+					*outlineInvSpot = -1
+					return
+				}
+
+				shared.SendPacket(h.Game.Conn, &c2s.InvSwap{
+					From: byte(*outlineInvSpot),
+					To:   byte(idx),
+				})
+				*outlineInvSpot = -1
+
+				return
+			}
+
+			if h.Player.Inventory[idx].ItemId != 0 {
+				*outlineInvSpot = idx
+			}
 		}
 	}
 }
