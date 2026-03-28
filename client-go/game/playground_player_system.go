@@ -14,6 +14,7 @@ type PgPlayerSystem struct {
 	WorldImage     *ebiten.Image
 	PlayerTextures map[shared.Direction]*ebiten.Image
 	Game           *shared.Game
+	InputHandler   *PgInputHandler
 	Font16         *gebiten_ui.GFont
 }
 
@@ -22,6 +23,7 @@ func NewPgPlayerSystem(
 	otherTex map[string]*ebiten.Image,
 	game *shared.Game,
 	font16 *gebiten_ui.GFont,
+	inputHandler *PgInputHandler,
 ) *PgPlayerSystem {
 	playerTextures := make(map[shared.Direction]*ebiten.Image)
 	playerTextures[shared.UP] = otherTex["player_up"]
@@ -33,12 +35,13 @@ func NewPgPlayerSystem(
 		WorldImage:     worldImage,
 		PlayerTextures: playerTextures,
 		Game:           game,
+		InputHandler:   inputHandler,
 		Font16:         font16,
 	}
 }
 
 func (r *PgPlayerSystem) Update(crossedZone bool) {
-	r.Game.Player.Update(r.Game, crossedZone)
+	r.Game.Player.Update(r.Game, crossedZone, r.InputHandler.MovementHeld)
 
 	for _, rp := range r.Game.OtherPlayers {
 		rp.Update(r.Game)

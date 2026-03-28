@@ -108,7 +108,7 @@ func (p *Playground) Setup() {
 	p.Camera = NewPgCamera(p.Game.Player)
 	p.World = NewPgWorld(p.Game, p.WorldImage, p.Textures, otherTex["exclam"], p.Font16)
 	p.InputHandler = NewPgInputHandler(p.Game)
-	p.PlayerSystem = NewPgPlayerSystem(p.WorldImage, otherTex, p.Game, p.Font16)
+	p.PlayerSystem = NewPgPlayerSystem(p.WorldImage, otherTex, p.Game, p.Font16, p.InputHandler)
 	p.Gameframe = NewPgGameframe(
 		p.Game,
 		p.InputHandler,

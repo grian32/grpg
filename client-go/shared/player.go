@@ -4,6 +4,7 @@ import (
 	"client/network/c2s"
 	"client/util"
 	"log"
+	"time"
 )
 
 type LocalPlayer struct {
@@ -105,7 +106,7 @@ func (lp *LocalPlayer) GetFacingCoord() util.Vector2I {
 	return util.Vector2I{}
 }
 
-func (lp *LocalPlayer) Update(game *Game, crossedZone bool) {
+func (lp *LocalPlayer) Update(game *Game, crossedZone bool, movementHeld bool) {
 	targetX := (lp.X % 16) * game.TileSize
 	targetY := (lp.Y % 16) * game.TileSize
 
@@ -131,7 +132,7 @@ func (lp *LocalPlayer) Update(game *Game, crossedZone bool) {
 		lp.FrameCounter = 0
 	} else if lp.RealX != targetX || lp.RealY != targetY {
 		lp.FrameCounter++
-		lp.CurrFrame = uint8(lp.FrameCounter/4) % 4
+		lp.CurrFrame = uint8(lp.FrameCounter/8) % 4
 
 		if lp.RealX < targetX {
 			lp.RealX += speed
@@ -144,6 +145,12 @@ func (lp *LocalPlayer) Update(game *Game, crossedZone bool) {
 		} else if lp.RealY > targetY {
 			lp.RealY -= speed
 		}
+	} else if movementHeld {
+		lp.FrameCounter++
+		lp.CurrFrame = uint8(lp.FrameCounter/8) % 4
+	} else {
+		lp.CurrFrame = 0
+		lp.FrameCounter = 0
 	}
 
 	lp.PrevX = lp.X
@@ -157,6 +164,7 @@ type RemotePlayer struct {
 	Facing       Direction
 	CurrFrame    uint8
 	FrameCounter uint64
+	LastMoveTime time.Time
 	Name         string
 }
 
@@ -170,6 +178,11 @@ func NewRemotePlayer(x, y int32, facing Direction, name string) *RemotePlayer {
 }
 
 func (rp *RemotePlayer) Move(newX, newY int32, facing Direction) {
+	// FIXME: really dubious hack to be honest, im not too happy with it, but can't really think of another good way to do it
+	if rp.X != newX || rp.Y != newY {
+		rp.LastMoveTime = time.Now()
+	}
+
 	rp.X = newX
 	rp.Y = newY
 	rp.Facing = facing
@@ -178,6 +191,7 @@ func (rp *RemotePlayer) Move(newX, newY int32, facing Direction) {
 func (rp *RemotePlayer) Update(game *Game) {
 	targetX := (rp.X % 16) * game.TileSize
 	targetY := (rp.Y % 16) * game.TileSize
+	isMoving := time.Since(rp.LastMoveTime) < 200*time.Millisecond
 
 	// just logged in, basically.
 	if rp.PrevX == 0 && rp.PrevY == 0 {
@@ -196,7 +210,7 @@ func (rp *RemotePlayer) Update(game *Game) {
 
 	if rp.RealX != targetX || rp.RealY != targetY {
 		rp.FrameCounter++
-		rp.CurrFrame = uint8(rp.FrameCounter/4) % 4
+		rp.CurrFrame = uint8(rp.FrameCounter/8) % 4
 
 		if rp.RealX < targetX {
 			rp.RealX += speed
@@ -209,6 +223,12 @@ func (rp *RemotePlayer) Update(game *Game) {
 		} else if rp.RealY > targetY {
 			rp.RealY -= speed
 		}
+	} else if isMoving {
+		rp.FrameCounter++
+		rp.CurrFrame = uint8(rp.FrameCounter/8) % 4
+	} else {
+		rp.CurrFrame = 0
+		rp.FrameCounter = 0
 	}
 
 	rp.PrevX = rp.X

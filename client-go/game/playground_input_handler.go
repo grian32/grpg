@@ -15,6 +15,9 @@ type PgInputHandler struct {
 	IsTypingCommand bool
 	CommandString   string
 
+	MoveFrameCounter int
+	MovementHeld     bool
+
 	minInvX, maxInvX, minInvY, maxInvY int
 }
 
@@ -41,22 +44,36 @@ func (h *PgInputHandler) Update() {
 		} else {
 			h.CommandString = string(ebiten.AppendInputChars([]rune(h.CommandString)))
 		}
-	} else {
-		if inpututil.IsKeyJustPressed(ebiten.KeyW) {
-			h.Player.SendMovePacket(h.Game, h.Player.X, h.Player.Y-1, shared.UP)
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyS) {
-			h.Player.SendMovePacket(h.Game, h.Player.X, h.Player.Y+1, shared.DOWN)
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyA) {
-			h.Player.SendMovePacket(h.Game, h.Player.X-1, h.Player.Y, shared.LEFT)
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyD) {
-			h.Player.SendMovePacket(h.Game, h.Player.X+1, h.Player.Y, shared.RIGHT)
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
-			h.Player.SendInteractPacket(h.Game)
-		} else if h.Game.Talkbox.Active && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-			shared.SendPacket(h.Game.Conn, &c2s.Continue{})
-		} else if inpututil.IsKeyJustPressed(ebiten.KeyC) {
-			h.IsTypingCommand = true
+		h.MovementHeld = false
+		h.MoveFrameCounter = 0
+		return
+	}
+
+	h.MovementHeld = ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyD)
+
+	if h.MovementHeld {
+		if h.MoveFrameCounter%10 == 0 {
+			if ebiten.IsKeyPressed(ebiten.KeyW) {
+				h.Player.SendMovePacket(h.Game, h.Player.X, h.Player.Y-1, shared.UP)
+			} else if ebiten.IsKeyPressed(ebiten.KeyS) {
+				h.Player.SendMovePacket(h.Game, h.Player.X, h.Player.Y+1, shared.DOWN)
+			} else if ebiten.IsKeyPressed(ebiten.KeyA) {
+				h.Player.SendMovePacket(h.Game, h.Player.X-1, h.Player.Y, shared.LEFT)
+			} else if ebiten.IsKeyPressed(ebiten.KeyD) {
+				h.Player.SendMovePacket(h.Game, h.Player.X+1, h.Player.Y, shared.RIGHT)
+			}
 		}
+		h.MoveFrameCounter++
+	} else {
+		h.MoveFrameCounter = 0
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+		h.Player.SendInteractPacket(h.Game)
+	} else if h.Game.Talkbox.Active && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		shared.SendPacket(h.Game.Conn, &c2s.Continue{})
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyC) {
+		h.IsTypingCommand = true
 	}
 }
 
