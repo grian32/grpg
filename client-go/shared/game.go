@@ -39,7 +39,6 @@ type Game struct {
 	PlayerVars          map[constants.PlayerVarId]uint16
 	PlayerVarHandlers   map[constants.PlayerVarId]PlayerVarHandlerFunc
 	Conn                net.Conn
-	OutlineInvSpot      int
 	ShowFailedLogin     bool
 	DebugMode           bool
 	RenderExclamOnGuide bool

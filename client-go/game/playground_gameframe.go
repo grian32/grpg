@@ -50,6 +50,7 @@ type PgGameframe struct {
 	InputHandler *PgInputHandler
 
 	ContainerRenderType RenderType
+	OutlineInvSpot      int
 }
 
 func NewPgGameframe(
@@ -139,24 +140,24 @@ func (g *PgGameframe) Update() {
 			idx := row*ItemsPerRow + col
 
 			// TODO: i wager i can move outlineinvspot to be local to this?
-			if g.Game.OutlineInvSpot != -1 {
-				if g.Game.OutlineInvSpot == idx || g.Player.Inventory[idx].ItemId != 0 {
+			if g.OutlineInvSpot != -1 {
+				if g.OutlineInvSpot == idx || g.Player.Inventory[idx].ItemId != 0 {
 					// deselect behaviour, basically
-					g.Game.OutlineInvSpot = -1
+					g.OutlineInvSpot = -1
 					return
 				}
 
 				shared.SendPacket(g.Game.Conn, &c2s.InvSwap{
-					From: byte(g.Game.OutlineInvSpot),
+					From: byte(g.OutlineInvSpot),
 					To:   byte(idx),
 				})
-				g.Game.OutlineInvSpot = -1
+				g.OutlineInvSpot = -1
 
 				return
 			}
 
 			if g.Player.Inventory[idx].ItemId != 0 {
-				g.Game.OutlineInvSpot = idx
+				g.OutlineInvSpot = idx
 			}
 		}
 	}
@@ -181,7 +182,7 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 
 				g.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY+ItemCountYOffset), color.White)
 
-				if idx == g.Game.OutlineInvSpot {
+				if idx == g.OutlineInvSpot {
 					util.DrawImage(screen, g.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)
 				}
 			}
