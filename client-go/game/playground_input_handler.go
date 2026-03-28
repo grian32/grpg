@@ -19,7 +19,12 @@ type PgInputHandler struct {
 }
 
 func NewPgInputHandler(g *shared.Game) *PgInputHandler {
-	return &PgInputHandler{Game: g, Player: g.Player}
+	h := &PgInputHandler{Game: g, Player: g.Player}
+	h.minInvX = RightGameframeX + TileSize
+	h.maxInvX = h.minInvX + TileSize*4
+	h.minInvY = TileSize
+	h.maxInvY = h.minInvY + TileSize*6
+	return h
 }
 
 func (h *PgInputHandler) Update() {
@@ -53,10 +58,6 @@ func (h *PgInputHandler) Update() {
 			h.IsTypingCommand = true
 		}
 	}
-	h.minInvX = RightGameframeX + TileSize
-	h.maxInvX = h.minInvX + TileSize*4
-	h.minInvY = TileSize
-	h.maxInvY = h.minInvY + TileSize*6
 }
 
 func (h *PgInputHandler) UpdateItemMove(renderType RenderType, outlineInvSpot *int) {
