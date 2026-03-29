@@ -54,6 +54,11 @@ func (g *GenericCtx) SetPlayerVar(varId constants.PlayerVarId, newValue uint16) 
 	}, g.game)
 }
 
+// TEMP
+func (g *GenericCtx) Player() *shared.Player {
+	return g.player
+}
+
 type ObjInteractCtx struct {
 	game   *shared.Game
 	player *shared.Player
@@ -165,13 +170,18 @@ type CommandCtx struct {
 	args       []string
 	currArgIdx uint
 	game       *shared.Game
+	GenericCtx
 }
 
-func NewCommandCtx(args []string, game *shared.Game) *CommandCtx {
+func NewCommandCtx(args []string, game *shared.Game, player *shared.Player) *CommandCtx {
 	return &CommandCtx{
 		args:       args,
 		currArgIdx: 0,
 		game:       game,
+		GenericCtx: GenericCtx{
+			game:   game,
+			player: player,
+		},
 	}
 }
 

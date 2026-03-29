@@ -25,4 +25,8 @@ func init() {
 		}
 		npc.Wander(g)
 	})
+
+	scripts.OnCommand("logequipment", func(ctx *scripts.CommandCtx) {
+		log.Printf("equipment for %s: %v", ctx.Player().Name, ctx.Player().Equipment)
+	})
 }

@@ -102,24 +102,24 @@ func (p *Player) SaveToDB(db *sql.DB) error {
 	}
 
 	if err == sql.ErrNoRows {
-		stmt, err := tx.Prepare("INSERT INTO players(player_id, name, x, y, inventory, skills, playervar) VALUES (NULL, ?, ?, ?, ?, ?)")
+		stmt, err := tx.Prepare("INSERT INTO players(player_id, name, x, y, inventory, skills, playervar, equipment) VALUES (NULL, ?, ?, ?, ?, ?, ?)")
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), p.EncodePlayerVarsToBlob())
+		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), p.EncodePlayerVarsToBlob(), p.Equipment.EncodeToBlob())
 		if err != nil {
 			return err
 		}
 	} else {
-		stmt, err := tx.Prepare("UPDATE players SET x=?, y=?, inventory=?, skills=?, playervar=? WHERE player_id=?")
+		stmt, err := tx.Prepare("UPDATE players SET x=?, y=?, inventory=?, skills=?, playervar=?, equipment=? WHERE player_id=?")
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), p.EncodePlayerVarsToBlob(), existingId)
+		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), p.EncodePlayerVarsToBlob(), p.Equipment.EncodeToBlob(), existingId)
 		if err != nil {
 			return err
 		}

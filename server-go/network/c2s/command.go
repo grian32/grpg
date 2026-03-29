@@ -33,5 +33,5 @@ func (c *Command) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Playe
 		return
 	}
 
-	script(scripts.NewCommandCtx(args, game))
+	script(scripts.NewCommandCtx(args, game, player))
 }
