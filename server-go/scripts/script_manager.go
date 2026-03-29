@@ -12,6 +12,7 @@ type ScriptManager struct {
 	InteractScripts map[constants.ObjConstant]ObjInteractFunc
 	NpcTalkScripts  map[constants.NpcConstant]NpcTalkFunc
 	CommandScripts  map[string]CommandFunc
+	ItemUseScripts  map[constants.ItemConstant]ItemUseFunc
 }
 
 var npcUid uint32 = 1
@@ -21,6 +22,7 @@ func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptMa
 		InteractScripts: make(map[constants.ObjConstant]ObjInteractFunc),
 		NpcTalkScripts:  make(map[constants.NpcConstant]NpcTalkFunc),
 		CommandScripts:  make(map[string]CommandFunc),
+		ItemUseScripts:  make(map[constants.ItemConstant]ItemUseFunc),
 	}
 
 	for _, reg := range pendingObjInteracts {
@@ -68,10 +70,15 @@ func NewScriptManager(game *shared.Game, npcs map[uint16]*grpgnpc.Npc) *ScriptMa
 		s.CommandScripts[reg.name] = reg.fn
 	}
 
+	for _, reg := range pendingItemUses {
+		s.ItemUseScripts[reg.itemId] = reg.fn
+	}
+
 	pendingObjInteracts = nil
 	pendingNpcTalks = nil
 	pendingNpcSpawns = nil
 	pendingCmds = nil
+	pendingItemUses = nil
 
 	return s
 }

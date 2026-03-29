@@ -24,6 +24,7 @@ var (
 	ContinueData = PacketData{Opcode: 0x05, Length: 0, Handler: &Continue{}}
 	CommandData  = PacketData{Opcode: 0x06, Length: -1, Handler: &Command{}}
 	InvSwapData  = PacketData{Opcode: 0x07, Length: 2, Handler: &InvSwap{}}
+	ItemUseData  = PacketData{Opcode: 0x08, Length: 1, Handler: &ItemUse{}}
 )
 
 var Packets = map[byte]PacketData{
@@ -34,4 +35,5 @@ var Packets = map[byte]PacketData{
 	0x05: ContinueData,
 	0x06: CommandData,
 	0x07: InvSwapData,
+	0x08: ItemUseData,
 }

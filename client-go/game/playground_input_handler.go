@@ -18,6 +18,8 @@ type PgInputHandler struct {
 	MoveFrameCounter int
 	MovementHeld     bool
 
+	OutlineInvSpot *int
+
 	minInvX, maxInvX, minInvY, maxInvY int
 }
 
@@ -72,12 +74,16 @@ func (h *PgInputHandler) Update() {
 		h.Player.SendInteractPacket(h.Game)
 	} else if h.Game.Talkbox.Active && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		shared.SendPacket(h.Game.Conn, &c2s.Continue{})
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyC) {
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyControlLeft) {
 		h.IsTypingCommand = true
+	} else if h.OutlineInvSpot != nil && *h.OutlineInvSpot != -1 && inpututil.IsKeyJustPressed(ebiten.KeyC) {
+		h.Player.SendItemUsePacket(h.Game, uint8(*h.OutlineInvSpot))
+		*h.OutlineInvSpot = -1
 	}
 }
 
 func (h *PgInputHandler) UpdateItemMove(renderType RenderType, outlineInvSpot *int) {
+	h.OutlineInvSpot = outlineInvSpot
 	if renderType == Inventory && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		mouseX, mouseY := ebiten.CursorPosition()
 		if mouseX >= h.minInvX && mouseX < h.maxInvX && mouseY >= h.minInvY && mouseY < h.maxInvY {

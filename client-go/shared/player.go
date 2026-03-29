@@ -64,6 +64,19 @@ func (lp *LocalPlayer) SendCmdPacket(game *Game, cmd string) {
 	})
 }
 
+func (lp *LocalPlayer) SendItemUsePacket(game *Game, invIdx uint8) {
+	if invIdx > 23 {
+		return
+	}
+	item := lp.Inventory[invIdx]
+	if item.ItemId == 0 {
+		return
+	}
+	SendPacket(game.Conn, &c2s.ItemUse{
+		InvIdx: invIdx,
+	})
+}
+
 // SendInteractPacket TODO: maybe bad place for this?
 func (lp *LocalPlayer) SendInteractPacket(game *Game) {
 	facing := lp.GetFacingCoord()

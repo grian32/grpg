@@ -13,7 +13,7 @@ type TimerFunc func()
 
 // GenericCtx possibly bad name but this consists of functions that should be on every context
 type GenericCtx struct {
-	game *shared.Game
+	game   *shared.Game
 	player *shared.Player
 }
 
@@ -42,14 +42,14 @@ func (g *GenericCtx) AddTimer(ticks uint32, fn TimerFunc) {
 	}
 }
 
-func (g *GenericCtx) GetPlayerVar(varId constants.PlayerVarId) uint16{
+func (g *GenericCtx) GetPlayerVar(varId constants.PlayerVarId) uint16 {
 	return g.player.PlayerVars[varId]
 }
 
 func (g *GenericCtx) SetPlayerVar(varId constants.PlayerVarId, newValue uint16) {
-	g.player.PlayerVars[varId] = newValue;
+	g.player.PlayerVars[varId] = newValue
 	network.SendPacket(g.player.Conn, &s2c.PlayerVarIndiv{
-		VarId:   uint16(varId),
+		VarId:    uint16(varId),
 		VarValue: newValue,
 	}, g.game)
 }
@@ -67,7 +67,7 @@ func NewObjInteractCtx(game *shared.Game, player *shared.Player, objPos util.Vec
 		player: player,
 		objPos: objPos,
 		GenericCtx: GenericCtx{
-			game: game,
+			game:   game,
 			player: player,
 		},
 	}
@@ -100,7 +100,7 @@ func NewNpcTalkCtx(player *shared.Player, game *shared.Game, npcId constants.Npc
 		game:   game,
 		npcId:  npcId,
 		GenericCtx: GenericCtx{
-			game: game,
+			game:   game,
 			player: player,
 		},
 	}
@@ -189,4 +189,17 @@ func (c *CommandCtx) GetIntArg() (int64, error) {
 	}
 	c.currArgIdx++
 	return p, nil
+}
+
+type ItemUseCtx struct {
+	GenericCtx
+}
+
+func NewItemUseCtx(game *shared.Game, player *shared.Player) *ItemUseCtx {
+	return &ItemUseCtx{
+		GenericCtx: GenericCtx{
+			game:   game,
+			player: player,
+		},
+	}
 }
