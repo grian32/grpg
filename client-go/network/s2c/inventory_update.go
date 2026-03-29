@@ -10,17 +10,29 @@ import (
 type InventoryUpdate struct{}
 
 func (i *InventoryUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
-	firstMask, err1 := buf.ReadByte()
-	secondMask, err2 := buf.ReadByte()
-	thirdMask, err3 := buf.ReadByte()
-
-	if firstMask == 0 && secondMask == 0 && thirdMask == 0 {
-		// no dirty indexes, happens on a login for a brand new acc
+	firstMask, err := buf.ReadByte()
+	if err != nil {
+		log.Printf("failed to read first mask byte in inv update: %v", err)
+		return
+	}
+	secondMask, err := buf.ReadByte()
+	if err != nil {
+		log.Printf("failed to read second mask byte in inv update: %v", err)
+		return
+	}
+	thirdMask, err := buf.ReadByte()
+	if err != nil {
+		log.Printf("failed to read third mask byte in inv update: %v", err)
+		return
+	}
+	fourthMask, err := buf.ReadByte()
+	if err != nil {
+		log.Printf("failed to read fourth mask byte in inv update: %v", err)
 		return
 	}
 
-	if err := cmp.Or(err1, err2, err3); err != nil {
-		log.Printf("failed to read mask bytes in inv update: %v", err)
+	if firstMask == 0 && secondMask == 0 && thirdMask == 0 && fourthMask == 0 {
+		// no dirty indexes, happens on a login for a brand new acc
 		return
 	}
 
@@ -49,6 +61,19 @@ func (i *InventoryUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 			game.Player.Inventory[idx] = shared.InventoryItem{
 				ItemId: item,
 				Count:  count,
+			}
+		}
+	}
+
+	if fourthMask != 0 {
+		for idx := range 5 {
+			if (fourthMask & (1 << idx)) != 0 {
+				item, err := buf.ReadUint16()
+				if err != nil {
+					log.Printf("failed to read equipment item in inv update: %v", err)
+					return
+				}
+				game.Player.Equipment[shared.EquipmentType(idx)] = item
 			}
 		}
 	}

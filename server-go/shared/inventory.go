@@ -9,7 +9,13 @@ type Inventory struct {
 }
 
 type Equipment struct {
-	Items [5]InventoryItem // 0: helmet, 1: chest, 2: legs, 3: wep, 4: ring
+	Items [5]EquipmentItem // 0: helmet, 1: chest, 2: legs, 3: wep, 4: ring
+}
+
+type EquipmentItem struct {
+	ItemId uint16
+	// count is always 1 if itemid != 0
+	Dirty bool
 }
 
 type InventoryItem struct {
@@ -82,7 +88,6 @@ func (e *Equipment) EncodeToBlob() []byte {
 
 	for idx := range 5 {
 		buf.WriteUint16(e.Items[idx].ItemId)
-		buf.WriteUint16(e.Items[idx].Count)
 	}
 
 	return buf.Bytes()
@@ -99,14 +104,9 @@ func (e *Equipment) DecodeFromBlob(blob []byte) error {
 		if err != nil {
 			return err
 		}
-		count, err := buf.ReadUint16()
-		if err != nil {
-			return err
-		}
 
-		e.Items[idx] = InventoryItem{
+		e.Items[idx] = EquipmentItem{
 			ItemId: itemId,
-			Count:  count,
 			Dirty:  itemId != 0,
 		}
 	}

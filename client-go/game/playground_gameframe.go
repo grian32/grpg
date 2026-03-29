@@ -134,6 +134,7 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 		g.Font16.Draw(screen, "Command: "+g.InputHandler.CommandString, 0, CommandY, color.White)
 	}
 
+	// TODO: prob abstracting these into their own functions would be wise
 	if g.ContainerRenderType == Inventory {
 		var currItemRealPosX int32 = RightGameframeX + TileSize
 		var currItemRealPosY int32 = TileSize
@@ -141,10 +142,7 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 		for idx, item := range g.Player.Inventory {
 			// you still want to advance the rendering pos since after inv moving is implemented you'll have empty spots and it'll render wrongly
 			if item.ItemId != 0 {
-				data := g.Game.Items[item.ItemId]
-				tex := g.Textures[data.Texture]
-				util.DrawImage(screen, tex, currItemRealPosX, currItemRealPosY)
-
+				g.DrawItem(item.ItemId, screen, currItemRealPosX, currItemRealPosY)
 				g.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY+ItemCountYOffset), color.White)
 
 				if idx == g.OutlineInvSpot {
@@ -169,11 +167,11 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 		}
 	} else if g.ContainerRenderType == Equipment {
 		util.DrawImage(screen, g.EquipmentFrame, RightGameframeX, 0)
-		util.DrawImage(screen, g.HelmetFrame, RightGameframeX+EquipmentMidOffsetX, HelmetOffsetY)
-		util.DrawImage(screen, g.ChestplateFrame, RightGameframeX+EquipmentMidOffsetX, EquipmentMidOffsetY)
-		util.DrawImage(screen, g.LeggingsFrame, RightGameframeX+EquipmentMidOffsetX, LeggingsOffsetY)
-		util.DrawImage(screen, g.WeaponFrame, RightGameframeX+WeaponOffsetX, EquipmentMidOffsetY)
-		util.DrawImage(screen, g.RingFrame, RightGameframeX+RingOffsetX, EquipmentMidOffsetY)
+		g.DrawItemOrTex(g.Player.Equipment[shared.HELMET], screen, g.HelmetFrame, RightGameframeX+EquipmentMidOffsetX, HelmetOffsetY)
+		g.DrawItemOrTex(g.Player.Equipment[shared.CHESTPLATE], screen, g.ChestplateFrame, RightGameframeX+EquipmentMidOffsetX, EquipmentMidOffsetY)
+		g.DrawItemOrTex(g.Player.Equipment[shared.LEGGINGS], screen, g.LeggingsFrame, RightGameframeX+EquipmentMidOffsetX, LeggingsOffsetY)
+		g.DrawItemOrTex(g.Player.Equipment[shared.WEAPON], screen, g.WeaponFrame, RightGameframeX+WeaponOffsetX, EquipmentMidOffsetY)
+		g.DrawItemOrTex(g.Player.Equipment[shared.RING], screen, g.RingFrame, RightGameframeX+RingOffsetX, EquipmentMidOffsetY)
 	}
 
 	util.DrawImage(screen, g.GameframeBottom, 0, RightGameframeX)
@@ -196,5 +194,19 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 	if g.Game.DebugMode {
 		playerCoords := fmt.Sprintf("X: %d, Y: %d, Facing: %s", g.Player.X, g.Player.Y, g.Player.Facing.String())
 		g.Font24.Draw(screen, playerCoords, RightGameframeX, DebugCoordsY, color.White)
+	}
+}
+
+func (g *PgGameframe) DrawItem(id uint16, screen *ebiten.Image, x, y int32) {
+	data := g.Game.Items[id]
+	tex := g.Textures[data.Texture]
+	util.DrawImage(screen, tex, x, y)
+}
+
+func (g *PgGameframe) DrawItemOrTex(id uint16, screen *ebiten.Image, elseTex *ebiten.Image, x, y int32) {
+	if id != 0 {
+		g.DrawItem(id, screen, x, y)
+	} else {
+		util.DrawImage(screen, elseTex, x, y)
 	}
 }
