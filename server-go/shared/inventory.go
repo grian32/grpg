@@ -1,12 +1,15 @@
 package shared
 
 import (
-	"cmp"
 	"grpg/data-go/gbuf"
 )
 
 type Inventory struct {
 	Items [24]InventoryItem
+}
+
+type Equipment struct {
+	Items [5]InventoryItem // 0: helmet, 1: chest, 2: legs, 3: wep, 4: ring
 }
 
 type InventoryItem struct {
@@ -50,28 +53,63 @@ func (i *Inventory) EncodeToBlob() []byte {
 	return buf.Bytes()
 }
 
-func DecodeInventoryFromBlob(blob []byte) (Inventory, error) {
+func (i *Inventory) DecodeFromBlob(blob []byte) error {
 	buf := gbuf.NewGBuf(blob)
 	inv := [24]InventoryItem{}
 
 	for idx := range 24 {
-		id, err1 := buf.ReadUint16()
-		count, err2 := buf.ReadUint16()
-		if err := cmp.Or(err1, err2); err != nil {
-			return Inventory{}, err
+		id, err := buf.ReadUint16()
+		if err != nil {
+			return err
 		}
-
-		dirty := false
-		if id != 0 {
-			dirty = true
+		count, err := buf.ReadUint16()
+		if err != nil {
+			return err
 		}
 
 		inv[idx] = InventoryItem{
 			ItemId: id,
 			Count:  count,
-			Dirty:  dirty,
+			Dirty:  id != 0,
 		}
 	}
 
-	return Inventory{Items: inv}, nil
+	return nil
+}
+
+func (e *Equipment) EncodeToBlob() []byte {
+	buf := gbuf.NewEmptyGBuf()
+
+	for idx := range 5 {
+		buf.WriteUint16(e.Items[idx].ItemId)
+		buf.WriteUint16(e.Items[idx].Count)
+	}
+
+	return buf.Bytes()
+}
+
+func (e *Equipment) DecodeFromBlob(blob []byte) error {
+	if len(blob) == 0 {
+		return nil
+	}
+	buf := gbuf.NewGBuf(blob)
+
+	for idx := range 5 {
+		itemId, err := buf.ReadUint16()
+		if err != nil {
+			return err
+		}
+		count, err := buf.ReadUint16()
+		if err != nil {
+			return err
+		}
+
+		e.Items[idx] = InventoryItem{
+			ItemId: itemId,
+			Count:  count,
+			Dirty:  itemId != 0,
+		}
+	}
+
+	return nil
 }

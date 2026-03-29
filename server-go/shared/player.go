@@ -15,6 +15,7 @@ type Player struct {
 	ChunkPos      util.Vector2I
 	Facing        Direction
 	Inventory     Inventory
+	Equipment     Equipment
 	Name          string
 	DialogueQueue DialogueQueue
 	Skills        map[Skill]*SkillInfo
@@ -23,14 +24,12 @@ type Player struct {
 }
 
 func (p *Player) LoadFromDB(db *sql.DB) error {
-	row := db.QueryRow("SELECT x, y, inventory, skills, playervar FROM players WHERE name = ?", p.Name)
+	row := db.QueryRow("SELECT x, y, inventory, skills, playervar, equipment FROM players WHERE name = ?", p.Name)
 
 	var loadedX int
 	var loadedY int
-	var invBlob []byte
-	var skillsBlob []byte
-	var pvBlob []byte
-	err := row.Scan(&loadedX, &loadedY, &invBlob, &skillsBlob, &pvBlob)
+	var invBlob, skillsBlob, pvBlob, equipmentBlob []byte
+	err := row.Scan(&loadedX, &loadedY, &invBlob, &skillsBlob, &pvBlob, &equipmentBlob)
 
 	if err == sql.ErrNoRows {
 		p.InitDefaults()
@@ -43,7 +42,9 @@ func (p *Player) LoadFromDB(db *sql.DB) error {
 
 	pos := util.Vector2I{X: uint32(loadedX), Y: uint32(loadedY)}
 	chunkPos := util.Vector2I{X: uint32(loadedX / 16), Y: uint32(loadedY / 16)}
-	inv, err := DecodeInventoryFromBlob(invBlob)
+	// not sure if necessary
+	p.Inventory = Inventory{}
+	err = p.Inventory.DecodeFromBlob(invBlob)
 	if err != nil {
 		return err
 	}
@@ -55,10 +56,14 @@ func (p *Player) LoadFromDB(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
+	p.Equipment = Equipment{}
+	err = p.Equipment.DecodeFromBlob(equipmentBlob)
+	if err != nil {
+		return err
+	}
 
 	p.Pos = pos
 	p.ChunkPos = chunkPos
-	p.Inventory = inv
 	p.Skills = skills
 
 	return nil
