@@ -10,10 +10,10 @@ type Header struct {
 }
 
 type Item struct {
-	ItemId  uint16
-	Texture uint16
-	// maybe stackable etc in the future
-	Name string
+	ItemId    uint16
+	Texture   uint16
+	Name      string
+	Stackable bool
 }
 
 func WriteHeader(buf *gbuf.GBuf) {
@@ -38,6 +38,7 @@ func WriteItems(buf *gbuf.GBuf, items []Item) {
 		buf.WriteUint16(item.ItemId)
 		buf.WriteUint16(item.Texture)
 		buf.WriteString(item.Name)
+		buf.WriteBool(item.Stackable)
 	}
 }
 
@@ -53,15 +54,17 @@ func ReadItems(buf *gbuf.GBuf) ([]Item, error) {
 		itemId, err1 := buf.ReadUint16()
 		textureId, err2 := buf.ReadUint16()
 		itemName, err3 := buf.ReadString()
+		stackable, err4 := buf.ReadBool()
 
-		if err := cmp.Or(err1, err2, err3); err != nil {
+		if err := cmp.Or(err1, err2, err3, err4); err != nil {
 			return nil, err
 		}
 
 		itemArr[idx] = Item{
-			ItemId:  itemId,
-			Texture: textureId,
-			Name:    itemName,
+			ItemId:    itemId,
+			Texture:   textureId,
+			Name:      itemName,
+			Stackable: stackable,
 		}
 	}
 

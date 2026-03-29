@@ -37,22 +37,26 @@ func TestReadWriteItems(t *testing.T) {
 		0x00, 0x01, // item id
 		0x00, 0x03, // item tex
 		0x00, 0x00, 0x00, 0x07, 'b', 'e', 'r', 'r', 'i', 'e', 's', // item name
+		0x01, // stackable
 
 		0x00, 0x02, // item id
 		0x00, 0x03, // item tex
 		0x00, 0x00, 0x00, 0x08, 'b', 'e', 'r', 'r', 'i', 'e', 's', 's', // item name
+		0x00, // not stackable
 	}
 
 	expectedItems := []Item{
 		{
-			ItemId:  1,
-			Texture: 3,
-			Name:    "berries",
+			ItemId:    1,
+			Texture:   3,
+			Name:      "berries",
+			Stackable: true,
 		},
 		{
-			ItemId:  2,
-			Texture: 3,
-			Name:    "berriess",
+			ItemId:    2,
+			Texture:   3,
+			Name:      "berriess",
+			Stackable: false,
 		},
 	}
 

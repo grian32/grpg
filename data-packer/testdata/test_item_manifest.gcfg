@@ -2,10 +2,12 @@
     name = "berries"
     id = 1
     texture = "grass_tex"
+    stackable = true
 }
 
 [Item] {
     name = "berriess"
     id = 2
     texture = "grass_tex"
+    stackable = false
 }

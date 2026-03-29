@@ -12,9 +12,10 @@ type ManifestConfig struct {
 }
 
 type GRPGItemManifestEntry struct {
-	Name    string `gcfg:"name"`
-	ItemId  uint16 `gcfg:"id"`
-	Texture string `gcfg:"texture"`
+	Name      string `gcfg:"name"`
+	ItemId    uint16 `gcfg:"id"`
+	Texture   string `gcfg:"texture"`
+	Stackable bool   `gcfg:"stackable"`
 }
 
 func BuildGRPGItemFromManifest(entries []GRPGItemManifestEntry, texMap map[string]uint16) []grpgitem.Item {
@@ -22,9 +23,10 @@ func BuildGRPGItemFromManifest(entries []GRPGItemManifestEntry, texMap map[strin
 
 	for idx, entry := range entries {
 		itemArr[idx] = grpgitem.Item{
-			ItemId:  entry.ItemId,
-			Texture: texMap[entry.Texture],
-			Name:    entry.Name,
+			ItemId:    entry.ItemId,
+			Texture:   texMap[entry.Texture],
+			Name:      entry.Name,
+			Stackable: entry.Stackable,
 		}
 	}
 

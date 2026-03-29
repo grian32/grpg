@@ -9,14 +9,16 @@ import (
 var (
 	manifest = []GRPGItemManifestEntry{
 		{
-			Name:    "berries",
-			ItemId:  1,
-			Texture: "grass_tex",
+			Name:      "berries",
+			ItemId:    1,
+			Texture:   "grass_tex",
+			Stackable: true,
 		},
 		{
-			Name:    "berriess",
-			ItemId:  2,
-			Texture: "grass_tex",
+			Name:      "berriess",
+			ItemId:    2,
+			Texture:   "grass_tex",
+			Stackable: false,
 		},
 	}
 	texMap = map[string]uint16{
@@ -37,14 +39,16 @@ func TestParseManifestFile(t *testing.T) {
 func TestBuildGRPGItemFromManifest(t *testing.T) {
 	expectedItems := []grpgitem.Item{
 		{
-			ItemId:  1,
-			Texture: 1,
-			Name:    "berries",
+			ItemId:    1,
+			Texture:   1,
+			Name:      "berries",
+			Stackable: true,
 		},
 		{
-			ItemId:  2,
-			Texture: 1,
-			Name:    "berriess",
+			ItemId:    2,
+			Texture:   1,
+			Name:      "berriess",
+			Stackable: false,
 		},
 	}
 
