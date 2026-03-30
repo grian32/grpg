@@ -81,6 +81,8 @@ func (i *Inventory) DecodeFromBlob(blob []byte) error {
 		}
 	}
 
+	i.Items = inv
+
 	return nil
 }
 
