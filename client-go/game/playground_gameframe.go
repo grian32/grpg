@@ -143,7 +143,9 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 			// you still want to advance the rendering pos since after inv moving is implemented you'll have empty spots and it'll render wrongly
 			if item.ItemId != 0 {
 				g.DrawItem(item.ItemId, screen, currItemRealPosX, currItemRealPosY)
-				g.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY+ItemCountYOffset), color.White)
+				if item.Count > 1 {
+					g.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY+ItemCountYOffset), color.White)
+				}
 
 				if idx == g.OutlineInvSpot {
 					util.DrawImage(screen, g.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)

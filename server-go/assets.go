@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"server/constants"
 	"server/shared"
 	"server/util"
 )
@@ -135,7 +136,7 @@ func LoadNpcs(path string) (map[uint16]*grpgnpc.Npc, error) {
 	return npcMap, nil
 }
 
-func LoadItems(path string) ([]grpgitem.Item, error) {
+func LoadItems(path string) (map[constants.ItemConstant]*grpgitem.Item, error) {
 	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -156,5 +157,10 @@ func LoadItems(path string) ([]grpgitem.Item, error) {
 		return nil, err
 	}
 
-	return items, nil
+	m := make(map[constants.ItemConstant]*grpgitem.Item)
+	for _, item := range items {
+		m[constants.ItemConstant(item.ItemId)] = &item
+	}
+
+	return m, nil
 }

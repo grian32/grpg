@@ -2,6 +2,7 @@ package content
 
 import (
 	"log"
+	"server/constants"
 	"server/scripts"
 	"strings"
 )
@@ -28,5 +29,14 @@ func init() {
 
 	scripts.OnCommand("logequipment", func(ctx *scripts.CommandCtx) {
 		log.Printf("equipment for %s: %v", ctx.Player().Name, ctx.Player().Equipment)
+	})
+
+	scripts.OnCommand("additem", func(ctx *scripts.CommandCtx) {
+		id, err := ctx.GetIntArg()
+		if err != nil {
+			log.Printf("failed to parse int in additem cmd")
+			return
+		}
+		ctx.PlayerInvAdd(constants.ItemConstant(id))
 	})
 }

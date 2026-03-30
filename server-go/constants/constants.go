@@ -20,6 +20,11 @@ const (
 const (
 	_ ItemConstant = iota
 	BERRIES
+	BRONZE_HELM
+	BRONZE_CHESTPLATE
+	BRONZE_LEGS
+	BRONZE_RING
+	BRONZE_DAGGER
 )
 
 const (

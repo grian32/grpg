@@ -2,7 +2,9 @@ package shared
 
 import (
 	"database/sql"
+	"grpg/data-go/grpgitem"
 	"net"
+	"server/constants"
 	"server/util"
 	"sync"
 )
@@ -29,4 +31,5 @@ type Game struct {
 	NpcMoves          map[util.Vector2I][]NpcPath
 	CurrentTick       uint32
 	OperatorUsernames []string
+	Items             map[constants.ItemConstant]*grpgitem.Item
 }

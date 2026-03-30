@@ -18,7 +18,7 @@ type GenericCtx struct {
 }
 
 func (g *GenericCtx) PlayerInvAdd(itemId constants.ItemConstant) {
-	g.player.Inventory.AddItem(uint16(itemId))
+	g.player.Inventory.AddItem(g.game.Items[itemId])
 	network.SendPacket(g.player.Conn, &s2c.InventoryUpdate{
 		Player: g.player,
 	}, g.game)

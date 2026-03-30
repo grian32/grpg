@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"server/constants"
 	_ "server/content"
 	"strings"
 
@@ -11,6 +12,7 @@ import (
 	"database/sql"
 	"encoding/binary"
 	"grpg/data-go/gbuf"
+	"grpg/data-go/grpgitem"
 	"io"
 	"log"
 	"net"
@@ -44,6 +46,7 @@ var (
 		Mu:                sync.RWMutex{},
 		NpcMoves:          make(map[util.Vector2I][]shared.NpcPath),
 		OperatorUsernames: make([]string, 0),
+		Items:             make(map[constants.ItemConstant]*grpgitem.Item),
 		MaxX:              0,
 		MaxY:              0,
 		CurrentTick:       0,
@@ -96,6 +99,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed loading npcs: ", err)
 	}
+	items, err := LoadItems(assetsDirectory + "assets/items.grpgitem")
+	if err != nil {
+		log.Fatal("Failed loading items: ", err)
+	}
+	g.Items = items
 
 	LoadMaps(assetsDirectory+"maps/", g, objs)
 

@@ -2,6 +2,7 @@ package shared
 
 import (
 	"grpg/data-go/gbuf"
+	"grpg/data-go/grpgitem"
 )
 
 type Inventory struct {
@@ -24,11 +25,11 @@ type InventoryItem struct {
 	Dirty  bool
 }
 
-func (i *Inventory) AddItem(itemId uint16) {
+func (i *Inventory) AddItem(item *grpgitem.Item) {
 	firstEmptyIdx := -1
 
 	for idx := range 24 {
-		if i.Items[idx].ItemId == uint16(itemId) {
+		if i.Items[idx].ItemId == uint16(item.ItemId) && item.Stackable {
 			i.Items[idx].Count++
 			i.Items[idx].Dirty = true
 			return
@@ -41,7 +42,7 @@ func (i *Inventory) AddItem(itemId uint16) {
 
 	// if it finds a pre existing stack then it returns early anyway so np
 	if firstEmptyIdx != -1 {
-		i.Items[firstEmptyIdx].ItemId = uint16(itemId)
+		i.Items[firstEmptyIdx].ItemId = uint16(item.ItemId)
 		i.Items[firstEmptyIdx].Count = 1
 		i.Items[firstEmptyIdx].Dirty = true
 	}
