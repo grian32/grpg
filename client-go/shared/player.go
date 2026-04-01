@@ -67,12 +67,19 @@ func (lp *LocalPlayer) SendCmdPacket(game *Game, cmd string) {
 }
 
 func (lp *LocalPlayer) SendItemUsePacket(game *Game, invIdx uint8) {
-	if invIdx > 23 {
+	if invIdx > 28 {
 		return
 	}
-	item := lp.Inventory[invIdx]
-	if item.ItemId == 0 {
-		return
+	if invIdx < 24 {
+		item := lp.Inventory[invIdx]
+		if item.ItemId == 0 {
+			return
+		}
+	} else {
+		item := lp.Equipment[EquipmentType(invIdx-24)]
+		if item == 0 {
+			return
+		}
 	}
 	SendPacket(game.Conn, &c2s.ItemUse{
 		InvIdx: invIdx,

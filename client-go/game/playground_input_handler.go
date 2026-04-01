@@ -84,31 +84,51 @@ func (h *PgInputHandler) Update() {
 
 func (h *PgInputHandler) UpdateItemMove(renderType RenderType, outlineInvSpot *int) {
 	h.OutlineInvSpot = outlineInvSpot
-	if renderType == Inventory && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		mouseX, mouseY := ebiten.CursorPosition()
-		if mouseX >= h.minInvX && mouseX < h.maxInvX && mouseY >= h.minInvY && mouseY < h.maxInvY {
-			col := (mouseX - h.minInvX) / TileSize
-			row := (mouseY - h.minInvY) / TileSize
-			idx := row*ItemsPerRow + col
+		if renderType == Inventory {
+			if mouseX >= h.minInvX && mouseX < h.maxInvX && mouseY >= h.minInvY && mouseY < h.maxInvY {
+				col := (mouseX - h.minInvX) / TileSize
+				row := (mouseY - h.minInvY) / TileSize
+				idx := row*ItemsPerRow + col
 
-			if *outlineInvSpot != -1 {
-				if *outlineInvSpot == idx || h.Player.Inventory[idx].ItemId != 0 {
-					// deselect behaviour, basically
+				if *outlineInvSpot != -1 {
+					if *outlineInvSpot == idx || h.Player.Inventory[idx].ItemId != 0 {
+						// deselect behaviour, basically
+						*outlineInvSpot = -1
+						return
+					}
+
+					shared.SendPacket(h.Game.Conn, &c2s.InvSwap{
+						From: byte(*outlineInvSpot),
+						To:   byte(idx),
+					})
 					*outlineInvSpot = -1
+
 					return
 				}
 
-				shared.SendPacket(h.Game.Conn, &c2s.InvSwap{
-					From: byte(*outlineInvSpot),
-					To:   byte(idx),
-				})
-				*outlineInvSpot = -1
-
-				return
+				if h.Player.Inventory[idx].ItemId != 0 {
+					*outlineInvSpot = idx
+				}
 			}
-
-			if h.Player.Inventory[idx].ItemId != 0 {
-				*outlineInvSpot = idx
+		} else if renderType == Equipment {
+			mouseX -= RightGameframeX
+			// TODO: not sure if theres a better way to do this lol
+			if mouseX >= EquipmentMidOffsetX && mouseX <= EquipmentMidOffsetX+TileSize {
+				if mouseY >= HelmetOffsetY && mouseY <= HelmetOffsetY+TileSize {
+					*outlineInvSpot = 24
+				} else if mouseY >= EquipmentMidOffsetY && mouseY <= EquipmentMidOffsetY+TileSize {
+					*outlineInvSpot = 25
+				} else if mouseY >= LeggingsOffsetY && mouseY <= LeggingsOffsetY+TileSize {
+					*outlineInvSpot = 26
+				}
+			} else if mouseY >= EquipmentMidOffsetY && mouseY <= EquipmentMidOffsetY+TileSize {
+				if mouseX >= WeaponOffsetX && mouseX <= WeaponOffsetX+TileSize {
+					*outlineInvSpot = 27
+				} else if mouseX >= RingOffsetX && mouseX <= RingOffsetX+TileSize {
+					*outlineInvSpot = 28
+				}
 			}
 		}
 	}

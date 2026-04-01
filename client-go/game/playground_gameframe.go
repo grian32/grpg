@@ -83,6 +83,7 @@ func NewPgGameframe(
 
 	g.InventoryButton = gebiten_ui.NewTextureButton(RightGameframeX+InvButtonXOffset, 0, otherTex["inv_button"], func() {
 		g.ContainerRenderType = Inventory
+		g.OutlineInvSpot = -1
 	})
 
 	g.SkillsButton = gebiten_ui.NewTextureButton(RightGameframeX+SkillsButtonXOffset, 0, otherTex["skills_button"], func() {
@@ -91,6 +92,7 @@ func NewPgGameframe(
 
 	g.EquipmentButton = gebiten_ui.NewTextureButton(RightGameframeX+EquipmentButtonXOffset, 0, otherTex["equipment_button"], func() {
 		g.ContainerRenderType = Equipment
+		g.OutlineInvSpot = -1
 	})
 
 	g.ContainerRenderType = Inventory
@@ -169,11 +171,11 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 		}
 	} else if g.ContainerRenderType == Equipment {
 		util.DrawImage(screen, g.EquipmentFrame, RightGameframeX, 0)
-		g.DrawItemOrTex(g.Player.Equipment[shared.HELMET], screen, g.HelmetFrame, RightGameframeX+EquipmentMidOffsetX, HelmetOffsetY)
-		g.DrawItemOrTex(g.Player.Equipment[shared.CHESTPLATE], screen, g.ChestplateFrame, RightGameframeX+EquipmentMidOffsetX, EquipmentMidOffsetY)
-		g.DrawItemOrTex(g.Player.Equipment[shared.LEGGINGS], screen, g.LeggingsFrame, RightGameframeX+EquipmentMidOffsetX, LeggingsOffsetY)
-		g.DrawItemOrTex(g.Player.Equipment[shared.WEAPON], screen, g.WeaponFrame, RightGameframeX+WeaponOffsetX, EquipmentMidOffsetY)
-		g.DrawItemOrTex(g.Player.Equipment[shared.RING], screen, g.RingFrame, RightGameframeX+RingOffsetX, EquipmentMidOffsetY)
+		g.DrawItemEquip(g.Player.Equipment[shared.HELMET], screen, g.HelmetFrame, RightGameframeX+EquipmentMidOffsetX, HelmetOffsetY, 24)
+		g.DrawItemEquip(g.Player.Equipment[shared.CHESTPLATE], screen, g.ChestplateFrame, RightGameframeX+EquipmentMidOffsetX, EquipmentMidOffsetY, 25)
+		g.DrawItemEquip(g.Player.Equipment[shared.LEGGINGS], screen, g.LeggingsFrame, RightGameframeX+EquipmentMidOffsetX, LeggingsOffsetY, 26)
+		g.DrawItemEquip(g.Player.Equipment[shared.WEAPON], screen, g.WeaponFrame, RightGameframeX+WeaponOffsetX, EquipmentMidOffsetY, 27)
+		g.DrawItemEquip(g.Player.Equipment[shared.RING], screen, g.RingFrame, RightGameframeX+RingOffsetX, EquipmentMidOffsetY, 28)
 	}
 
 	util.DrawImage(screen, g.GameframeBottom, 0, RightGameframeX)
@@ -205,10 +207,13 @@ func (g *PgGameframe) DrawItem(id uint16, screen *ebiten.Image, x, y int32) {
 	util.DrawImage(screen, tex, x, y)
 }
 
-func (g *PgGameframe) DrawItemOrTex(id uint16, screen *ebiten.Image, elseTex *ebiten.Image, x, y int32) {
+func (g *PgGameframe) DrawItemEquip(id uint16, screen *ebiten.Image, elseTex *ebiten.Image, x, y int32, outlineSpot int) {
 	if id != 0 {
 		g.DrawItem(id, screen, x, y)
 	} else {
 		util.DrawImage(screen, elseTex, x, y)
+	}
+	if g.OutlineInvSpot == outlineSpot {
+		util.DrawImage(screen, g.ItemOutlineTexture, x, y)
 	}
 }

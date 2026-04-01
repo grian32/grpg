@@ -16,17 +16,33 @@ func (i *ItemUse) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Playe
 		log.Printf("warn: failed to read item id in item use packet: %v", err)
 		return
 	}
-	if invIdx > 23 {
+	if invIdx > 28 {
 		log.Printf("warn: invalid idx passed for itemuse packet: %d", invIdx)
 		return
 	}
-	item := player.Inventory.Items[invIdx]
-	if item.ItemId == 0 {
-		return
+	equip := invIdx > 23
+	var itemId uint16
+	if !equip {
+		item := player.Inventory.Items[invIdx]
+		if item.ItemId == 0 {
+			return
+		}
+		itemId = item.ItemId
+	} else {
+		// looks similar but equipment item also uses a diff struct so not much can do
+		item := player.Equipment.Items[invIdx-24]
+		if item.ItemId == 0 {
+			return
+		}
+		itemId = item.ItemId
 	}
-	script, exists := scriptManager.ItemUseScripts[constants.ItemConstant(item.ItemId)]
+	script, exists := scriptManager.ItemUseScripts[constants.ItemConstant(itemId)]
 	if !exists {
 		return
 	}
-	script(scripts.NewItemUseCtx(game, player, invIdx))
+	if equip {
+		script(scripts.NewItemUseCtx(game, player, invIdx-24, equip))
+	} else {
+		script(scripts.NewItemUseCtx(game, player, invIdx, equip))
+	}
 }

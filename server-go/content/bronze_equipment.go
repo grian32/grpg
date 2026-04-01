@@ -7,7 +7,11 @@ import (
 
 func equipScript(itemId constants.ItemConstant, slot int) {
 	scripts.OnItemUse(itemId, func(ctx *scripts.ItemUseCtx) {
-		ctx.EquipItem(ctx.InventoryIndex(), slot)
+		if ctx.IsEquipmentSlot() {
+			ctx.UnequipItem(slot)
+		} else {
+			ctx.EquipItem(ctx.InventoryIndex(), slot)
+		}
 	})
 }
 

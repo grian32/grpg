@@ -76,6 +76,18 @@ func (g *GenericCtx) EquipItem(invIdx byte, slot int) {
 	}, g.game)
 }
 
+func (g *GenericCtx) UnequipItem(slot int) {
+	if g.player.Equipment.Items[slot].ItemId == 0 {
+		return
+	}
+	item := g.player.Equipment.Items[slot]
+	g.player.Inventory.AddItem(g.game.Items[constants.ItemConstant(item.ItemId)])
+	g.player.Equipment.Items[slot] = shared.EquipmentItem{Dirty: true}
+	network.SendPacket(g.player.Conn, &s2c.InventoryUpdate{
+		Player: g.player,
+	}, g.game)
+}
+
 type ObjInteractCtx struct {
 	game   *shared.Game
 	player *shared.Player
@@ -221,18 +233,30 @@ func (c *CommandCtx) GetIntArg() (int64, error) {
 type ItemUseCtx struct {
 	GenericCtx
 	invIdx byte
+	equip  bool
 }
 
-func NewItemUseCtx(game *shared.Game, player *shared.Player, invIdx byte) *ItemUseCtx {
-	return &ItemUseCtx{
+func NewItemUseCtx(game *shared.Game, player *shared.Player, invIdx byte, equip bool) *ItemUseCtx {
+	i := &ItemUseCtx{
 		GenericCtx: GenericCtx{
 			game:   game,
 			player: player,
 		},
-		invIdx: invIdx,
+		equip: equip,
 	}
+	if i.equip {
+		i.invIdx = invIdx - 23
+	} else {
+		i.invIdx = invIdx
+	}
+
+	return i
 }
 
 func (c *ItemUseCtx) InventoryIndex() byte {
 	return c.invIdx
+}
+
+func (c *ItemUseCtx) IsEquipmentSlot() bool {
+	return c.equip
 }

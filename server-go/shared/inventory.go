@@ -36,6 +36,8 @@ func (i *Inventory) AddItem(item *grpgitem.Item) {
 		}
 
 		if i.Items[idx].ItemId == 0 && firstEmptyIdx == -1 {
+			// doesnt break here cuz even if it finds an empty index then it can find a pre existing add to stackable,
+			// which then insta returns making firstemptyidx irrelevant
 			firstEmptyIdx = idx
 		}
 	}
