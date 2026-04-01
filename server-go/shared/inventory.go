@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"fmt"
 	"grpg/data-go/gbuf"
 	"grpg/data-go/grpgitem"
 )
@@ -25,14 +26,14 @@ type InventoryItem struct {
 	Dirty  bool
 }
 
-func (i *Inventory) AddItem(item *grpgitem.Item) {
+func (i *Inventory) AddItem(item *grpgitem.Item) error {
 	firstEmptyIdx := -1
 
 	for idx := range 24 {
 		if i.Items[idx].ItemId == uint16(item.ItemId) && item.Stackable {
 			i.Items[idx].Count++
 			i.Items[idx].Dirty = true
-			return
+			return nil
 		}
 
 		if i.Items[idx].ItemId == 0 && firstEmptyIdx == -1 {
@@ -47,8 +48,10 @@ func (i *Inventory) AddItem(item *grpgitem.Item) {
 		i.Items[firstEmptyIdx].ItemId = uint16(item.ItemId)
 		i.Items[firstEmptyIdx].Count = 1
 		i.Items[firstEmptyIdx].Dirty = true
+		return nil
 	}
 
+	return fmt.Errorf("inventory full")
 }
 
 func (i *Inventory) EncodeToBlob() []byte {

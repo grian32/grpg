@@ -40,9 +40,5 @@ func (i *ItemUse) Handle(buf *gbuf.GBuf, game *shared.Game, player *shared.Playe
 	if !exists {
 		return
 	}
-	if equip {
-		script(scripts.NewItemUseCtx(game, player, invIdx-24, equip))
-	} else {
-		script(scripts.NewItemUseCtx(game, player, invIdx, equip))
-	}
+	script(scripts.NewItemUseCtx(game, player, invIdx, equip))
 }

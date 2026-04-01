@@ -18,7 +18,10 @@ type GenericCtx struct {
 }
 
 func (g *GenericCtx) InventoryAdd(itemId constants.ItemConstant) {
-	g.player.Inventory.AddItem(g.game.Items[itemId])
+	err := g.player.Inventory.AddItem(g.game.Items[itemId])
+	if err != nil {
+		return
+	}
 	network.SendPacket(g.player.Conn, &s2c.InventoryUpdate{
 		Player: g.player,
 	}, g.game)
@@ -81,7 +84,10 @@ func (g *GenericCtx) UnequipItem(slot int) {
 		return
 	}
 	item := g.player.Equipment.Items[slot]
-	g.player.Inventory.AddItem(g.game.Items[constants.ItemConstant(item.ItemId)])
+	err := g.player.Inventory.AddItem(g.game.Items[constants.ItemConstant(item.ItemId)])
+	if err != nil {
+		return
+	}
 	g.player.Equipment.Items[slot] = shared.EquipmentItem{Dirty: true}
 	network.SendPacket(g.player.Conn, &s2c.InventoryUpdate{
 		Player: g.player,
@@ -245,7 +251,7 @@ func NewItemUseCtx(game *shared.Game, player *shared.Player, invIdx byte, equip 
 		equip: equip,
 	}
 	if i.equip {
-		i.invIdx = invIdx - 23
+		i.invIdx = invIdx - 24
 	} else {
 		i.invIdx = invIdx
 	}
