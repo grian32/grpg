@@ -18,7 +18,11 @@ type GenericCtx struct {
 }
 
 func (g *GenericCtx) InventoryAdd(itemId constants.ItemConstant) {
-	err := g.player.Inventory.AddItem(g.game.Items[itemId])
+	item, ok := g.game.Items[itemId]
+	if !ok {
+		return
+	}
+	err := g.player.Inventory.AddItem(item)
 	if err != nil {
 		return
 	}
