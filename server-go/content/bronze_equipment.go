@@ -7,7 +7,7 @@ import (
 
 func equipScript(itemId constants.ItemConstant, slot int) {
 	scripts.OnItemUse(itemId, func(ctx *scripts.ItemUseCtx) {
-		ctx.PlayerEquipItem(ctx.InventoryIndex(), slot)
+		ctx.EquipItem(ctx.InventoryIndex(), slot)
 	})
 }
 

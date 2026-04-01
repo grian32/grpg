@@ -58,7 +58,7 @@ func (g *GenericCtx) Player() *shared.Player {
 	return g.player
 }
 
-func (g *GenericCtx) PlayerEquipItem(invIdx byte, slot int) {
+func (g *GenericCtx) EquipItem(invIdx byte, slot int) {
 	if g.player.Equipment.Items[slot].ItemId != 0 {
 		return
 	}
