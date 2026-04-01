@@ -65,6 +65,9 @@ func (i *InventoryUpdate) Handle(buf *gbuf.GBuf, game *shared.Game) {
 		}
 	}
 
+	if game.Player.Equipment == nil {
+		game.Player.Equipment = make(map[shared.EquipmentType]uint16)
+	}
 	if fourthMask != 0 {
 		for idx := range 5 {
 			if (fourthMask & (1 << idx)) != 0 {

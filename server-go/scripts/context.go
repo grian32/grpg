@@ -17,14 +17,14 @@ type GenericCtx struct {
 	player *shared.Player
 }
 
-func (g *GenericCtx) PlayerInvAdd(itemId constants.ItemConstant) {
+func (g *GenericCtx) InventoryAdd(itemId constants.ItemConstant) {
 	g.player.Inventory.AddItem(g.game.Items[itemId])
 	network.SendPacket(g.player.Conn, &s2c.InventoryUpdate{
 		Player: g.player,
 	}, g.game)
 }
 
-func (g *GenericCtx) PlayerAddXp(skill shared.Skill, xpAmount uint32) {
+func (g *GenericCtx) AddXp(skill shared.Skill, xpAmount uint32) {
 	g.player.AddXp(skill, xpAmount)
 	network.SendPacket(g.player.Conn, &s2c.SkillUpdate{
 		SkillIds: []shared.Skill{skill},
@@ -54,9 +54,26 @@ func (g *GenericCtx) SetPlayerVar(varId constants.PlayerVarId, newValue uint16) 
 	}, g.game)
 }
 
-// TEMP
 func (g *GenericCtx) Player() *shared.Player {
 	return g.player
+}
+
+func (g *GenericCtx) PlayerEquipItem(invIdx byte, slot int) {
+	if g.player.Equipment.Items[slot].ItemId != 0 {
+		return
+	}
+	item := g.player.Inventory.Items[invIdx]
+	if item.ItemId == 0 {
+		return
+	}
+	g.player.Inventory.Items[invIdx] = shared.InventoryItem{Dirty: true}
+	g.player.Equipment.Items[slot] = shared.EquipmentItem{
+		ItemId: item.ItemId,
+		Dirty:  true,
+	}
+	network.SendPacket(g.player.Conn, &s2c.InventoryUpdate{
+		Player: g.player,
+	}, g.game)
 }
 
 type ObjInteractCtx struct {
@@ -203,13 +220,19 @@ func (c *CommandCtx) GetIntArg() (int64, error) {
 
 type ItemUseCtx struct {
 	GenericCtx
+	invIdx byte
 }
 
-func NewItemUseCtx(game *shared.Game, player *shared.Player) *ItemUseCtx {
+func NewItemUseCtx(game *shared.Game, player *shared.Player, invIdx byte) *ItemUseCtx {
 	return &ItemUseCtx{
 		GenericCtx: GenericCtx{
 			game:   game,
 			player: player,
 		},
+		invIdx: invIdx,
 	}
+}
+
+func (c *ItemUseCtx) InventoryIndex() byte {
+	return c.invIdx
 }

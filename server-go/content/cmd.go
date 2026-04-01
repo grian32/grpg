@@ -37,6 +37,6 @@ func init() {
 			log.Printf("failed to parse int in additem cmd")
 			return
 		}
-		ctx.PlayerInvAdd(constants.ItemConstant(id))
+		ctx.InventoryAdd(constants.ItemConstant(id))
 	})
 }
