@@ -12,8 +12,8 @@ github.com/go-text/typesetting v0.3.0 h1:OWCgYpp8njoxSRpwrdd1bQOxdjOXDj9Rqart9ML
 github.com/go-text/typesetting v0.3.0/go.mod h1:qjZLkhRgOEYMhU9eHBr3AR4sfnGJvOXNLt8yRAySFuY=
 github.com/go-text/typesetting-utils v0.0.0-20241103174707-87a29e9e6066 h1:qCuYC+94v2xrb1PoS4NIDe7DGYtLnU2wWiQe9a1B1c0=
 github.com/go-text/typesetting-utils v0.0.0-20241103174707-87a29e9e6066/go.mod h1:DDxDdQEnB70R8owOx3LVpEFvpMK9eeH1o2r0yZhFI9o=
-github.com/grian32/gebiten-ui v0.0.9 h1:nGehh361QxG7M4L54JimOfwPcMR2BQl/cv/xk+gXviM=
-github.com/grian32/gebiten-ui v0.0.9/go.mod h1:VN3Y29b8MmMkncs9RR4+s87KMwoy9Npm6s9KbsgrTDE=
+github.com/grian32/gebiten-ui v0.0.13 h1:JaeHFai2IyrdUWNVcwJsIG6Ce8q2JTg3XaTM8nAH1z4=
+github.com/grian32/gebiten-ui v0.0.13/go.mod h1:VN3Y29b8MmMkncs9RR4+s87KMwoy9Npm6s9KbsgrTDE=
 github.com/hajimehoshi/bitmapfont/v4 v4.1.0 h1:eE3qa5Do4qhowZVIHjsrX5pYyyPN6sAFWMsO7QREm3U=
 github.com/hajimehoshi/bitmapfont/v4 v4.1.0/go.mod h1:/PD+aLjAJ0F2UoQx6hkOfXqWN7BkroDUMr5W+IT1dpE=
 github.com/hajimehoshi/ebiten/v2 v2.9.7 h1:WuNgM24uJxwdLZLqM8SXLAGVBof/45udRjo2tJoTpM0=

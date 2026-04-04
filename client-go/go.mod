@@ -1,10 +1,10 @@
 module client
 
-go 1.25
+go 1.26
 
 require (
 	github.com/gen2brain/jpegxl v0.4.5
-	github.com/grian32/gebiten-ui v0.0.9
+	github.com/grian32/gebiten-ui v0.0.13
 	github.com/hajimehoshi/ebiten/v2 v2.9.7
 	grpg/data-go v0.0.0
 )

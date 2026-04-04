@@ -18,6 +18,13 @@ const (
 	Equipment
 )
 
+type DrawItem struct {
+	currX, currY int32
+	count        uint16
+	invIdx       int
+	dynHoverTex  *gebiten_ui.GDynHoverTexture
+}
+
 type PgGameframe struct {
 	Font16 *gebiten_ui.GFont
 	Font20 *gebiten_ui.GFont
@@ -46,6 +53,12 @@ type PgGameframe struct {
 	Player       *shared.LocalPlayer
 	Game         *shared.Game
 	InputHandler *PgInputHandler
+
+	ItemHoverTextures map[uint16]*gebiten_ui.GDynHoverTexture
+	HoverTexX         int
+	HoverTexY         int
+	DrawInvItems      []DrawItem
+	DrawEquipItems    [5]*gebiten_ui.GDynHoverTexture
 
 	ContainerRenderType RenderType
 	OutlineInvSpot      int
@@ -104,23 +117,27 @@ func NewPgGameframe(
 	g.RingFrame = otherTex["ring_outline"]
 	g.WeaponFrame = otherTex["wep_outline"]
 
+	g.ItemHoverTextures = make(map[uint16]*gebiten_ui.GDynHoverTexture)
+	for id, item := range game.Items {
+		g.ItemHoverTextures[id] = gebiten_ui.NewDynHoverTexture(RightGameframeX+(TileSize*5), textures[item.Texture], new(item.Name), hoverTex, font16, color.White)
+	}
+
 	return g
 }
 
 func (g *PgGameframe) Update() {
-	facingCoord := g.Game.Player.GetFacingCoord()
-	trackedObj, objExists := g.Game.TrackedObjs[facingCoord]
-	trackedNpc, npcExists := g.Game.NpcsByPos[facingCoord]
-	if objExists {
-		g.CurrActionString = "Current Action: " + trackedObj.DataObj.InteractText
-	} else if npcExists {
-		g.CurrActionString = "Talk to " + trackedNpc.NpcData.Name
-	} else {
-		g.CurrActionString = "Current Action: None :("
-	}
+	g.DrawInvItems = make([]DrawItem, 0)
+	g.DrawEquipItems = [5]*gebiten_ui.GDynHoverTexture{}
+	g.UpdateCurrActionString()
 
 	for _, si := range g.SkillIcons {
 		si.Update()
+	}
+
+	if g.ContainerRenderType == Inventory {
+		g.UpdateInventoryPanel()
+	} else if g.ContainerRenderType == Equipment {
+		g.UpdateEquipmentPanel()
 	}
 
 	g.InventoryButton.Update()
@@ -136,30 +153,8 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 		g.Font16.Draw(screen, "Command: "+g.InputHandler.CommandString, 0, CommandY, color.White)
 	}
 
-	// TODO: prob abstracting these into their own functions would be wise
 	if g.ContainerRenderType == Inventory {
-		var currItemRealPosX int32 = RightGameframeX + TileSize
-		var currItemRealPosY int32 = TileSize
-
-		for idx, item := range g.Player.Inventory {
-			// you still want to advance the rendering pos since after inv moving is implemented you'll have empty spots and it'll render wrongly
-			if item.ItemId != 0 {
-				g.DrawItem(item.ItemId, screen, currItemRealPosX, currItemRealPosY)
-				if item.Count > 1 {
-					g.Font16.Draw(screen, fmt.Sprintf("%d", item.Count), float64(currItemRealPosX+ItemCountXOffset), float64(currItemRealPosY+ItemCountYOffset), color.White)
-				}
-
-				if idx == g.OutlineInvSpot {
-					util.DrawImage(screen, g.ItemOutlineTexture, currItemRealPosX, currItemRealPosY)
-				}
-			}
-
-			currItemRealPosX += TileSize
-			if (idx+1)%ItemsPerRow == 0 {
-				currItemRealPosY += TileSize
-				currItemRealPosX = RightGameframeX + TileSize
-			}
-		}
+		g.DrawInventoryPanel(screen)
 	} else if g.ContainerRenderType == Skills {
 		for _, si := range g.SkillIcons {
 			si.Draw(screen)
@@ -171,11 +166,7 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 		}
 	} else if g.ContainerRenderType == Equipment {
 		util.DrawImage(screen, g.EquipmentFrame, RightGameframeX, 0)
-		g.DrawItemEquip(g.Player.Equipment[shared.HELMET], screen, g.HelmetFrame, RightGameframeX+EquipmentMidOffsetX, HelmetOffsetY, 24)
-		g.DrawItemEquip(g.Player.Equipment[shared.CHESTPLATE], screen, g.ChestplateFrame, RightGameframeX+EquipmentMidOffsetX, EquipmentMidOffsetY, 25)
-		g.DrawItemEquip(g.Player.Equipment[shared.LEGGINGS], screen, g.LeggingsFrame, RightGameframeX+EquipmentMidOffsetX, LeggingsOffsetY, 26)
-		g.DrawItemEquip(g.Player.Equipment[shared.WEAPON], screen, g.WeaponFrame, RightGameframeX+WeaponOffsetX, EquipmentMidOffsetY, 27)
-		g.DrawItemEquip(g.Player.Equipment[shared.RING], screen, g.RingFrame, RightGameframeX+RingOffsetX, EquipmentMidOffsetY, 28)
+		g.DrawEquipmentPanel(screen)
 	}
 
 	util.DrawImage(screen, g.GameframeBottom, 0, RightGameframeX)
@@ -201,19 +192,117 @@ func (g *PgGameframe) Draw(screen *ebiten.Image) {
 	}
 }
 
-func (g *PgGameframe) DrawItem(id uint16, screen *ebiten.Image, x, y int32) {
-	data := g.Game.Items[id]
-	tex := g.Textures[data.Texture]
-	util.DrawImage(screen, tex, x, y)
-}
+func (g *PgGameframe) DrawItem(tex *gebiten_ui.GDynHoverTexture, screen *ebiten.Image, x, y, hoverOffsetX, hoverOffsetY int32, outlineSpot int) {
+	tex.Draw(screen, float64(x), float64(y), float64(hoverOffsetX), float64(hoverOffsetY))
 
-func (g *PgGameframe) DrawItemEquip(id uint16, screen *ebiten.Image, elseTex *ebiten.Image, x, y int32, outlineSpot int) {
-	if id != 0 {
-		g.DrawItem(id, screen, x, y)
-	} else {
-		util.DrawImage(screen, elseTex, x, y)
-	}
 	if g.OutlineInvSpot == outlineSpot {
 		util.DrawImage(screen, g.ItemOutlineTexture, x, y)
 	}
+}
+
+func (g *PgGameframe) UpdateCurrActionString() {
+	facingCoord := g.Game.Player.GetFacingCoord()
+	trackedObj, objExists := g.Game.TrackedObjs[facingCoord]
+	trackedNpc, npcExists := g.Game.NpcsByPos[facingCoord]
+	if objExists {
+		g.CurrActionString = "Current Action: " + trackedObj.DataObj.InteractText
+	} else if npcExists {
+		g.CurrActionString = "Talk to " + trackedNpc.NpcData.Name
+	} else {
+		g.CurrActionString = "Current Action: None :("
+	}
+}
+
+func (g *PgGameframe) UpdateInventoryPanel() {
+	var currItemRealPosX int32 = RightGameframeX + TileSize
+	var currItemRealPosY int32 = TileSize
+
+	for idx, item := range g.Player.Inventory {
+		if item.ItemId != 0 {
+			g.DrawInvItems = append(g.DrawInvItems, DrawItem{
+				currX:       currItemRealPosX,
+				currY:       currItemRealPosY,
+				count:       item.Count,
+				invIdx:      idx,
+				dynHoverTex: g.ItemHoverTextures[item.ItemId],
+			})
+		}
+
+		currItemRealPosX += TileSize
+		if (idx+1)%ItemsPerRow == 0 {
+			currItemRealPosY += TileSize
+			currItemRealPosX = RightGameframeX + TileSize
+		}
+	}
+
+	for _, item := range g.DrawInvItems {
+		item.dynHoverTex.Update(float64(item.currX), float64(item.currY))
+	}
+}
+
+func (g *PgGameframe) DrawInventoryPanel(screen *ebiten.Image) {
+	// reverse order so that hover textures show up in the correct order, if i was drawing it in order then hover tex would show up beneath lower items etc
+	for i := len(g.DrawInvItems) - 1; i >= 0; i-- {
+		item := g.DrawInvItems[i]
+		g.DrawItem(item.dynHoverTex, screen, item.currX, item.currY, 0, 0, item.invIdx)
+		if item.count > 1 {
+			g.Font16.Draw(screen, fmt.Sprintf("%d", item.count), float64(item.currX+ItemCountXOffset), float64(item.currY+ItemCountYOffset), color.White)
+		}
+	}
+}
+
+func (g *PgGameframe) UpdateEquipmentPanel() {
+	e := g.Player.Equipment
+
+	// maybe inefficient access?
+	if e[shared.HELMET] != 0 {
+		g.DrawEquipItems[shared.HELMET] = g.ItemHoverTextures[e[shared.HELMET]]
+	}
+	if e[shared.CHESTPLATE] != 0 {
+		g.DrawEquipItems[shared.CHESTPLATE] = g.ItemHoverTextures[e[shared.CHESTPLATE]]
+	}
+	if e[shared.LEGGINGS] != 0 {
+		g.DrawEquipItems[shared.LEGGINGS] = g.ItemHoverTextures[e[shared.LEGGINGS]]
+	}
+	if e[shared.WEAPON] != 0 {
+		g.DrawEquipItems[shared.WEAPON] = g.ItemHoverTextures[e[shared.WEAPON]]
+	}
+	if e[shared.RING] != 0 {
+		g.DrawEquipItems[shared.RING] = g.ItemHoverTextures[e[shared.RING]]
+	}
+
+	for idx, item := range g.DrawEquipItems {
+		if item != nil {
+			x, y := getEquipmentPositions(shared.EquipmentType(idx))
+			item.Update(x, y)
+		}
+	}
+}
+
+func (g *PgGameframe) DrawEquipmentPanel(screen *ebiten.Image) {
+	// reverse order so that hover textures show up in the correct order, if i was drawing it in order then hover tex would show up beneath lower items etc
+	for i := 4; i >= 0; i-- {
+		item := g.DrawEquipItems[i]
+		if item != nil {
+			x, y := getEquipmentPositions(shared.EquipmentType(i))
+			g.DrawItem(item, screen, int32(x), int32(y), -4, 0, 24+i)
+		}
+	}
+}
+
+func getEquipmentPositions(e shared.EquipmentType) (float64, float64) {
+	switch e {
+	case shared.HELMET:
+		return RightGameframeX + EquipmentMidOffsetX, HelmetOffsetY
+	case shared.CHESTPLATE:
+		return RightGameframeX + EquipmentMidOffsetX, EquipmentMidOffsetY
+	case shared.LEGGINGS:
+		return RightGameframeX + EquipmentMidOffsetX, LeggingsOffsetY
+	case shared.WEAPON:
+		return RightGameframeX + WeaponOffsetX, EquipmentMidOffsetY
+	case shared.RING:
+		return RightGameframeX + RingOffsetX, EquipmentMidOffsetY
+	}
+
+	return 0, 0
 }
