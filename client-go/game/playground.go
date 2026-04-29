@@ -51,6 +51,9 @@ const (
 
 	DebugCoordsY = 800
 
+	HealthBarX = RightGameframeX + 44
+	HealthBarY = 500
+
 	AssetsDir = "../../grpg-assets/"
 )
 

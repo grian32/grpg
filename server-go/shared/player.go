@@ -21,15 +21,17 @@ type Player struct {
 	Skills        map[Skill]*SkillInfo
 	PlayerVars    map[constants.PlayerVarId]uint16
 	Conn          net.Conn
+	Health        uint8
 }
 
 func (p *Player) LoadFromDB(db *sql.DB) error {
-	row := db.QueryRow("SELECT x, y, inventory, skills, playervar, equipment FROM players WHERE name = ?", p.Name)
+	row := db.QueryRow("SELECT x, y, inventory, skills, playervar, equipment, health FROM players WHERE name = ?", p.Name)
 
 	var loadedX int
 	var loadedY int
 	var invBlob, skillsBlob, pvBlob, equipmentBlob []byte
-	err := row.Scan(&loadedX, &loadedY, &invBlob, &skillsBlob, &pvBlob, &equipmentBlob)
+	var loadedHealth *uint8
+	err := row.Scan(&loadedX, &loadedY, &invBlob, &skillsBlob, &pvBlob, &equipmentBlob, &loadedHealth)
 
 	if err == sql.ErrNoRows {
 		p.InitDefaults()
@@ -65,6 +67,11 @@ func (p *Player) LoadFromDB(db *sql.DB) error {
 	p.Pos = pos
 	p.ChunkPos = chunkPos
 	p.Skills = skills
+	if loadedHealth == nil {
+		p.Health = 100
+	} else {
+		p.Health = *loadedHealth
+	}
 
 	return nil
 }
@@ -78,6 +85,7 @@ func (p *Player) InitDefaults() {
 		}
 	}
 	p.InitDefaultPlayerVars()
+	p.Health = 100
 }
 
 func (p *Player) InitDefaultPlayerVars() {
@@ -102,24 +110,24 @@ func (p *Player) SaveToDB(db *sql.DB) error {
 	}
 
 	if err == sql.ErrNoRows {
-		stmt, err := tx.Prepare("INSERT INTO players(player_id, name, x, y, inventory, skills, playervar, equipment) VALUES (NULL, ?, ?, ?, ?, ?, ?)")
+		stmt, err := tx.Prepare("INSERT INTO players(player_id, name, x, y, inventory, skills, playervar, equipment, health) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)")
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), p.EncodePlayerVarsToBlob(), p.Equipment.EncodeToBlob())
+		_, err = stmt.Exec(p.Name, p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), p.EncodePlayerVarsToBlob(), p.Equipment.EncodeToBlob(), p.Health)
 		if err != nil {
 			return err
 		}
 	} else {
-		stmt, err := tx.Prepare("UPDATE players SET x=?, y=?, inventory=?, skills=?, playervar=?, equipment=? WHERE player_id=?")
+		stmt, err := tx.Prepare("UPDATE players SET x=?, y=?, inventory=?, skills=?, playervar=?, equipment=?, health=? WHERE player_id=?")
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), p.EncodePlayerVarsToBlob(), p.Equipment.EncodeToBlob(), existingId)
+		_, err = stmt.Exec(p.Pos.X, p.Pos.Y, p.Inventory.EncodeToBlob(), EncodeSkillsToBlob(p.Skills), p.EncodePlayerVarsToBlob(), p.Equipment.EncodeToBlob(), p.Health, existingId)
 		if err != nil {
 			return err
 		}

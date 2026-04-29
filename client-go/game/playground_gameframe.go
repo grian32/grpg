@@ -4,6 +4,7 @@ import (
 	"client/shared"
 	"client/util"
 	"fmt"
+	"image"
 	"image/color"
 
 	gebiten_ui "github.com/grian32/gebiten-ui"
@@ -35,6 +36,9 @@ type PgGameframe struct {
 	SkillIcons         map[shared.Skill]*gebiten_ui.GHoverTexture
 	GameframeRight     *ebiten.Image
 	GameframeBottom    *ebiten.Image
+	HealthLeftTexture  *ebiten.Image
+	HealthMidTexture   *ebiten.Image
+	HealthRightTexture *ebiten.Image
 
 	// TODO: maybe move helmet etc into an array based on an  enum somewhere when i get further into the implementation of this..
 	EquipmentFrame  *ebiten.Image
@@ -89,6 +93,11 @@ func NewPgGameframe(
 
 	hoverTex := otherTex["hover_tex"]
 	foragingIconTex := otherTex["foraging_icon"]
+
+	healthTex := otherTex["healthbar_segments"]
+	g.HealthLeftTexture = healthTex.SubImage(image.Rect(0, 0, 8, 24)).(*ebiten.Image)
+	g.HealthMidTexture = healthTex.SubImage(image.Rect(8, 0, 16, 24)).(*ebiten.Image)
+	g.HealthRightTexture = healthTex.SubImage(image.Rect(16, 0, 24, 24)).(*ebiten.Image)
 
 	g.SkillIcons[shared.Foraging] = gebiten_ui.NewHoverTexture(RightGameframeX+TileSize, TileSize, RightGameframeX+(TileSize*5), foragingIconTex, g.Game.SkillHoverMsgs[shared.Foraging], hoverTex, font16, color.White)
 	g.GameframeRight = otherTex["gameframe_right"]
@@ -149,6 +158,20 @@ func (g *PgGameframe) Update() {
 
 func (g *PgGameframe) Draw(screen *ebiten.Image) {
 	util.DrawImage(screen, g.GameframeRight, RightGameframeX, 0)
+
+	if g.Player.Health == 1 {
+		util.DrawImage(screen, g.HealthLeftTexture, HealthBarX, HealthBarY)
+		util.DrawImage(screen, g.HealthRightTexture, HealthBarX+8, HealthBarY)
+	} else if g.Player.Health >= 2 {
+		util.DrawImage(screen, g.HealthLeftTexture, HealthBarX, HealthBarY)
+		var currX int32 = 8
+		for _ = range int(g.Player.Health) * 35 / 100 {
+			util.DrawImage(screen, g.HealthMidTexture, HealthBarX+currX, HealthBarY)
+			currX += 8
+		}
+		util.DrawImage(screen, g.HealthRightTexture, HealthBarX+currX, HealthBarY)
+	}
+
 	if g.InputHandler.IsTypingCommand {
 		g.Font16.Draw(screen, "Command: "+g.InputHandler.CommandString, 0, CommandY, color.White)
 	}

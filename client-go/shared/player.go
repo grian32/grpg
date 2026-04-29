@@ -16,6 +16,7 @@ type LocalPlayer struct {
 	CurrFrame      uint8
 	FrameCounter   float64
 	Inventory      [24]InventoryItem
+	Health         uint8
 	// map of EquipmentType to item id, no need for an inventory item since this is countless
 	Equipment map[EquipmentType]uint16
 	Name      string

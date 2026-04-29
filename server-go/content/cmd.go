@@ -3,6 +3,8 @@ package content
 import (
 	"log"
 	"server/constants"
+	"server/network"
+	"server/network/s2c"
 	"server/scripts"
 	"strings"
 )
@@ -38,5 +40,19 @@ func init() {
 			return
 		}
 		ctx.InventoryAdd(constants.ItemConstant(id))
+	})
+
+	scripts.OnCommand("sethealth", func(ctx *scripts.CommandCtx) {
+		newHp, err := ctx.GetIntArg()
+		if err != nil {
+			log.Printf("failed to parse int in sethealth cmd")
+			return
+		}
+
+		ctx.Player().Health = uint8(newHp)
+
+		network.SendPacket(ctx.Player().Conn, &s2c.StatUpdate{
+			Player: ctx.Player(),
+		}, ctx.Game())
 	})
 }
