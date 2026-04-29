@@ -11,11 +11,11 @@ import (
 )
 
 type PgPlayerSystem struct {
-	WorldImage     *ebiten.Image
-	PlayerTextures map[shared.Direction]*ebiten.Image
-	Game           *shared.Game
-	InputHandler   *PgInputHandler
-	Font16         *gebiten_ui.GFont
+	WorldImage    *ebiten.Image
+	PlayerIdleRun *ebiten.Image
+	Game          *shared.Game
+	InputHandler  *PgInputHandler
+	Font16        *gebiten_ui.GFont
 }
 
 func NewPgPlayerSystem(
@@ -25,18 +25,13 @@ func NewPgPlayerSystem(
 	font16 *gebiten_ui.GFont,
 	inputHandler *PgInputHandler,
 ) *PgPlayerSystem {
-	playerTextures := make(map[shared.Direction]*ebiten.Image)
-	playerTextures[shared.UP] = otherTex["player_up"]
-	playerTextures[shared.DOWN] = otherTex["player_down"]
-	playerTextures[shared.LEFT] = otherTex["player_left"]
-	playerTextures[shared.RIGHT] = otherTex["player_right"]
 
 	return &PgPlayerSystem{
-		WorldImage:     worldImage,
-		PlayerTextures: playerTextures,
-		Game:           game,
-		InputHandler:   inputHandler,
-		Font16:         font16,
+		WorldImage:    worldImage,
+		PlayerIdleRun: otherTex["player_idle_run"],
+		Game:          game,
+		InputHandler:  inputHandler,
+		Font16:        font16,
 	}
 }
 
@@ -62,14 +57,14 @@ func (r *PgPlayerSystem) drawPlayer(currFrame uint8, facing shared.Direction, re
 	sourceRec := image.Rectangle{
 		Min: image.Point{
 			X: srcX,
-			Y: 0,
+			Y: int(facing) * TileSize,
 		},
 		Max: image.Point{
 			X: srcX + TileSize,
-			Y: TileSize,
+			Y: int(facing)*TileSize + TileSize,
 		},
 	}
-	sub := util.SubImage(r.PlayerTextures[facing], sourceRec)
+	sub := util.SubImage(r.PlayerIdleRun, sourceRec)
 	util.DrawImage(r.WorldImage, sub, realX, realY)
 
 	r.Font16.Draw(r.WorldImage, name, float64(realX), float64(realY), textColor)
