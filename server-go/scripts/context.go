@@ -98,6 +98,24 @@ func (g *GenericCtx) UnequipItem(slot int) {
 	}, g.game)
 }
 
+func (g *GenericCtx) SetHealth(health uint8) {
+	g.player.Health = health
+	network.SendPacket(g.player.Conn, &s2c.StatUpdate{
+		Player: g.player,
+	}, g.game)
+}
+
+func (g *GenericCtx) Damage(amount uint8) {
+	if amount > g.player.Health {
+		g.player.Health = 0
+	} else {
+		g.player.Health -= amount
+	}
+	network.SendPacket(g.player.Conn, &s2c.StatUpdate{
+		Player: g.player,
+	}, g.game)
+}
+
 type ObjInteractCtx struct {
 	game   *shared.Game
 	player *shared.Player

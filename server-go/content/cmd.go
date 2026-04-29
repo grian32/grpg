@@ -1,10 +1,9 @@
 package content
 
 import (
+	"fmt"
 	"log"
 	"server/constants"
-	"server/network"
-	"server/network/s2c"
 	"server/scripts"
 	"strings"
 )
@@ -42,17 +41,18 @@ func init() {
 		ctx.InventoryAdd(constants.ItemConstant(id))
 	})
 
-	scripts.OnCommand("sethealth", func(ctx *scripts.CommandCtx) {
+	scripts.OnCommand("damage", func(ctx *scripts.CommandCtx) {
 		newHp, err := ctx.GetIntArg()
 		if err != nil {
 			log.Printf("failed to parse int in sethealth cmd")
 			return
 		}
 
-		ctx.Player().Health = uint8(newHp)
+		ctx.Damage(uint8(newHp))
+		fmt.Printf("new hp: %d\n", ctx.Player().Health)
+	})
 
-		network.SendPacket(ctx.Player().Conn, &s2c.StatUpdate{
-			Player: ctx.Player(),
-		}, ctx.Game())
+	scripts.OnCommand("resethealth", func(ctx *scripts.CommandCtx) {
+		ctx.SetHealth(100)
 	})
 }
