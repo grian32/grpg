@@ -11,7 +11,7 @@ Currently the project is still in its early stages. There isn't much content but
 
 ### Client
 
-The GRPG Client is located in `client-go/`, it uses Raylib for rendering
+The GRPG Client is located in `client-go/`, it uses Ebitenengine for rendering
 
 ### Server
 
